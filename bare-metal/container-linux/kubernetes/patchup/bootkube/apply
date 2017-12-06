@@ -1,0 +1,3 @@
+#!/bin/bash
+cp /opt/bootkube/bootkube-start /opt/bootkube/bootkube-start.orig
+mv bootkube-start /opt/bootkube/bootkube-start
