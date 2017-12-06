@@ -109,14 +109,8 @@ resource "null_resource" "bootkube-start" {
     destination = "$HOME/assets"
   }
 
-  provisioner "file" {
-    source      = "${path.module}/patchup"
-    destination = "$HOME/patchup"
-  }
-
   provisioner "remote-exec" {
     inline = [
-      "[ -n \"$(ls $HOME/patchup/*/apply 2>/dev/null)\" ] && sudo bash -c 'for patchup in '\"$HOME\"'/patchup/*/apply; do cd $${patchup%/apply}; chmod a+x ./apply; ./apply; done'",
       "sudo mv /home/core/assets /opt/bootkube",
       "sudo systemctl start bootkube",
     ]
