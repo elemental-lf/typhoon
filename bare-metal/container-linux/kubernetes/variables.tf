@@ -105,6 +105,12 @@ EOD
   default     = ""
 }
 
+variable "apiserver_vip" {
+  description = "VIP to use for apiserver HA via keepalived"       
+  type        = "string"
+  default     = ""  
+}
+
 # optional
 
 variable "cached_install" {
