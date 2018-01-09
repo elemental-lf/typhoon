@@ -4,7 +4,7 @@ module "bootkube" {
 
   cluster_name          = "${var.cluster_name}"
   api_servers           = ["${var.k8s_domain_name}"]
-  api_servers           = ["${var.k8s_domain_name}"]
+  apiserver_vip         = "${var.apiserver_vip}"
   etcd_servers          = ["${var.controller_domains}"]
   asset_dir             = "${var.asset_dir}"
   networking            = "${var.networking}"
