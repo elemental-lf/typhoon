@@ -7,7 +7,7 @@ systemd:
         - name: 40-etcd-cluster.conf
           contents: |
             [Service]
-            Environment="ETCD_IMAGE_TAG=v3.2.0"
+            Environment="ETCD_IMAGE_TAG=v3.2.13"
             Environment="ETCD_NAME=${etcd_name}"
             Environment="ETCD_ADVERTISE_CLIENT_URLS=https://${etcd_domain}:2379"
             Environment="ETCD_INITIAL_ADVERTISE_PEER_URLS=https://${etcd_domain}:2380"
@@ -54,7 +54,7 @@ systemd:
     - name: kubelet.service
       contents: |
         [Unit]
-        Description=Kubelet via Hyperkube ACI
+        Description=Kubelet via Hyperkube
         Requires=coreos-metadata.service
         After=coreos-metadata.service
         Wants=rpc-statd.service
@@ -84,7 +84,7 @@ systemd:
           --anonymous-auth=false \
           --client-ca-file=/etc/kubernetes/ca.crt \
           --cluster_dns=${k8s_dns_service_ip} \
-          --cluster_domain=cluster.local \
+          --cluster_domain=${cluster_domain_suffix} \
           --cni-conf-dir=/etc/kubernetes/cni/net.d \
           --exit-on-lock-contention \
           --hostname-override=$${COREOS_DIGITALOCEAN_IPV4_PRIVATE_0} \
@@ -120,7 +120,7 @@ storage:
       contents:
         inline: |
           KUBELET_IMAGE_URL=docker://gcr.io/google_containers/hyperkube
-          KUBELET_IMAGE_TAG=v1.8.5
+          KUBELET_IMAGE_TAG=v1.9.1
     - path: /etc/sysctl.d/max-user-watches.conf
       filesystem: root
       contents:
@@ -140,10 +140,8 @@ storage:
           set -e
           # Move experimental manifests
           [ -n "$(ls /opt/bootkube/assets/manifests-*/* 2>/dev/null)" ] && mv /opt/bootkube/assets/manifests-*/* /opt/bootkube/assets/manifests && rm -rf /opt/bootkube/assets/manifests-*
-          [ -d /opt/bootkube/assets/experimental/manifests ] && mv /opt/bootkube/assets/experimental/manifests/* /opt/bootkube/assets/manifests && rm -r /opt/bootkube/assets/experimental/manifests
-          [ -d /opt/bootkube/assets/experimental/bootstrap-manifests ] && mv /opt/bootkube/assets/experimental/bootstrap-manifests/* /opt/bootkube/assets/bootstrap-manifests && rm -r /opt/bootkube/assets/experimental/bootstrap-manifests
           BOOTKUBE_ACI="$${BOOTKUBE_ACI:-quay.io/coreos/bootkube}"
-          BOOTKUBE_VERSION="$${BOOTKUBE_VERSION:-v0.9.0}"
+          BOOTKUBE_VERSION="$${BOOTKUBE_VERSION:-v0.9.1}"
           BOOTKUBE_ASSETS="$${BOOTKUBE_ASSETS:-/opt/bootkube/assets}"
           exec /usr/bin/rkt run \
             --trust-keys-from-https \

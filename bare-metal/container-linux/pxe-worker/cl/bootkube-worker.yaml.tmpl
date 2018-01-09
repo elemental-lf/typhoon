@@ -30,7 +30,7 @@ systemd:
     - name: kubelet.service
       contents: |
         [Unit]
-        Description=Kubelet via Hyperkube ACI
+        Description=Kubelet via Hyperkube
         Wants=rpc-statd.service
         [Service]
         EnvironmentFile=/etc/kubernetes/kubelet.env
@@ -58,7 +58,7 @@ systemd:
           --anonymous-auth=false \
           --client-ca-file=/etc/kubernetes/ca.crt \
           --cluster_dns={{.k8s_dns_service_ip}} \
-          --cluster_domain=cluster.local \
+          --cluster_domain={{.cluster_domain_suffix}} \
           --cni-conf-dir=/etc/kubernetes/cni/net.d \
           --exit-on-lock-contention \
           --hostname-override={{.domain_name}} \
@@ -98,7 +98,7 @@ storage:
       contents:
         inline: |
           KUBELET_IMAGE_URL=docker://gcr.io/google_containers/hyperkube
-          KUBELET_IMAGE_TAG=v1.8.5
+          KUBELET_IMAGE_TAG=v1.9.1
     - path: /etc/hostname
       filesystem: root
       mode: 0644

@@ -1,6 +1,6 @@
 # AWS
 
-In this tutorial, we'll create a Kubernetes v1.8.5 cluster on AWS.
+In this tutorial, we'll create a Kubernetes v1.9.1 cluster on AWS.
 
 We'll declare a Kubernetes cluster in Terraform using the Typhoon Terraform module. On apply, a VPC, gateway, subnets, auto-scaling groups of controllers and workers, network load balancers for controllers and workers, and security groups will be created.
 
@@ -119,7 +119,7 @@ Get or update Terraform modules.
 $ terraform get            # downloads missing modules
 $ terraform get --update   # updates all modules
 Get: git::https://github.com/poseidon/typhoon (update)
-Get: git::https://github.com/poseidon/bootkube-terraform.git?ref=v0.9.0 (update)
+Get: git::https://github.com/poseidon/bootkube-terraform.git?ref=v0.9.1 (update)
 ```
 
 Plan the resources to be created.
@@ -148,12 +148,12 @@ In 4-8 minutes, the Kubernetes cluster will be ready.
 [Install kubectl](https://coreos.com/kubernetes/docs/latest/configure-kubectl.html) on your system. Use the generated `kubeconfig` credentials to access the Kubernetes cluster and list nodes.
 
 ```
-$ KUBECONFIG=/home/user/.secrets/clusters/tempest/auth/kubeconfig
+$ export KUBECONFIG=/home/user/.secrets/clusters/tempest/auth/kubeconfig
 $ kubectl get nodes
 NAME             STATUS    AGE       VERSION        
-ip-10-0-12-221   Ready     34m       v1.8.5
-ip-10-0-19-112   Ready     34m       v1.8.5
-ip-10-0-4-22     Ready     34m       v1.8.5
+ip-10-0-12-221   Ready     34m       v1.9.1
+ip-10-0-19-112   Ready     34m       v1.9.1
+ip-10-0-4-22     Ready     34m       v1.9.1
 ```
 
 List the pods.
@@ -179,7 +179,7 @@ kube-system   pod-checkpointer-4kxtl-ip-10-0-12-221     1/1    Running   0      
 
 ## Going Further
 
-Learn about [version pinning](concepts.md#versioning), maintenance, and [addons](addons/overview.md).
+Learn about [version pinning](concepts.md#versioning), [maintenance](topics/maintenance.md), and [addons](addons/overview.md).
 
 !!! note
     On Container Linux clusters, install the `container-linux-update-operator` addon to coordinate reboots and drains when nodes auto-update. Otherwise, updates may not be applied until the next reboot.
@@ -228,6 +228,7 @@ Reference the DNS zone id with `"${aws_route53_zone.zone-for-clusters.zone_id}"`
 | host_cidr | CIDR range to assign to EC2 instances | "10.0.0.0/16" | "10.1.0.0/16" |
 | pod_cidr | CIDR range to assign to Kubernetes pods | "10.2.0.0/16" | "10.22.0.0/16" |
 | service_cidr | CIDR range to assign to Kubernetes services | "10.3.0.0/16" | "10.3.0.0/24" |
+| cluster_domain_suffix | FQDN suffix for Kubernetes services answered by kube-dns. | "cluster.local" | "k8s.example.com" |
 
 Check the list of valid [instance types](https://aws.amazon.com/ec2/instance-types/).
 

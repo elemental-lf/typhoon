@@ -1,6 +1,6 @@
 # Google Cloud
 
-In this tutorial, we'll create a Kubernetes v1.8.5 cluster on Google Compute Engine (not GKE).
+In this tutorial, we'll create a Kubernetes v1.9.1 cluster on Google Compute Engine (not GKE).
 
 We'll declare a Kubernetes cluster in Terraform using the Typhoon Terraform module. On apply, a network, firewall rules, managed instance groups of Kubernetes controllers and workers, network load balancers for controllers and workers, and health checks will be created.
 
@@ -80,7 +80,7 @@ module "google-cloud-yavin" {
   region        = "us-central1"
   dns_zone      = "example.com"
   dns_zone_name = "example-zone"
-  os_image      = "coreos-stable-1576-4-0-v20171206"
+  os_image      = "coreos-stable-1576-5-0-v20180105"
 
   cluster_name       = "yavin"
   controller_count   = 1
@@ -120,7 +120,7 @@ Get or update Terraform modules.
 $ terraform get            # downloads missing modules
 $ terraform get --update   # updates all modules
 Get: git::https://github.com/poseidon/typhoon (update)
-Get: git::https://github.com/poseidon/bootkube-terraform.git?ref=v0.9.0 (update)
+Get: git::https://github.com/poseidon/bootkube-terraform.git?ref=v0.9.1 (update)
 ```
 
 Plan the resources to be created.
@@ -151,12 +151,12 @@ In 4-8 minutes, the Kubernetes cluster will be ready.
 [Install kubectl](https://coreos.com/kubernetes/docs/latest/configure-kubectl.html) on your system. Use the generated `kubeconfig` credentials to access the Kubernetes cluster and list nodes.
 
 ```
-$ KUBECONFIG=/home/user/.secrets/clusters/yavin/auth/kubeconfig
+$ export KUBECONFIG=/home/user/.secrets/clusters/yavin/auth/kubeconfig
 $ kubectl get nodes
 NAME                                          STATUS   AGE    VERSION
-yavin-controller-0.c.example-com.internal     Ready    6m     v1.8.5
-yavin-worker-jrbf.c.example-com.internal      Ready    5m     v1.8.5
-yavin-worker-mzdm.c.example-com.internal      Ready    5m     v1.8.5
+yavin-controller-0.c.example-com.internal     Ready    6m     v1.9.1
+yavin-worker-jrbf.c.example-com.internal      Ready    5m     v1.9.1
+yavin-worker-mzdm.c.example-com.internal      Ready    5m     v1.9.1
 ```
 
 List the pods.
@@ -181,7 +181,7 @@ kube-system   pod-checkpointer-l6lrt                    1/1    Running   0      
 
 ## Going Further
 
-Learn about [version pinning](concepts.md#versioning), maintenance, and [addons](addons/overview.md).
+Learn about [version pinning](concepts.md#versioning), [maintenance](topics/maintenance.md), and [addons](addons/overview.md).
 
 !!! note
     On Container Linux clusters, install the `container-linux-update-operator` addon to coordinate reboots and drains when nodes auto-update. Otherwise, updates may not be applied until the next reboot.
@@ -197,7 +197,7 @@ Learn about [version pinning](concepts.md#versioning), maintenance, and [addons]
 | dns_zone | Google Cloud DNS zone | "google-cloud.example.com" |
 | dns_zone_name | Google Cloud DNS zone name | "example-zone" |
 | ssh_authorized_key | SSH public key for ~/.ssh_authorized_keys | "ssh-rsa AAAAB3NZ..." |
-| os_image | OS image for compute instances | "coreos-stable-1576-4-0-v20171206" |
+| os_image | OS image for compute instances | "coreos-stable-1576-5-0-v20180105" |
 | asset_dir | Path to a directory where generated assets should be placed (contains secrets) | "/home/user/.secrets/clusters/yavin" |
 
 Check the list of valid [regions](https://cloud.google.com/compute/docs/regions-zones/regions-zones) and list Container Linux [images](https://cloud.google.com/compute/docs/images) with `gcloud compute images list | grep coreos`.
@@ -230,6 +230,7 @@ resource "google_dns_managed_zone" "zone-for-clusters" {
 | networking | Choice of networking provider | "calico" | "calico" or "flannel" |
 | pod_cidr | CIDR range to assign to Kubernetes pods | "10.2.0.0/16" | "10.22.0.0/16" |
 | service_cidr | CIDR range to assign to Kubernetes services | "10.3.0.0/16" | "10.3.0.0/24" |
+| cluster_domain_suffix | FQDN suffix for Kubernetes services answered by kube-dns. | "cluster.local" | "k8s.example.com" |
 
 Check the list of valid [machine types](https://cloud.google.com/compute/docs/machine-types).
 

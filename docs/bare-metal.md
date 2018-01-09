@@ -1,6 +1,6 @@
 # Bare-Metal
 
-In this tutorial, we'll network boot and provision a Kubernetes v1.8.5 cluster on bare-metal.
+In this tutorial, we'll network boot and provision a Kubernetes v1.9.1 cluster on bare-metal.
 
 First, we'll deploy a [Matchbox](https://github.com/coreos/matchbox) service and setup a network boot environment. Then, we'll declare a Kubernetes cluster in Terraform using the Typhoon Terraform module and power on machines. On PXE boot, machines will install Container Linux to disk, reboot into the disk install, and provision themselves as Kubernetes controllers or workers.
 
@@ -162,7 +162,7 @@ module "bare-metal-mercury" {
   # install
   matchbox_http_endpoint  = "http://matchbox.example.com"
   container_linux_channel = "stable"
-  container_linux_version = "1576.4.0"
+  container_linux_version = "1576.5.0"
   ssh_authorized_key      = "ssh-rsa AAAAB3Nz..."
 
   # cluster
@@ -219,7 +219,7 @@ Get or update Terraform modules.
 $ terraform get            # downloads missing modules
 $ terraform get --update   # updates all modules
 Get: git::https://github.com/poseidon/typhoon (update)
-Get: git::https://github.com/poseidon/bootkube-terraform.git?ref=v0.9.0 (update)
+Get: git::https://github.com/poseidon/bootkube-terraform.git?ref=v0.9.1 (update)
 ```
 
 Plan the resources to be created.
@@ -287,12 +287,12 @@ bootkube[5]: Tearing down temporary bootstrap control plane...
 [Install kubectl](https://coreos.com/kubernetes/docs/latest/configure-kubectl.html) on your system. Use the generated `kubeconfig` credentials to access the Kubernetes cluster and list nodes.
 
 ```
-$ KUBECONFIG=/home/user/.secrets/clusters/mercury/auth/kubeconfig
+$ export KUBECONFIG=/home/user/.secrets/clusters/mercury/auth/kubeconfig
 $ kubectl get nodes
 NAME                STATUS    AGE       VERSION
-node1.example.com   Ready     11m       v1.8.5
-node2.example.com   Ready     11m       v1.8.5
-node3.example.com   Ready     11m       v1.8.5
+node1.example.com   Ready     11m       v1.9.1
+node2.example.com   Ready     11m       v1.9.1
+node3.example.com   Ready     11m       v1.9.1
 ```
 
 List the pods.
@@ -319,7 +319,7 @@ kube-system   pod-checkpointer-wf65d-node1.example.com   1/1       Running   0  
 
 ## Going Further
 
-Learn about [version pinning](concepts.md#versioning), maintenance, and [addons](addons/overview.md).
+Learn about [version pinning](concepts.md#versioning), [maintenance](topics/maintenance.md), and [addons](addons/overview.md).
 
 !!! note
     On Container Linux clusters, install the `container-linux-update-operator` addon to coordinate reboots and drains when nodes auto-update. Otherwise, updates may not be applied until the next reboot.
@@ -332,7 +332,7 @@ Learn about [version pinning](concepts.md#versioning), maintenance, and [addons]
 |:-----|:------------|:--------|
 | matchbox_http_endpoint | Matchbox HTTP read-only endpoint | http://matchbox.example.com:8080 |
 | container_linux_channel | Container Linux channel | stable, beta, alpha |
-| container_linux_version | Container Linux version of the kernel/initrd to PXE and the image to install | 1576.4.0 |
+| container_linux_version | Container Linux version of the kernel/initrd to PXE and the image to install | 1576.5.0 |
 | cluster_name | Cluster name | mercury |
 | k8s_domain_name | FQDN resolving to the controller(s) nodes. Workers and kubectl will communicate with this endpoint | "myk8s.example.com" |
 | ssh_authorized_key | SSH public key for ~/.ssh/authorized_keys | "ssh-rsa AAAAB3Nz..." |
@@ -355,5 +355,6 @@ Learn about [version pinning](concepts.md#versioning), maintenance, and [addons]
 | network_mtu | CNI interface MTU (calico-only) | 1480 | - | 
 | pod_cidr | CIDR range to assign to Kubernetes pods | "10.2.0.0/16" | "10.22.0.0/16" |
 | service_cidr | CIDR range to assign to Kubernetes services | "10.3.0.0/16" | "10.3.0.0/24" |
+| cluster_domain_suffix | FQDN suffix for Kubernetes services answered by kube-dns. | "cluster.local" | "k8s.example.com" |
 | kernel_args | Additional kernel args to provide at PXE boot | [] | "kvm-intel.nested=1" |
 

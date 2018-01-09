@@ -22,7 +22,7 @@ systemd:
       enable: true
       contents: |
         [Unit]
-        Description=Kubelet via Hyperkube ACI
+        Description=Kubelet via Hyperkube
         Wants=rpc-statd.service
         [Service]
         EnvironmentFile=/etc/kubernetes/kubelet.env
@@ -49,7 +49,7 @@ systemd:
           --anonymous-auth=false \
           --client-ca-file=/etc/kubernetes/ca.crt \
           --cluster_dns=${k8s_dns_service_ip} \
-          --cluster_domain=cluster.local \
+          --cluster_domain=${cluster_domain_suffix} \
           --cni-conf-dir=/etc/kubernetes/cni/net.d \
           --exit-on-lock-contention \
           --kubeconfig=/etc/kubernetes/kubeconfig \
@@ -103,7 +103,7 @@ storage:
       contents:
         inline: |
           KUBELET_IMAGE_URL=docker://gcr.io/google_containers/hyperkube
-          KUBELET_IMAGE_TAG=v1.8.5
+          KUBELET_IMAGE_TAG=v1.9.1
     - path: /etc/sysctl.d/max-user-watches.conf
       filesystem: root
       contents:
@@ -121,7 +121,7 @@ storage:
             --volume config,kind=host,source=/etc/kubernetes \
             --mount volume=config,target=/etc/kubernetes \
             --insecure-options=image \
-            docker://gcr.io/google_containers/hyperkube:v1.8.5 \
+            docker://gcr.io/google_containers/hyperkube:v1.9.1 \
             --net=host \
             --dns=host \
             --exec=/kubectl -- --kubeconfig=/etc/kubernetes/kubeconfig delete node $(hostname)

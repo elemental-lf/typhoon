@@ -11,7 +11,7 @@ Typhoon distributes upstream Kubernetes, architectural conventions, and cluster 
 
 ## Features <a href="https://www.cncf.io/certification/software-conformance/"><img align="right" src="https://storage.googleapis.com/poseidon/certified-kubernetes.png"></a>
 
-* Kubernetes v1.8.5 (upstream, via [kubernetes-incubator/bootkube](https://github.com/kubernetes-incubator/bootkube))
+* Kubernetes v1.9.1 (upstream, via [kubernetes-incubator/bootkube](https://github.com/kubernetes-incubator/bootkube))
 * Single or multi-master, workloads isolated on workers, [Calico](https://www.projectcalico.org/) or [flannel](https://github.com/coreos/flannel) networking
 * On-cluster etcd with TLS, [RBAC](https://kubernetes.io/docs/admin/authorization/rbac/)-enabled, [network policy](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
 * Ready for Ingress, Dashboards, Metrics and other optional [addons](addons/overview.md)
@@ -49,7 +49,7 @@ module "google-cloud-yavin" {
   region        = "us-central1"
   dns_zone      = "example.com"
   dns_zone_name = "example-zone"
-  os_image      = "coreos-stable-1576-4-0-v20171206"
+  os_image      = "coreos-stable-1576-5-0-v20180105"
 
   cluster_name       = "yavin"
   controller_count   = 1
@@ -74,12 +74,12 @@ Apply complete! Resources: 64 added, 0 changed, 0 destroyed.
 In 4-8 minutes (varies by platform), the cluster will be ready. This Google Cloud example creates a `yavin.example.com` DNS record to resolve to a network load balancer across controller nodes.
 
 ```
-$ KUBECONFIG=/home/user/.secrets/clusters/yavin/auth/kubeconfig
+$ export KUBECONFIG=/home/user/.secrets/clusters/yavin/auth/kubeconfig
 $ kubectl get nodes
 NAME                                          STATUS   AGE    VERSION
-yavin-controller-0.c.example-com.internal     Ready    6m     v1.8.5
-yavin-worker-jrbf.c.example-com.internal      Ready    5m     v1.8.5
-yavin-worker-mzdm.c.example-com.internal      Ready    5m     v1.8.5
+yavin-controller-0.c.example-com.internal     Ready    6m     v1.9.1
+yavin-worker-jrbf.c.example-com.internal      Ready    5m     v1.9.1
+yavin-worker-mzdm.c.example-com.internal      Ready    5m     v1.9.1
 ```
 
 List the pods.
