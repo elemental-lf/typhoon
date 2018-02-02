@@ -1,6 +1,6 @@
 # Google Cloud
 
-In this tutorial, we'll create a Kubernetes v1.9.1 cluster on Google Compute Engine (not GKE).
+In this tutorial, we'll create a Kubernetes v1.9.2 cluster on Google Compute Engine (not GKE).
 
 We'll declare a Kubernetes cluster in Terraform using the Typhoon Terraform module. On apply, a network, firewall rules, managed instance groups of Kubernetes controllers and workers, network load balancers for controllers and workers, and health checks will be created.
 
@@ -10,15 +10,15 @@ Controllers and workers are provisioned to run a `kubelet`. A one-time [bootkube
 
 * Google Cloud Account and Service Account
 * Google Cloud DNS Zone (registered Domain Name or delegated subdomain)
-* Terraform v0.10.x and [terraform-provider-ct](https://github.com/coreos/terraform-provider-ct) installed locally
+* Terraform v0.11.x and [terraform-provider-ct](https://github.com/coreos/terraform-provider-ct) installed locally
 
 ## Terraform Setup
 
-Install [Terraform](https://www.terraform.io/downloads.html) v0.10.x on your system.
+Install [Terraform](https://www.terraform.io/downloads.html) v0.11.x on your system.
 
 ```sh
 $ terraform version
-Terraform v0.10.7
+Terraform v0.11.1
 ```
 
 Add the [terraform-provider-ct](https://github.com/coreos/terraform-provider-ct) plugin binary for your system.
@@ -57,9 +57,32 @@ Configure the Google Cloud provider to use your service account key, project-id,
 
 ```tf
 provider "google" {
+  version = "1.2"
+  alias   = "default"
+
   credentials = "${file("~/.config/google-cloud/terraform.json")}"
   project     = "project-id"
   region      = "us-central1"
+}
+
+provider "local" {
+  version = "~> 1.0"
+  alias = "default"
+}
+
+provider "null" {
+  version = "~> 1.0"
+  alias = "default"
+}
+
+provider "template" {
+  version = "~> 1.0"
+  alias = "default"
+}
+
+provider "tls" {
+  version = "~> 1.0"
+  alias = "default"
 }
 ```
 
@@ -74,7 +97,15 @@ Define a Kubernetes cluster using the module `google-cloud/container-linux/kuber
 
 ```tf
 module "google-cloud-yavin" {
-  source = "git::https://github.com/poseidon/typhoon//google-cloud/container-linux/kubernetes"
+  source = "git::https://github.com/poseidon/typhoon//google-cloud/container-linux/kubernetes?ref=v1.9.2"
+  
+  providers = {
+    google = "google.default"
+    local = "local.default"
+    null = "null.default"
+    template = "template.default"
+    tls = "tls.default"
+  }
 
   # Google Cloud
   region        = "us-central1"
@@ -120,7 +151,7 @@ Get or update Terraform modules.
 $ terraform get            # downloads missing modules
 $ terraform get --update   # updates all modules
 Get: git::https://github.com/poseidon/typhoon (update)
-Get: git::https://github.com/poseidon/bootkube-terraform.git?ref=v0.9.1 (update)
+Get: git::https://github.com/poseidon/bootkube-terraform.git?ref=v0.10.0 (update)
 ```
 
 Plan the resources to be created.
@@ -154,9 +185,9 @@ In 4-8 minutes, the Kubernetes cluster will be ready.
 $ export KUBECONFIG=/home/user/.secrets/clusters/yavin/auth/kubeconfig
 $ kubectl get nodes
 NAME                                          STATUS   AGE    VERSION
-yavin-controller-0.c.example-com.internal     Ready    6m     v1.9.1
-yavin-worker-jrbf.c.example-com.internal      Ready    5m     v1.9.1
-yavin-worker-mzdm.c.example-com.internal      Ready    5m     v1.9.1
+yavin-controller-0.c.example-com.internal     Ready    6m     v1.9.2
+yavin-worker-jrbf.c.example-com.internal      Ready    5m     v1.9.2
+yavin-worker-mzdm.c.example-com.internal      Ready    5m     v1.9.2
 ```
 
 List the pods.

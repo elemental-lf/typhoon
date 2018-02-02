@@ -4,12 +4,45 @@ Notable changes between versions.
 
 ## Latest
 
+## v1.9.2
+
+* Kubernetes [v1.9.2](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.9.md#v192)
+* Add Terraform v0.11.x support
+  * Add explicit "providers" section to modules for Terraform v0.11.x
+  * Retain support for Terraform v0.10.4+
+* Add [migration guide](https://github.com/poseidon/typhoon/blob/master/docs/topics/maintenance.md) from Terraform v0.10.x to v0.11.x (**action required!**)
+* Update etcd from 3.2.13 to 3.2.14
+* Update calico from 2.6.5 to 2.6.6
+* Update kube-dns from v1.14.7 to v1.14.8
+* Use separate service account for kube-dns
+* Use kubernetes-incubator/bootkube v0.10.0
+
+#### Addons
+
+* Update CLUO to v0.5.0 to fix compatibility with Kubernetes 1.9 (**important**)
+  * Earlier versions can't roll out Container Linux updates on Kubernetes 1.9 nodes ([cluo#163](https://github.com/coreos/container-linux-update-operator/issues/163))
+* Update kube-state-metrics from v1.1.0 to v1.2.0
+* Fix RBAC cluster role for kube-state-metrics
+
+#### Bare-Metal
+
+* Use per-node Container Linux install profiles ([#97](https://github.com/poseidon/typhoon/pull/97))
+  * Allow Container Linux channel/version to be chosen per-cluster
+  * Fix issue where cluster deletion could require `terraform apply` multiple times
+
+#### Digital Ocean
+
+* Relax `digitalocean` provider version constraint
+* Fix bug with `terraform plan` always showing a firewall diff to be applied ([#3](https://github.com/poseidon/typhoon/issues/3))
+
+## v1.9.1
+
 * Kubernetes [v1.9.1](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.9.md#v191)
 * Update kube-dns from 1.14.5 to v1.14.7
 * Update etcd from 3.2.0 to 3.2.13
 * Update Calico from v2.6.4 to v2.6.5
 * Enable portmap to fix hostPort with Calico
-* Service account for controller-manager
+* Use separate service account for controller-manager
 
 ## v1.8.6
 

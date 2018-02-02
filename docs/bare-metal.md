@@ -1,6 +1,6 @@
 # Bare-Metal
 
-In this tutorial, we'll network boot and provision a Kubernetes v1.9.1 cluster on bare-metal.
+In this tutorial, we'll network boot and provision a Kubernetes v1.9.2 cluster on bare-metal.
 
 First, we'll deploy a [Matchbox](https://github.com/coreos/matchbox) service and setup a network boot environment. Then, we'll declare a Kubernetes cluster in Terraform using the Typhoon Terraform module and power on machines. On PXE boot, machines will install Container Linux to disk, reboot into the disk install, and provision themselves as Kubernetes controllers or workers.
 
@@ -12,7 +12,7 @@ Controllers are provisioned as etcd peers and run `etcd-member` (etcd3) and `kub
 * PXE-enabled [network boot](https://coreos.com/matchbox/docs/latest/network-setup.html) environment
 * Matchbox v0.6+ deployment with API enabled
 * Matchbox credentials `client.crt`, `client.key`, `ca.crt`
-* Terraform v0.10.x and [terraform-provider-matchbox](https://github.com/coreos/terraform-provider-matchbox) installed locally
+* Terraform v0.11.x and [terraform-provider-matchbox](https://github.com/coreos/terraform-provider-matchbox) installed locally
 
 ## Machines
 
@@ -109,11 +109,11 @@ Read about the [many ways](https://coreos.com/matchbox/docs/latest/network-setup
 
 ## Terraform Setup
 
-Install [Terraform](https://www.terraform.io/downloads.html) v0.10.x on your system.
+Install [Terraform](https://www.terraform.io/downloads.html) v0.11.x on your system.
 
 ```sh
 $ terraform version
-Terraform v0.10.7
+Terraform v0.11.1
 ```
 
 Add the [terraform-provider-matchbox](https://github.com/coreos/terraform-provider-matchbox) plugin binary for your system.
@@ -149,6 +149,26 @@ provider "matchbox" {
   client_key  = "${file("~/.config/matchbox/client.key")}"
   ca          = "${file("~/.config/matchbox/ca.crt")}"
 }
+
+provider "local" {
+  version = "~> 1.0"
+  alias = "default"
+}
+
+provider "null" {
+  version = "~> 1.0"
+  alias = "default"
+}
+
+provider "template" {
+  version = "~> 1.0"
+  alias = "default"
+}
+
+provider "tls" {
+  version = "~> 1.0"
+  alias = "default"
+}
 ```
 
 ## Cluster
@@ -157,7 +177,14 @@ Define a Kubernetes cluster using the module `bare-metal/container-linux/kuberne
 
 ```tf
 module "bare-metal-mercury" {
-  source = "git::https://github.com/poseidon/typhoon//bare-metal/container-linux/kubernetes"
+  source = "git::https://github.com/poseidon/typhoon//bare-metal/container-linux/kubernetes?ref=v1.9.2"
+  
+  providers = {
+    local = "local.default"
+    null = "null.default"
+    template = "template.default"
+    tls = "tls.default"
+  }
   
   # install
   matchbox_http_endpoint  = "http://matchbox.example.com"
@@ -219,7 +246,7 @@ Get or update Terraform modules.
 $ terraform get            # downloads missing modules
 $ terraform get --update   # updates all modules
 Get: git::https://github.com/poseidon/typhoon (update)
-Get: git::https://github.com/poseidon/bootkube-terraform.git?ref=v0.9.1 (update)
+Get: git::https://github.com/poseidon/bootkube-terraform.git?ref=v0.10.0 (update)
 ```
 
 Plan the resources to be created.
@@ -290,9 +317,9 @@ bootkube[5]: Tearing down temporary bootstrap control plane...
 $ export KUBECONFIG=/home/user/.secrets/clusters/mercury/auth/kubeconfig
 $ kubectl get nodes
 NAME                STATUS    AGE       VERSION
-node1.example.com   Ready     11m       v1.9.1
-node2.example.com   Ready     11m       v1.9.1
-node3.example.com   Ready     11m       v1.9.1
+node1.example.com   Ready     11m       v1.9.2
+node2.example.com   Ready     11m       v1.9.2
+node3.example.com   Ready     11m       v1.9.2
 ```
 
 List the pods.
