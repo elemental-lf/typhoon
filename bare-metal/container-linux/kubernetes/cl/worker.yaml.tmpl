@@ -3,6 +3,11 @@ systemd:
   units:
     - name: docker.service
       enable: true
+      dropins:
+        - name: 10-dockeropts.conf
+          contents: |
+            [Service]
+            Environment="DOCKER_OPTS=--log-opt max-size=50m --log-opt max-file=3"
     - name: locksmithd.service
       mask: true
     - name: kubelet.path
