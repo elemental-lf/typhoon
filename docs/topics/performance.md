@@ -2,14 +2,14 @@
 
 ## Provision Time
 
-Provisioning times vary based on the platform. Sampling the time to create (apply) and destroy clusters with 1 controller and 2 workers shows (roughly) what to expect.
+Provisioning times vary based on the operating system and platform. Sampling the time to create (apply) and destroy clusters with 1 controller and 2 workers shows (roughly) what to expect.
 
 | Platform      | Apply | Destroy |
 |---------------|-------|---------|
 | AWS           | 6 min | 5 min   |
-| Bare-Metal    | 10-14 min | NA  |
+| Bare-Metal    | 10-15 min | NA  |
 | Digital Ocean | 3 min 30 sec | 20 sec |
-| Google Cloud  | 4 min | 4 min 30 sec |
+| Google Cloud  | 10 min | 4 min 30 sec |
 
 Notes:
 
@@ -25,7 +25,7 @@ Network performance varies based on the platform and CNI plugin. `iperf` was use
 |----------------------------|-------:|-------------:|-------------:|
 | AWS (flannel)              | ?      | 976 MB/s     | 900-999 MB/s |
 | AWS (calico, MTU 1480)     | ?      | 976 MB/s     | 100-350 MB/s |
-| AWS (calico, MTU 8991)     | ?      | 976 MB/s     | 900-999 MB/s |
+| AWS (calico, MTU 8981)     | ?      | 976 MB/s     | 900-999 MB/s |
 | Bare-Metal (flannel)       | 1 GB/s | 934 MB/s     | 903 MB/s     | 
 | Bare-Metal (calico)        | 1 GB/s | 941 MB/s     | 931 MB/s     |
 | Bare-Metal (flannel, bond) | 3 GB/s |  2.3 GB/s    | 1.17 GB/s    | 

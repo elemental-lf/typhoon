@@ -1,6 +1,6 @@
 # Hardware
 
-While bare-metal Kubernetes clusters have no special hardware requirements (beyond the [min reqs](/bare-metal.md#requirements)), Typhoon does ensure certain router and server hardware integrates well with Kubernetes.
+Typhoon ensures certain networking hardware integrates well with bare-metal Kubernetes.
 
 ## Ubiquiti
 
@@ -162,14 +162,14 @@ show ip bgp neighbors
 show ip route bgp
 ```
 
-Be sure to register the peer by creating a Calico `bgpPeer` CRD with `kubectl apply`.
+Be sure to register the peer by creating a Calico `BGPPeer` CRD with `kubectl apply`.
 
 ```
-apiVersion: v1
-kind: bgpPeer
+apiVersion: crd.projectcalico.org/v1
+kind: BGPPeer
 metadata:
-  peerIP: LAN_IP
-  scope: global
+  name: NAME
 spec:
+  peerIP: LAN_IP
   asNumber: 64512
 ```

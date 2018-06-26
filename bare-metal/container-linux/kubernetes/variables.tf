@@ -1,30 +1,27 @@
+variable "cluster_name" {
+  type        = "string"
+  description = "Unique cluster name"
+}
+
+# bare-metal
+
 variable "matchbox_http_endpoint" {
   type        = "string"
   description = "Matchbox HTTP read-only endpoint (e.g. http://matchbox.example.com:8080)"
 }
 
-variable "container_linux_channel" {
+variable "os_channel" {
   type        = "string"
-  description = "Container Linux channel corresponding to the container_linux_version"
+  description = "Channel for a Container Linux derivative (coreos-stable, coreos-beta, coreos-alpha, flatcar-stable, flatcar-beta, flatcar-alpha)"
 }
 
-variable "container_linux_version" {
+variable "os_version" {
   type        = "string"
-  description = "Container Linux version of the kernel/initrd to PXE or the image to install"
+  description = "Version for a Container Linux derivative to PXE and install (coreos-stable, coreos-beta, coreos-alpha, flatcar-stable, flatcar-beta, flatcar-alpha)"
 }
 
-variable "cluster_name" {
-  type        = "string"
-  description = "Cluster name"
-}
-
-variable "ssh_authorized_key" {
-  type        = "string"
-  description = "SSH public key to set as an authorized_key on machines"
-}
-
-# Machines
-# Terraform's crude "type system" does properly support lists of maps so we do this.
+# machines
+# Terraform's crude "type system" does not properly support lists of maps so we do this.
 
 variable "controller_names" {
   type = "list"
@@ -50,11 +47,16 @@ variable "worker_domains" {
   type = "list"
 }
 
-# bootkube assets
+# configuration
 
 variable "k8s_domain_name" {
   description = "Controller DNS name which resolves to a controller instance. Workers and kubeconfig's will communicate with this endpoint (e.g. cluster.example.com)"
   type        = "string"
+}
+
+variable "ssh_authorized_key" {
+  type        = "string"
+  description = "SSH public key for user 'core'"
 }
 
 variable "asset_dir" {
@@ -74,15 +76,21 @@ variable "network_mtu" {
   default     = "1480"
 }
 
+variable "network_ip_autodetection_method" {
+  description = "Method to autodetect the host IPv4 address (applies to calico only)"
+  type        = "string"
+  default     = "first-found"
+}
+
 variable "pod_cidr" {
-  description = "CIDR IP range to assign Kubernetes pods"
+  description = "CIDR IPv4 range to assign Kubernetes pods"
   type        = "string"
   default     = "10.2.0.0/16"
 }
 
 variable "service_cidr" {
   description = <<EOD
-CIDR IP range to assign Kubernetes services.
+CIDR IPv4 range to assign Kubernetes services.
 The 1st IP will be reserved for kube_apiserver, the 10th IP will be reserved for kube-dns.
 EOD
 
@@ -122,7 +130,7 @@ variable "cluster_domain_suffix" {
 variable "cached_install" {
   type        = "string"
   default     = "false"
-  description = "Whether Container Linux should PXE boot and install from matchbox /assets cache. Note that the admin must have downloaded the container_linux_version into matchbox assets."
+  description = "Whether Container Linux should PXE boot and install from matchbox /assets cache. Note that the admin must have downloaded the os_version into matchbox assets."
 }
 
 variable "install_disk" {
@@ -134,7 +142,7 @@ variable "install_disk" {
 variable "container_linux_oem" {
   type        = "string"
   default     = ""
-  description = "Specify an OEM image id to use as base for the installation (e.g. ami, vmware_raw, xen) or leave blank for the default image"
+  description = "DEPRECATED: Specify an OEM image id to use as base for the installation (e.g. ami, vmware_raw, xen) or leave blank for the default image"
 }
 
 variable "kernel_args" {

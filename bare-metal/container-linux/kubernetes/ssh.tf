@@ -1,6 +1,14 @@
 # Secure copy etcd TLS assets and kubeconfig to controllers. Activates kubelet.service
-resource "null_resource" "copy-etcd-secrets" {
+resource "null_resource" "copy-controller-secrets" {
   count = "${length(var.controller_names)}"
+
+  # Without depends_on, remote-exec could start and wait for machines before
+  # matchbox groups are written, causing a deadlock.
+  depends_on = [
+    "matchbox_group.install",
+    "matchbox_group.controller",
+    "matchbox_group.worker",
+  ]
 
   connection {
     type    = "ssh"
@@ -61,14 +69,22 @@ resource "null_resource" "copy-etcd-secrets" {
       "sudo mv etcd-peer.key /etc/ssl/etcd/etcd/peer.key",
       "sudo chown -R etcd:etcd /etc/ssl/etcd",
       "sudo chmod -R 500 /etc/ssl/etcd",
-      "sudo mv /home/core/kubeconfig /etc/kubernetes/kubeconfig",
+      "sudo mv $HOME/kubeconfig /etc/kubernetes/kubeconfig",
     ]
   }
 }
 
 # Secure copy kubeconfig to all workers. Activates kubelet.service
-resource "null_resource" "copy-kubeconfig" {
+resource "null_resource" "copy-worker-secrets" {
   count = "${length(var.worker_names)}"
+
+  # Without depends_on, remote-exec could start and wait for machines before
+  # matchbox groups are written, causing a deadlock.
+  depends_on = [
+    "matchbox_group.install",
+    "matchbox_group.controller",
+    "matchbox_group.worker",
+  ]
 
   connection {
     type    = "ssh"
@@ -84,7 +100,7 @@ resource "null_resource" "copy-kubeconfig" {
 
   provisioner "remote-exec" {
     inline = [
-      "sudo mv /home/core/kubeconfig /etc/kubernetes/kubeconfig",
+      "sudo mv $HOME/kubeconfig /etc/kubernetes/kubeconfig",
     ]
   }
 }
@@ -95,13 +111,16 @@ resource "null_resource" "bootkube-start" {
   # Without depends_on, this remote-exec may start before the kubeconfig copy.
   # Terraform only does one task at a time, so it would try to bootstrap
   # while no Kubelets are running.
-  depends_on = ["null_resource.copy-etcd-secrets", "null_resource.copy-kubeconfig"]
+  depends_on = [
+    "null_resource.copy-controller-secrets",
+    "null_resource.copy-worker-secrets",
+  ]
 
   connection {
     type    = "ssh"
     host    = "${element(var.controller_domains, 0)}"
     user    = "core"
-    timeout = "30m"
+    timeout = "15m"
   }
 
   provisioner "file" {
@@ -111,7 +130,7 @@ resource "null_resource" "bootkube-start" {
 
   provisioner "remote-exec" {
     inline = [
-      "sudo mv /home/core/assets /opt/bootkube",
+      "sudo mv $HOME/assets /opt/bootkube",
       "sudo systemctl start bootkube",
     ]
   }

@@ -4,8 +4,8 @@
 
 ### Environment
 
-* Platform: bare-metal, google-cloud, digital-ocean
-* OS: container-linux, fedora-cloud
+* Platform: aws, bare-metal, google-cloud, digital-ocean
+* OS: container-linux, fedora-atomic
 * Terraform: `terraform version`
 * Plugins: Provider plugin versions
 * Ref: Git SHA (if applicable)
