@@ -1,10 +1,10 @@
 # AWS
 
-In this tutorial, we'll create a Kubernetes v1.10.5 cluster on AWS with Container Linux.
+In this tutorial, we'll create a Kubernetes v1.11.0 cluster on AWS with Container Linux.
 
 We'll declare a Kubernetes cluster using the Typhoon Terraform module. Then apply the changes to create a VPC, gateway, subnets, security groups, controller instances, worker auto-scaling group, network load balancer, and TLS assets.
 
-Controllers are provisioned to run an `etcd-member` peer and a `kubelet` service. Workers run just a `kubelet` service. A one-time [bootkube](https://github.com/kubernetes-incubator/bootkube) bootstrap schedules the `apiserver`, `scheduler`, `controller-manager`, and `kube-dns` on controllers and schedules `kube-proxy` and `calico` (or `flannel`) on every node. A generated `kubeconfig` provides `kubectl` access to the cluster.
+Controllers are provisioned to run an `etcd-member` peer and a `kubelet` service. Workers run just a `kubelet` service. A one-time [bootkube](https://github.com/kubernetes-incubator/bootkube) bootstrap schedules the `apiserver`, `scheduler`, `controller-manager`, and `coredns` on controllers and schedules `kube-proxy` and `calico` (or `flannel`) on every node. A generated `kubeconfig` provides `kubectl` access to the cluster.
 
 ## Requirements
 
@@ -96,7 +96,7 @@ Define a Kubernetes cluster using the module `aws/container-linux/kubernetes`.
 
 ```tf
 module "aws-tempest" {
-  source = "git::https://github.com/poseidon/typhoon//aws/container-linux/kubernetes?ref=v1.10.5"
+  source = "git::https://github.com/poseidon/typhoon//aws/container-linux/kubernetes?ref=v1.11.0"
 
   providers = {
     aws = "aws.default"
@@ -169,9 +169,9 @@ In 4-8 minutes, the Kubernetes cluster will be ready.
 $ export KUBECONFIG=/home/user/.secrets/clusters/tempest/auth/kubeconfig
 $ kubectl get nodes
 NAME             STATUS    AGE       VERSION        
-ip-10-0-12-221   Ready     34m       v1.10.5
-ip-10-0-19-112   Ready     34m       v1.10.5
-ip-10-0-4-22     Ready     34m       v1.10.5
+ip-10-0-12-221   Ready     34m       v1.11.0
+ip-10-0-19-112   Ready     34m       v1.11.0
+ip-10-0-4-22     Ready     34m       v1.11.0
 ```
 
 List the pods.
@@ -182,10 +182,10 @@ NAMESPACE     NAME                                      READY  STATUS    RESTART
 kube-system   calico-node-1m5bf                         2/2    Running   0         34m              
 kube-system   calico-node-7jmr1                         2/2    Running   0         34m              
 kube-system   calico-node-bknc8                         2/2    Running   0         34m              
+kube-system   coredns-1187388186-wx1lg                  1/1    Running   0         34m              
 kube-system   kube-apiserver-4mjbk                      1/1    Running   0         34m              
 kube-system   kube-controller-manager-3597210155-j2jbt  1/1    Running   1         34m              
 kube-system   kube-controller-manager-3597210155-j7g7x  1/1    Running   0         34m              
-kube-system   kube-dns-1187388186-wx1lg                 3/3    Running   0         34m              
 kube-system   kube-proxy-14wxv                          1/1    Running   0         34m              
 kube-system   kube-proxy-9vxh2                          1/1    Running   0         34m              
 kube-system   kube-proxy-sbbsh                          1/1    Running   0         34m              
@@ -252,7 +252,7 @@ Reference the DNS zone id with `"${aws_route53_zone.zone-for-clusters.zone_id}"`
 | host_cidr | CIDR IPv4 range to assign to EC2 instances | "10.0.0.0/16" | "10.1.0.0/16" |
 | pod_cidr | CIDR IPv4 range to assign to Kubernetes pods | "10.2.0.0/16" | "10.22.0.0/16" |
 | service_cidr | CIDR IPv4 range to assign to Kubernetes services | "10.3.0.0/16" | "10.3.0.0/24" |
-| cluster_domain_suffix | FQDN suffix for Kubernetes services answered by kube-dns. | "cluster.local" | "k8s.example.com" |
+| cluster_domain_suffix | FQDN suffix for Kubernetes services answered by coredns. | "cluster.local" | "k8s.example.com" |
 
 Check the list of valid [instance types](https://aws.amazon.com/ec2/instance-types/).
 

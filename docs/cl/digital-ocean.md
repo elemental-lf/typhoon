@@ -1,10 +1,10 @@
 # Digital Ocean
 
-In this tutorial, we'll create a Kubernetes v1.10.5 cluster on DigitalOcean with Container Linux.
+In this tutorial, we'll create a Kubernetes v1.11.0 cluster on DigitalOcean with Container Linux.
 
 We'll declare a Kubernetes cluster using the Typhoon Terraform module. Then apply the changes to create controller droplets, worker droplets, DNS records, tags, and TLS assets.
 
-Controllers are provisioned to run an `etcd-member` peer and a `kubelet` service. Workers run just a `kubelet` service. A one-time [bootkube](https://github.com/kubernetes-incubator/bootkube) bootstrap schedules the `apiserver`, `scheduler`, `controller-manager`, and `kube-dns` on controllers and schedules `kube-proxy` and `flannel` on every node. A generated `kubeconfig` provides `kubectl` access to the cluster.
+Controllers are provisioned to run an `etcd-member` peer and a `kubelet` service. Workers run just a `kubelet` service. A one-time [bootkube](https://github.com/kubernetes-incubator/bootkube) bootstrap schedules the `apiserver`, `scheduler`, `controller-manager`, and `coredns` on controllers and schedules `kube-proxy` and `flannel` on every node. A generated `kubeconfig` provides `kubectl` access to the cluster.
 
 ## Requirements
 
@@ -90,7 +90,7 @@ Define a Kubernetes cluster using the module `digital-ocean/container-linux/kube
 
 ```tf
 module "digital-ocean-nemo" {
-  source = "git::https://github.com/poseidon/typhoon//digital-ocean/container-linux/kubernetes?ref=v1.10.5"
+  source = "git::https://github.com/poseidon/typhoon//digital-ocean/container-linux/kubernetes?ref=v1.11.0"
   
   providers = {
     digitalocean = "digitalocean.default"
@@ -164,19 +164,19 @@ In 3-6 minutes, the Kubernetes cluster will be ready.
 $ export KUBECONFIG=/home/user/.secrets/clusters/nemo/auth/kubeconfig
 $ kubectl get nodes
 NAME             STATUS    AGE       VERSION
-10.132.110.130   Ready     10m       v1.10.5
-10.132.115.81    Ready     10m       v1.10.5
-10.132.124.107   Ready     10m       v1.10.5
+10.132.110.130   Ready     10m       v1.11.0
+10.132.115.81    Ready     10m       v1.11.0
+10.132.124.107   Ready     10m       v1.11.0
 ```
 
 List the pods.
 
 ```
 NAMESPACE     NAME                                       READY     STATUS    RESTARTS   AGE
+kube-system   coredns-1187388186-ld1j7                   1/1       Running   0          11m
 kube-system   kube-apiserver-n10qr                       1/1       Running   0          11m
 kube-system   kube-controller-manager-3271970485-37gtw   1/1       Running   1          11m
 kube-system   kube-controller-manager-3271970485-p52t5   1/1       Running   0          11m
-kube-system   kube-dns-1187388186-ld1j7                  3/3       Running   0          11m
 kube-system   kube-flannel-1cq1v                         2/2       Running   0          11m
 kube-system   kube-flannel-hq9t0                         2/2       Running   1          11m
 kube-system   kube-flannel-v0g9w                         2/2       Running   0          11m
@@ -258,7 +258,7 @@ Digital Ocean requires the SSH public key be uploaded to your account, so you ma
 | worker_clc_snippets | Worker Container Linux Config snippets | [] | |
 | pod_cidr | CIDR IPv4 range to assign to Kubernetes pods | "10.2.0.0/16" | "10.22.0.0/16" |
 | service_cidr | CIDR IPv4 range to assign to Kubernetes services | "10.3.0.0/16" | "10.3.0.0/24" |
-| cluster_domain_suffix | FQDN suffix for Kubernetes services answered by kube-dns. | "cluster.local" | "k8s.example.com" |
+| cluster_domain_suffix | FQDN suffix for Kubernetes services answered by coredns. | "cluster.local" | "k8s.example.com" |
 
 Check the list of valid [droplet types](https://developers.digitalocean.com/documentation/changelog/api-v2/new-size-slugs-for-droplet-plan-changes/) or use `doctl compute size list`.
 

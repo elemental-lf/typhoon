@@ -15,8 +15,7 @@ write_files:
       RestartSec=10
   - path: /etc/kubernetes/kubelet.conf
     content: |
-      ARGS="--allow-privileged \
-        --anonymous-auth=false \
+      ARGS="--anonymous-auth=false \
         --authentication-token-webhook \
         --authorization-mode=Webhook \
         --client-ca-file=/etc/kubernetes/ca.crt \
@@ -60,7 +59,7 @@ runcmd:
   - [systemctl, daemon-reload]
   - [systemctl, restart, NetworkManager]
   - [hostnamectl, set-hostname, ${domain_name}]
-  - "atomic install --system --name=kubelet quay.io/poseidon/kubelet:v1.10.5"
+  - "atomic install --system --name=kubelet quay.io/poseidon/kubelet:v1.11.0"
   - [systemctl, enable, kubelet.path]
   - [systemctl, start, --no-block, kubelet.path]
 users:

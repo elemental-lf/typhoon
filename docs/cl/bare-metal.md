@@ -1,10 +1,10 @@
 # Bare-Metal
 
-In this tutorial, we'll network boot and provision a Kubernetes v1.10.5 cluster on bare-metal with Container Linux.
+In this tutorial, we'll network boot and provision a Kubernetes v1.11.0 cluster on bare-metal with Container Linux.
 
 First, we'll deploy a [Matchbox](https://github.com/coreos/matchbox) service and setup a network boot environment. Then, we'll declare a Kubernetes cluster using the Typhoon Terraform module and power on machines. On PXE boot, machines will install Container Linux to disk, reboot into the disk install, and provision themselves as Kubernetes controllers or workers via Ignition.
 
-Controllers are provisioned to run an `etcd-member` peer and a `kubelet` service. Workers run just a `kubelet` service. A one-time [bootkube](https://github.com/kubernetes-incubator/bootkube) bootstrap schedules the `apiserver`, `scheduler`, `controller-manager`, and `kube-dns` on controllers and schedules `kube-proxy` and `calico` (or `flannel`) on every node. A generated `kubeconfig` provides `kubectl` access to the cluster.
+Controllers are provisioned to run an `etcd-member` peer and a `kubelet` service. Workers run just a `kubelet` service. A one-time [bootkube](https://github.com/kubernetes-incubator/bootkube) bootstrap schedules the `apiserver`, `scheduler`, `controller-manager`, and `coredns` on controllers and schedules `kube-proxy` and `calico` (or `flannel`) on every node. A generated `kubeconfig` provides `kubectl` access to the cluster.
 
 ## Requirements
 
@@ -174,7 +174,7 @@ Define a Kubernetes cluster using the module `bare-metal/container-linux/kuberne
 
 ```tf
 module "bare-metal-mercury" {
-  source = "git::https://github.com/poseidon/typhoon//bare-metal/container-linux/kubernetes?ref=v1.10.5"
+  source = "git::https://github.com/poseidon/typhoon//bare-metal/container-linux/kubernetes?ref=v1.11.0"
   
   providers = {
     local = "local.default"
@@ -283,9 +283,9 @@ Apply complete! Resources: 55 added, 0 changed, 0 destroyed.
 To watch the install to disk (until machines reboot from disk), SSH to port 2222.
 
 ```
-# before v1.10.5
+# before v1.11.0
 $ ssh debug@node1.example.com
-# after v1.10.5
+# after v1.11.0
 $ ssh -p 2222 core@node1.example.com
 ```
 
@@ -310,9 +310,9 @@ bootkube[5]: Tearing down temporary bootstrap control plane...
 $ export KUBECONFIG=/home/user/.secrets/clusters/mercury/auth/kubeconfig
 $ kubectl get nodes
 NAME                STATUS    AGE       VERSION
-node1.example.com   Ready     11m       v1.10.5
-node2.example.com   Ready     11m       v1.10.5
-node3.example.com   Ready     11m       v1.10.5
+node1.example.com   Ready     11m       v1.11.0
+node2.example.com   Ready     11m       v1.11.0
+node3.example.com   Ready     11m       v1.11.0
 ```
 
 List the pods.
@@ -323,10 +323,10 @@ NAMESPACE     NAME                                       READY     STATUS    RES
 kube-system   calico-node-6qp7f                          2/2       Running   1          11m
 kube-system   calico-node-gnjrm                          2/2       Running   0          11m
 kube-system   calico-node-llbgt                          2/2       Running   0          11m
+kube-system   coredns-1187388186-mx9rt                   1/1       Running   0          11m
 kube-system   kube-apiserver-7336w                       1/1       Running   0          11m
 kube-system   kube-controller-manager-3271970485-b9chx   1/1       Running   0          11m
 kube-system   kube-controller-manager-3271970485-v30js   1/1       Running   1          11m
-kube-system   kube-dns-1187388186-mx9rt                  3/3       Running   0          11m
 kube-system   kube-proxy-50sd4                           1/1       Running   0          11m
 kube-system   kube-proxy-bczhp                           1/1       Running   0          11m
 kube-system   kube-proxy-mp2fw                           1/1       Running   0          11m
@@ -376,6 +376,6 @@ Check the [variables.tf](https://github.com/poseidon/typhoon/blob/master/bare-me
 | network_ip_autodetection_method | Method to detect host IPv4 address (calico-only) | first-found | can-reach=10.0.0.1 |
 | pod_cidr | CIDR IPv4 range to assign to Kubernetes pods | "10.2.0.0/16" | "10.22.0.0/16" |
 | service_cidr | CIDR IPv4 range to assign to Kubernetes services | "10.3.0.0/16" | "10.3.0.0/24" |
-| cluster_domain_suffix | FQDN suffix for Kubernetes services answered by kube-dns. | "cluster.local" | "k8s.example.com" |
+| cluster_domain_suffix | FQDN suffix for Kubernetes services answered by coredns. | "cluster.local" | "k8s.example.com" |
 | kernel_args | Additional kernel args to provide at PXE boot | [] | "kvm-intel.nested=1" |
 

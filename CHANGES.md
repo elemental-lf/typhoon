@@ -4,6 +4,35 @@ Notable changes between versions.
 
 ## Latest
 
+## v1.11.0
+
+* Kubernetes [v1.11.0](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.11.md#v1110)
+* Force apiserver to stop listening on `127.0.0.1:8080`
+* Replace `kube-dns` with [CoreDNS](https://coredns.io/) ([#261](https://github.com/poseidon/typhoon/pull/261))
+  * Edit the `coredns` ConfigMap to [customize](https://coredns.io/plugins/)
+  * CoreDNS doesn't use a resizer. For large clusters, scaling may be required. 
+
+#### AWS
+
+* Update from Fedora Atomic 27 to 28 ([#258](https://github.com/poseidon/typhoon/pull/258))
+
+#### Bare-Metal
+
+* Update from Fedora Atomic 27 to 28 ([#263](https://github.com/poseidon/typhoon/pull/263))
+
+#### Google
+
+* Promote Google Cloud to stable
+* Update from Fedora Atomic 27 to 28 ([#259](https://github.com/poseidon/typhoon/pull/259))
+* Remove `ingress_static_ip` module output. Use `ingress_static_ipv4`.
+* Remove `controllers_ipv4_public` module output.
+
+#### Addons
+
+* Update nginx-ingress from 0.15.0 to 0.16.2
+* Update Grafana from 5.1.4 to [5.2.1](http://docs.grafana.org/guides/whats-new-in-v5-2/)
+* Update heapster from v1.5.2 to v1.5.3
+
 ## v1.10.5
 
 * Kubernetes [v1.10.5](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.10.md#v1105)
