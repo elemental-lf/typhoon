@@ -118,8 +118,17 @@ resource "matchbox_profile" "flatcar-install" {
 resource "matchbox_profile" "controllers" {
   count                  = "${length(var.controller_names)}"
   name                   = "${format("%s-controller-%s", var.cluster_name, element(var.controller_names, count.index))}"
-  container_linux_config = "${element(data.template_file.controller-configs.*.rendered, count.index)}"
+  raw_ignition = "${element(data.ct_config.controller-ignitions.*.rendered, count.index)}"
 }
+
+data "ct_config" "controller-ignitions" {
+  count = "${length(var.controller_names)}"
+  content = "${element(data.template_file.controller-configs.*.rendered, count.index)}"
+  pretty_print = false
+  # Must use direct lookup. Cannot use lookup(map, key) since it only works for flat maps
+  snippets = ["${local.clc_map[element(var.controller_names, count.index)]}"]
+}
+
 
 data "template_file" "controller-configs" {
   count = "${length(var.controller_names)}"
@@ -143,7 +152,16 @@ data "template_file" "controller-configs" {
 resource "matchbox_profile" "workers" {
   count                  = "${length(var.worker_names)}"
   name                   = "${format("%s-worker-%s", var.cluster_name, element(var.worker_names, count.index))}"
-  container_linux_config = "${element(data.template_file.worker-configs.*.rendered, count.index)}"
+  raw_ignition = "${element(data.ct_config.worker-ignitions.*.rendered, count.index)}"
+}
+
+
+data "ct_config" "worker-ignitions" {
+  count = "${length(var.worker_names)}"
+  content = "${element(data.template_file.worker-configs.*.rendered, count.index)}"
+  pretty_print = false
+  # Must use direct lookup. Cannot use lookup(map, key) since it only works for flat maps
+  snippets = ["${local.clc_map[element(var.worker_names, count.index)]}"]
 }
 
 data "template_file" "worker-configs" {
@@ -160,4 +178,19 @@ data "template_file" "worker-configs" {
     # Terraform evaluates both sides regardless and element cannot be used on 0 length lists
     networkd_content = "${length(var.worker_networkds) == 0 ? "" : element(concat(var.worker_networkds, list("")), count.index)}"
   }
+}
+
+locals {
+  # Hack to workaround https://github.com/hashicorp/terraform/issues/17251
+  # Default Container Linux config snippets map every node names to list("\n") so
+  # all lookups succeed
+  clc_defaults = "${zipmap(concat(var.controller_names, var.worker_names), chunklist(data.template_file.clc-default-snippets.*.rendered, 1))}"
+  # Union of the default and user specific snippets, later overrides prior.
+  clc_map = "${merge(local.clc_defaults, var.clc_snippets)}"
+}
+
+// Horrible hack to generate a Terraform list of node count length
+data "template_file" "clc-default-snippets" {
+  count = "${length(var.controller_names) + length(var.worker_names)}"
+  template = "\n"
 }

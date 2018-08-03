@@ -4,11 +4,33 @@ Notable changes between versions.
 
 ## Latest
 
+* Update etcd from v3.3.8 to [v3.3.9](https://github.com/coreos/etcd/blob/master/CHANGELOG-3.3.md#v339-2018-07-24)
+* Use kubernetes-incubator/bootkube v0.13.0
+* Fix Fedora Atomic modules' Kubelet version ([#270](https://github.com/poseidon/typhoon/issues/270))
+
+#### Bare-Metal
+
+* Introduce [Container Linux Config snippets](https://typhoon.psdn.io/advanced/customization/#container-linux) on bare-metal
+  * Validate and additively merge custom Container Linux Configs during terraform plan
+  * Define files, systemd units, dropins, networkd configs, mounts, users, and more
+  * [Require](https://typhoon.psdn.io/cl/bare-metal/#terraform-setup) `terraform-provider-ct` plugin v0.2.1 (action required!)
+
+#### Addons
+
+* Update Grafana from 5.2.1 to 5.2.2
+* Update heapster from v1.5.3 to v1.5.4
+
+## v1.11.1
+
 * Kubernetes [v1.11.1](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.11.md#v1111)
 
 #### Addons
 
 * Update Prometheus from v2.3.1 to v2.3.2
+
+#### Errata
+
+* Fedora Atomic modules shipped with Kubelet v1.11.0, instead of v1.11.1. Fixed in [#270](https://github.com/poseidon/typhoon/issues/270).
 
 ## v1.11.0
 
