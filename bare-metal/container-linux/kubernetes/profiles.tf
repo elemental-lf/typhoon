@@ -39,7 +39,7 @@ data "template_file" "container-linux-install-configs" {
     os_channel          = "${local.channel}"
     os_version          = "${var.os_version}"
     ignition_endpoint   = "${format("%s/ignition", var.matchbox_http_endpoint)}"
-    install_disk        = "${var.install_disk}"
+    install_disk        = "${element(concat(var.controller_install_disks, var.worker_install_disks), count.index)}"
     container_linux_oem = "${var.container_linux_oem}"
     ssh_authorized_key  = "${var.ssh_authorized_key}"
 
@@ -82,7 +82,7 @@ data "template_file" "cached-container-linux-install-configs" {
     os_channel          = "${local.channel}"
     os_version          = "${var.os_version}"
     ignition_endpoint   = "${format("%s/ignition", var.matchbox_http_endpoint)}"
-    install_disk        = "${var.install_disk}"
+    install_disk        = "${element(concat(var.controller_install_disks, var.worker_install_disks), count.index)}"
     container_linux_oem = "${var.container_linux_oem}"
     ssh_authorized_key  = "${var.ssh_authorized_key}"
 

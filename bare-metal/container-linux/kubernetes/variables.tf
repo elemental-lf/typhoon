@@ -176,3 +176,15 @@ variable "worker_networkds" {
   description = "Worker Container Linux config networkd section"
   default     = []
 }
+
+variable "controller_install_disks" {
+  type        = "list"
+  description = "Controller install disks"
+  default     = []
+}
+
+variable "worker_install_disks" {
+  type        = "list"
+  description = "Worker install disks"
+  default     = []
+}
