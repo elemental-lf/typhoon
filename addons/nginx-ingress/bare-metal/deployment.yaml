@@ -1,25 +1,23 @@
 apiVersion: apps/v1
-kind: DaemonSet
+kind: Deployment
 metadata:
-  name: nginx-ingress-controller
+  name: ingress-controller-public
   namespace: ingress
 spec:
-  updateStrategy:
-    type: RollingUpdate
+  replicas: 2
+  strategy:
     rollingUpdate:
       maxUnavailable: 1
   selector:
     matchLabels:
-      name: nginx-ingress-controller
+      name: ingress-controller-public
       phase: prod
   template:
     metadata:
       labels:
-        name: nginx-ingress-controller
+        name: ingress-controller-public
         phase: prod
     spec:
-      nodeSelector:
-        node-role.kubernetes.io/node: ""
       containers:
         - name: nginx-ingress-controller
           image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.17.1
@@ -40,15 +38,11 @@ spec:
           ports:
             - name: http
               containerPort: 80
-              hostPort: 80
             - name: https
               containerPort: 443
-              hostPort: 443
             - name: health
               containerPort: 10254
-              hostPort: 10254
           livenessProbe:
-            failureThreshold: 3
             httpGet:
               path: /healthz
               port: 10254
@@ -56,15 +50,16 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 10
             successThreshold: 1
+            failureThreshold: 3
             timeoutSeconds: 1
           readinessProbe:
-            failureThreshold: 3
             httpGet:
               path: /healthz
               port: 10254
               scheme: HTTP
             periodSeconds: 10
             successThreshold: 1
+            failureThreshold: 3
             timeoutSeconds: 1
           securityContext:
             capabilities:
@@ -75,3 +70,4 @@ spec:
             runAsUser: 33 # www-data
       restartPolicy: Always
       terminationGracePeriodSeconds: 60
+
