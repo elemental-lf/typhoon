@@ -94,6 +94,12 @@ variable "network_ip_autodetection_method" {
   default     = "first-found"
 }
 
+variable "network_ipip_mode" {
+  description = "IPIP mode to use (applies to calico only)"
+  type        = "string"
+  default     = "always"
+}
+
 variable "pod_cidr" {
   description = "CIDR IPv4 range to assign Kubernetes pods"
   type        = "string"
@@ -108,21 +114,6 @@ EOD
 
   type    = "string"
   default = "10.3.0.0/16"
-}
-
-variable "flannel_backend" {
-  description = "flannel backend to use when using the flannel or canal networking provider"
-  type        = "string"
-  default     = "vxlan"
-}
-
-variable "flannel_iface" {
-  description = <<EOD
-Interface to use for host-to-host communication when using the flannel or canal networking provider.
-An empty string means that the pod IP is used. This is also the default.
-EOD
-  type        = "string"
-  default     = ""
 }
 
 variable "apiserver_vip" {
