@@ -89,7 +89,7 @@ storage:
       contents:
         inline: |
           KUBELET_IMAGE_URL=docker://k8s.gcr.io/hyperkube
-          KUBELET_IMAGE_TAG=v1.11.2
+          KUBELET_IMAGE_TAG=v1.11.3
     - path: /etc/hostname
       filesystem: root
       mode: 0644
@@ -101,8 +101,6 @@ storage:
       contents:
         inline: |
           fs.inotify.max_user_watches=16184
-networkd:
-  ${networkd_content}
 passwd:
   users:
     - name: core

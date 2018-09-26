@@ -128,7 +128,7 @@ storage:
       contents:
         inline: |
           KUBELET_IMAGE_URL=docker://k8s.gcr.io/hyperkube
-          KUBELET_IMAGE_TAG=v1.11.2
+          KUBELET_IMAGE_TAG=v1.11.3
     - path: /etc/hostname
       filesystem: root
       mode: 0644
@@ -168,8 +168,6 @@ storage:
             --net=host \
             --dns=host \
             --exec=/bootkube -- start --asset-dir=/assets "$@"
-networkd:
-  ${networkd_content}
 passwd:
   users:
     - name: core

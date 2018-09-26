@@ -3,7 +3,7 @@
 !!! danger
     Typhoon for Fedora Atomic is alpha. Fedora does not publish official images for Google Cloud so you must prepare them yourself. Expect rough edges and changes.
 
-In this tutorial, we'll create a Kubernetes v1.11.2 cluster on Google Compute Engine with Fedora Atomic.
+In this tutorial, we'll create a Kubernetes v1.11.3 cluster on Google Compute Engine with Fedora Atomic.
 
 We'll declare a Kubernetes cluster using the Typhoon Terraform module. Then apply the changes to create a network, firewall rules, health checks, controller instances, worker managed instance group, load balancers, and TLS assets. Instances are provisioned on first boot with cloud-init.
 
@@ -12,7 +12,7 @@ Controllers are provisioned to run an `etcd` peer and a `kubelet` service. Worke
 ## Requirements
 
 * Google Cloud Account and Service Account
-* Google Cloud DNS Zone (registered Domain Name or delegated subdomain)
+* Google Cloud DNS Zone (registered main Name or delegated subdomain)
 * Terraform v0.11.x installed locally
 * `gcloud` and `gsutil` for uploading a disk image to Google Cloud (temporary)
 
@@ -25,7 +25,7 @@ $ terraform version
 Terraform v0.11.7
 ```
 
-Read [concepts](../architecture/concepts.md) to learn about Terraform, modules, and organizing resources. Change to your infrastructure repository (e.g. `infra`).
+Read [concepts](/architecture/concepts.md) to learn about Terraform, modules, and organizing resources. Change to your infrastructure repository (e.g. `infra`).
 
 ```
 cd infra/clusters
@@ -121,7 +121,7 @@ Define a Kubernetes cluster using the module `google-cloud/fedora-atomic/kuberne
 
 ```tf
 module "google-cloud-yavin" {
-  source = "git::https://github.com/poseidon/typhoon//google-cloud/fedora-atomic/kubernetes?ref=v1.11.2"
+  source = "git::https://github.com/poseidon/typhoon//google-cloud/fedora-atomic/kubernetes?ref=v1.11.3"
   
   providers = {
     google   = "google.default"
@@ -197,9 +197,9 @@ In 5-10 minutes, the Kubernetes cluster will be ready.
 $ export KUBECONFIG=/home/user/.secrets/clusters/yavin/auth/kubeconfig
 $ kubectl get nodes
 NAME                                          STATUS   AGE    VERSION
-yavin-controller-0.c.example-com.internal     Ready    6m     v1.11.2
-yavin-worker-jrbf.c.example-com.internal      Ready    5m     v1.11.2
-yavin-worker-mzdm.c.example-com.internal      Ready    5m     v1.11.2
+yavin-controller-0.c.example-com.internal     Ready    6m     v1.11.3
+yavin-worker-jrbf.c.example-com.internal      Ready    5m     v1.11.3
+yavin-worker-mzdm.c.example-com.internal      Ready    5m     v1.11.3
 ```
 
 List the pods.
@@ -224,7 +224,7 @@ kube-system   pod-checkpointer-l6lrt                    1/1    Running   0      
 
 ## Going Further
 
-Learn about [maintenance](../topics/maintenance.md) and [addons](../addons/overview.md).
+Learn about [maintenance](/topics/maintenance.md) and [addons](/addons/overview.md).
 
 ## Variables
 

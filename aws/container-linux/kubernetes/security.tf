@@ -11,16 +11,6 @@ resource "aws_security_group" "controller" {
   tags = "${map("Name", "${var.cluster_name}-controller")}"
 }
 
-resource "aws_security_group_rule" "controller-icmp" {
-  security_group_id = "${aws_security_group.controller.id}"
-
-  type        = "ingress"
-  protocol    = "icmp"
-  from_port   = 0
-  to_port     = 0
-  cidr_blocks = ["0.0.0.0/0"]
-}
-
 resource "aws_security_group_rule" "controller-ssh" {
   security_group_id = "${aws_security_group.controller.id}"
 
@@ -28,16 +18,6 @@ resource "aws_security_group_rule" "controller-ssh" {
   protocol    = "tcp"
   from_port   = 22
   to_port     = 22
-  cidr_blocks = ["0.0.0.0/0"]
-}
-
-resource "aws_security_group_rule" "controller-apiserver" {
-  security_group_id = "${aws_security_group.controller.id}"
-
-  type        = "ingress"
-  protocol    = "tcp"
-  from_port   = 6443
-  to_port     = 6443
   cidr_blocks = ["0.0.0.0/0"]
 }
 
@@ -51,6 +31,7 @@ resource "aws_security_group_rule" "controller-etcd" {
   self      = true
 }
 
+# Allow Prometheus to scrape etcd metrics
 resource "aws_security_group_rule" "controller-etcd-metrics" {
   security_group_id = "${aws_security_group.controller.id}"
 
@@ -59,6 +40,16 @@ resource "aws_security_group_rule" "controller-etcd-metrics" {
   from_port                = 2381
   to_port                  = 2381
   source_security_group_id = "${aws_security_group.worker.id}"
+}
+
+resource "aws_security_group_rule" "controller-apiserver" {
+  security_group_id = "${aws_security_group.controller.id}"
+
+  type        = "ingress"
+  protocol    = "tcp"
+  from_port   = 6443
+  to_port     = 6443
+  cidr_blocks = ["0.0.0.0/0"]
 }
 
 resource "aws_security_group_rule" "controller-flannel" {
@@ -81,6 +72,7 @@ resource "aws_security_group_rule" "controller-flannel-self" {
   self      = true
 }
 
+# Allow Prometheus to scrape node-exporter daemonset
 resource "aws_security_group_rule" "controller-node-exporter" {
   security_group_id = "${aws_security_group.controller.id}"
 
@@ -91,6 +83,7 @@ resource "aws_security_group_rule" "controller-node-exporter" {
   source_security_group_id = "${aws_security_group.worker.id}"
 }
 
+# Allow apiserver to access kubelets for exec, log, port-forward
 resource "aws_security_group_rule" "controller-kubelet" {
   security_group_id = "${aws_security_group.controller.id}"
 
@@ -111,6 +104,7 @@ resource "aws_security_group_rule" "controller-kubelet-self" {
   self      = true
 }
 
+# Allow heapster / metrics-server to scrape kubelet read-only
 resource "aws_security_group_rule" "controller-kubelet-read" {
   security_group_id = "${aws_security_group.controller.id}"
 
@@ -213,16 +207,6 @@ resource "aws_security_group" "worker" {
   tags = "${map("Name", "${var.cluster_name}-worker")}"
 }
 
-resource "aws_security_group_rule" "worker-icmp" {
-  security_group_id = "${aws_security_group.worker.id}"
-
-  type        = "ingress"
-  protocol    = "icmp"
-  from_port   = 0
-  to_port     = 0
-  cidr_blocks = ["0.0.0.0/0"]
-}
-
 resource "aws_security_group_rule" "worker-ssh" {
   security_group_id = "${aws_security_group.worker.id}"
 
@@ -273,6 +257,7 @@ resource "aws_security_group_rule" "worker-flannel-self" {
   self      = true
 }
 
+# Allow Prometheus to scrape node-exporter daemonset
 resource "aws_security_group_rule" "worker-node-exporter" {
   security_group_id = "${aws_security_group.worker.id}"
 
@@ -293,6 +278,7 @@ resource "aws_security_group_rule" "ingress-health" {
   cidr_blocks = ["0.0.0.0/0"]
 }
 
+# Allow apiserver to access kubelets for exec, log, port-forward
 resource "aws_security_group_rule" "worker-kubelet" {
   security_group_id = "${aws_security_group.worker.id}"
 
@@ -303,6 +289,7 @@ resource "aws_security_group_rule" "worker-kubelet" {
   source_security_group_id = "${aws_security_group.controller.id}"
 }
 
+# Allow Prometheus to scrape kubelet metrics
 resource "aws_security_group_rule" "worker-kubelet-self" {
   security_group_id = "${aws_security_group.worker.id}"
 
@@ -313,6 +300,7 @@ resource "aws_security_group_rule" "worker-kubelet-self" {
   self      = true
 }
 
+# Allow heapster / metrics-server to scrape kubelet read-only
 resource "aws_security_group_rule" "worker-kubelet-read" {
   security_group_id = "${aws_security_group.worker.id}"
 
