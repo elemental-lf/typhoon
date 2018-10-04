@@ -171,3 +171,15 @@ variable "etcd_cluster_exists" {
   description = "Wheter it should be assumed that the etcd cluster already exists or not"
   default     = "false"
 }
+
+variable "apiserver_extra_arguments" {
+  description = "List of extra arguments for the kube-apiserver"
+  type        = "list"
+  default     = []
+}
+
+variable "apiserver_extra_secrets" {
+  description = "Map of extra data to insert into the kube-apiserver Secrets (values must be BASE64 encoded)"
+  type        = "map"
+  default     = {}
+}
