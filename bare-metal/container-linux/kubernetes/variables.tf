@@ -165,3 +165,9 @@ variable "worker_install_disks" {
   description = "Worker install disks"
   default     = []
 }
+
+variable "etcd_cluster_exists" {
+  type        = "string"
+  description = "Wheter it should be assumed that the etcd cluster already exists or not"
+  default     = "false"
+}

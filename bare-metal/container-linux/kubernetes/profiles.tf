@@ -143,6 +143,7 @@ data "template_file" "controller-configs" {
     cluster_domain_suffix = "${var.cluster_domain_suffix}"
     ssh_authorized_key    = "${var.ssh_authorized_key}"
     apiserver_vip         = "${var.apiserver_vip}"
+    etcd_cluster_exists   = "${var.etcd_cluster_exists}"
   }
 }
 
