@@ -3,7 +3,7 @@
 !!! danger
     Typhoon for Fedora Atomic is alpha. Expect rough edges and changes.
 
-In this tutorial, we'll create a Kubernetes v1.11.2 cluster on AWS with Fedora Atomic.
+In this tutorial, we'll create a Kubernetes v1.11.3 cluster on AWS with Fedora Atomic.
 
 We'll declare a Kubernetes cluster using the Typhoon Terraform module. Then apply the changes to create a VPC, gateway, subnets, security groups, controller instances, worker auto-scaling group, network load balancer, and TLS assets. Instances are provisioned on first boot with cloud-init.
 
@@ -24,7 +24,7 @@ $ terraform version
 Terraform v0.11.7
 ```
 
-Read [concepts](../architecture/concepts.md) to learn about Terraform, modules, and organizing resources. Change to your infrastructure repository (e.g. `infra`).
+Read [concepts](/architecture/concepts.md) to learn about Terraform, modules, and organizing resources. Change to your infrastructure repository (e.g. `infra`).
 
 ```
 cd infra/clusters
@@ -83,7 +83,7 @@ Define a Kubernetes cluster using the module `aws/fedora-atomic/kubernetes`.
 
 ```tf
 module "aws-tempest" {
-  source = "git::https://github.com/poseidon/typhoon//aws/fedora-atomic/kubernetes?ref=v1.11.2"
+  source = "git::https://github.com/poseidon/typhoon//aws/fedora-atomic/kubernetes?ref=v1.11.3"
 
   providers = {
     aws = "aws.default"
@@ -156,9 +156,9 @@ In 5-10 minutes, the Kubernetes cluster will be ready.
 $ export KUBECONFIG=/home/user/.secrets/clusters/tempest/auth/kubeconfig
 $ kubectl get nodes
 NAME             STATUS    AGE       VERSION        
-ip-10-0-12-221   Ready     34m       v1.11.2
-ip-10-0-19-112   Ready     34m       v1.11.2
-ip-10-0-4-22     Ready     34m       v1.11.2
+ip-10-0-12-221   Ready     34m       v1.11.3
+ip-10-0-19-112   Ready     34m       v1.11.3
+ip-10-0-4-22     Ready     34m       v1.11.3
 ```
 
 List the pods.
@@ -184,7 +184,7 @@ kube-system   pod-checkpointer-4kxtl-ip-10-0-12-221     1/1    Running   0      
 
 ## Going Further
 
-Learn about [maintenance](../topics/maintenance.md) and [addons](../addons/overview.md).
+Learn about [maintenance](/topics/maintenance.md) and [addons](/addons/overview.md).
 
 ## Variables
 

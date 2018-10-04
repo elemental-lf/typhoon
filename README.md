@@ -11,10 +11,10 @@ Typhoon distributes upstream Kubernetes, architectural conventions, and cluster 
 
 ## Features <a href="https://www.cncf.io/certification/software-conformance/"><img align="right" src="https://storage.googleapis.com/poseidon/certified-kubernetes.png"></a>
 
-* Kubernetes v1.11.2 (upstream, via [kubernetes-incubator/bootkube](https://github.com/kubernetes-incubator/bootkube))
+* Kubernetes v1.11.3 (upstream, via [kubernetes-incubator/bootkube](https://github.com/kubernetes-incubator/bootkube))
 * Single or multi-master, workloads isolated on workers, [Calico](https://www.projectcalico.org/) or [flannel](https://github.com/coreos/flannel) networking
 * On-cluster etcd with TLS, [RBAC](https://kubernetes.io/docs/admin/authorization/rbac/)-enabled, [network policy](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
-* Advanced features like [worker pools](https://typhoon.psdn.io/advanced/worker-pools/) and [preemption](https://typhoon.psdn.io/google-cloud/#preemption) (varies by platform)
+* Advanced features like [worker pools](https://typhoon.psdn.io/advanced/worker-pools/) and [preemption](https://typhoon.psdn.io/cl/google-cloud/#preemption) (varies by platform)
 * Ready for Ingress, Prometheus, Grafana, and other optional [addons](https://typhoon.psdn.io/addons/overview/)
 
 ## Modules
@@ -25,6 +25,7 @@ Typhoon provides a Terraform Module for each supported operating system and plat
 |---------------|------------------|------------------|--------|
 | AWS           | Container Linux  | [aws/container-linux/kubernetes](aws/container-linux/kubernetes) | stable |
 | AWS           | Fedora Atomic    | [aws/fedora-atomic/kubernetes](aws/fedora-atomic/kubernetes) | alpha |
+| Azure         | Container Linux  | [azure/container-linux/kubernetes](cl/azure.md) | alpha |
 | Bare-Metal    | Container Linux  | [bare-metal/container-linux/kubernetes](bare-metal/container-linux/kubernetes) | stable |
 | Bare-Metal    | Fedora Atomic    | [bare-metal/fedora-atomic/kubernetes](bare-metal/fedora-atomic/kubernetes) | alpha |
 | Digital Ocean | Container Linux  | [digital-ocean/container-linux/kubernetes](digital-ocean/container-linux/kubernetes) | beta |
@@ -38,7 +39,7 @@ The AWS and bare-metal `container-linux` modules allow picking Red Hat Container
 
 * [Docs](https://typhoon.psdn.io)
 * Architecture [concepts](https://typhoon.psdn.io/architecture/concepts/) and [operating systems](https://typhoon.psdn.io/architecture/operating-systems/)
-* Tutorials for [AWS](https://typhoon.psdn.io/cl/aws/), [Bare-Metal](https://typhoon.psdn.io/cl/bare-metal/), [Digital Ocean](https://typhoon.psdn.io/cl/digital-ocean/), and [Google-Cloud](https://typhoon.psdn.io/cl/google-cloud/)
+* Tutorials for [AWS](cl/aws.md), [Azure](cl/azure.md), [Bare-Metal](cl/bare-metal.md), [Digital Ocean](cl/digital-ocean.md), and [Google-Cloud](cl/google-cloud.md)
 
 ## Usage
 
@@ -46,7 +47,7 @@ Define a Kubernetes cluster by using the Terraform module for your chosen platfo
 
 ```tf
 module "google-cloud-yavin" {
-  source = "git::https://github.com/poseidon/typhoon//google-cloud/container-linux/kubernetes?ref=v1.11.2"
+  source = "git::https://github.com/poseidon/typhoon//google-cloud/container-linux/kubernetes?ref=v1.11.3"
   
   providers = {
     google   = "google.default"
@@ -71,15 +72,14 @@ module "google-cloud-yavin" {
 }
 ```
 
-Fetch modules, plan the changes to be made, and apply the changes.
+Initialize modules, plan the changes to be made, and apply the changes.
 
 ```sh
 $ terraform init
-$ terraform get --update
 $ terraform plan
-Plan: 37 to add, 0 to change, 0 to destroy.
+Plan: 64 to add, 0 to change, 0 to destroy.
 $ terraform apply
-Apply complete! Resources: 37 added, 0 changed, 0 destroyed.
+Apply complete! Resources: 64 added, 0 changed, 0 destroyed.
 ```
 
 In 4-8 minutes (varies by platform), the cluster will be ready. This Google Cloud example creates a `yavin.example.com` DNS record to resolve to a network load balancer across controller nodes.
@@ -88,9 +88,9 @@ In 4-8 minutes (varies by platform), the cluster will be ready. This Google Clou
 $ export KUBECONFIG=/home/user/.secrets/clusters/yavin/auth/kubeconfig
 $ kubectl get nodes
 NAME                                          STATUS   AGE    VERSION
-yavin-controller-0.c.example-com.internal     Ready    6m     v1.11.2
-yavin-worker-jrbf.c.example-com.internal      Ready    5m     v1.11.2
-yavin-worker-mzdm.c.example-com.internal      Ready    5m     v1.11.2
+yavin-controller-0.c.example-com.internal     Ready    6m     v1.11.3
+yavin-worker-jrbf.c.example-com.internal      Ready    5m     v1.11.3
+yavin-worker-mzdm.c.example-com.internal      Ready    5m     v1.11.3
 ```
 
 List the pods.

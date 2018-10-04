@@ -27,11 +27,6 @@ systemd:
             Environment="ETCD_PEER_CLIENT_CERT_AUTH=true"
     - name: docker.service
       enable: true
-      dropins:
-        - name: 10-dockeropts.conf
-          contents: |
-            [Service]
-            Environment="DOCKER_OPTS=--log-opt max-size=50m --log-opt max-file=3"
     - name: locksmithd.service
       mask: true
     - name: kubelet.path
@@ -128,7 +123,7 @@ storage:
       contents:
         inline: |
           KUBELET_IMAGE_URL=docker://k8s.gcr.io/hyperkube
-          KUBELET_IMAGE_TAG=v1.11.2
+          KUBELET_IMAGE_TAG=v1.11.3
     - path: /etc/hostname
       filesystem: root
       mode: 0644
@@ -168,8 +163,6 @@ storage:
             --net=host \
             --dns=host \
             --exec=/bootkube -- start --asset-dir=/assets "$@"
-networkd:
-  ${networkd_content}
 passwd:
   users:
     - name: core

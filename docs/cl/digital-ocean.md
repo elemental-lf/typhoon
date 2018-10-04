@@ -1,6 +1,6 @@
 # Digital Ocean
 
-In this tutorial, we'll create a Kubernetes v1.11.2 cluster on DigitalOcean with Container Linux.
+In this tutorial, we'll create a Kubernetes v1.11.3 cluster on DigitalOcean with Container Linux.
 
 We'll declare a Kubernetes cluster using the Typhoon Terraform module. Then apply the changes to create controller droplets, worker droplets, DNS records, tags, and TLS assets.
 
@@ -18,7 +18,7 @@ Install [Terraform](https://www.terraform.io/downloads.html) v0.11.x on your sys
 
 ```sh
 $ terraform version
-Terraform v0.11.1
+Terraform v0.11.7
 ```
 
 Add the [terraform-provider-ct](https://github.com/coreos/terraform-provider-ct) plugin binary for your system.
@@ -37,7 +37,7 @@ providers {
 }
 ```
 
-Read [concepts](../architecture/concepts.md) to learn about Terraform, modules, and organizing resources. Change to your infrastructure repository (e.g. `infra`).
+Read [concepts](/architecture/concepts.md) to learn about Terraform, modules, and organizing resources. Change to your infrastructure repository (e.g. `infra`).
 
 ```
 cd infra/clusters
@@ -90,7 +90,7 @@ Define a Kubernetes cluster using the module `digital-ocean/container-linux/kube
 
 ```tf
 module "digital-ocean-nemo" {
-  source = "git::https://github.com/poseidon/typhoon//digital-ocean/container-linux/kubernetes?ref=v1.11.2"
+  source = "git::https://github.com/poseidon/typhoon//digital-ocean/container-linux/kubernetes?ref=v1.11.3"
   
   providers = {
     digitalocean = "digitalocean.default"
@@ -164,9 +164,9 @@ In 3-6 minutes, the Kubernetes cluster will be ready.
 $ export KUBECONFIG=/home/user/.secrets/clusters/nemo/auth/kubeconfig
 $ kubectl get nodes
 NAME             STATUS    AGE       VERSION
-10.132.110.130   Ready     10m       v1.11.2
-10.132.115.81    Ready     10m       v1.11.2
-10.132.124.107   Ready     10m       v1.11.2
+10.132.110.130   Ready     10m       v1.11.3
+10.132.115.81    Ready     10m       v1.11.3
+10.132.124.107   Ready     10m       v1.11.3
 ```
 
 List the pods.
@@ -191,7 +191,7 @@ kube-system   pod-checkpointer-pr1lq-10.132.115.81       1/1       Running   0  
 
 ## Going Further
 
-Learn about [maintenance](../topics/maintenance.md) and [addons](../addons/overview.md).
+Learn about [maintenance](/topics/maintenance.md) and [addons](/addons/overview.md).
 
 !!! note
     On Container Linux clusters, install the `CLUO` addon to coordinate reboots and drains when nodes auto-update. Otherwise, updates may not be applied until the next reboot.
@@ -254,8 +254,8 @@ Digital Ocean requires the SSH public key be uploaded to your account, so you ma
 | controller_type | Droplet type for controllers | s-2vcpu-2gb | s-2vcpu-2gb, s-2vcpu-4gb, s-4vcpu-8gb, ... |
 | worker_type | Droplet type for workers | s-1vcpu-1gb | s-1vcpu-1gb, s-1vcpu-2gb, s-2vcpu-2gb, ... |
 | image | Container Linux image for instances | "coreos-stable" | coreos-stable, coreos-beta, coreos-alpha |
-| controller_clc_snippets | Controller Container Linux Config snippets | [] | |
-| worker_clc_snippets | Worker Container Linux Config snippets | [] | |
+| controller_clc_snippets | Controller Container Linux Config snippets | [] | [example](/advnaced/customization.md) |
+| worker_clc_snippets | Worker Container Linux Config snippets | [] | [example](customization.md) |
 | pod_cidr | CIDR IPv4 range to assign to Kubernetes pods | "10.2.0.0/16" | "10.22.0.0/16" |
 | service_cidr | CIDR IPv4 range to assign to Kubernetes services | "10.3.0.0/16" | "10.3.0.0/24" |
 | cluster_domain_suffix | FQDN suffix for Kubernetes services answered by coredns. | "cluster.local" | "k8s.example.com" |

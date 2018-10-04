@@ -24,39 +24,39 @@ variable "os_version" {
 # Terraform's crude "type system" does not properly support lists of maps so we do this.
 
 variable "controller_names" {
-  type = "list"
+  type        = "list"
   description = "Ordered list of controller names (e.g. [node1])"
 }
 
 variable "controller_macs" {
-  type = "list"
+  type        = "list"
   description = "Ordered list of controller identifying MAC addresses (e.g. [52:54:00:a1:9c:ae])"
 }
 
 variable "controller_domains" {
-  type = "list"
+  type        = "list"
   description = "Ordered list of controller FQDNs (e.g. [node1.example.com])"
 }
 
 variable "worker_names" {
-  type = "list"
+  type        = "list"
   description = "Ordered list of worker names (e.g. [node2, node3])"
 }
 
 variable "worker_macs" {
-  type = "list"
+  type        = "list"
   description = "Ordered list of worker identifying MAC addresses (e.g. [52:54:00:b2:2f:86, 52:54:00:c3:61:77])"
 }
 
 variable "worker_domains" {
-  type = "list"
+  type        = "list"
   description = "Ordered list of worker FQDNs (e.g. [node2.example.com, node3.example.com])"
 }
 
 variable "clc_snippets" {
-  type = "map"
+  type        = "map"
   description = "Map from machine names to lists of Container Linux Config snippets"
-  default = {}
+  default     = {}
 }
 
 # configuration
@@ -151,20 +151,6 @@ variable "container_linux_oem" {
 variable "kernel_args" {
   description = "Additional kernel arguments to provide at PXE boot."
   type        = "list"
-  default     = []
-}
-
-# unofficial, undocumented, unsupported, temporary
-
-variable "controller_networkds" {
-  type        = "list"
-  description = "Controller Container Linux config networkd section"
-  default     = []
-}
-
-variable "worker_networkds" {
-  type        = "list"
-  description = "Worker Container Linux config networkd section"
   default     = []
 }
 

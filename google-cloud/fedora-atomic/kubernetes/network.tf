@@ -17,39 +17,13 @@ resource "google_compute_firewall" "allow-ssh" {
   target_tags   = ["${var.cluster_name}-controller", "${var.cluster_name}-worker"]
 }
 
-resource "google_compute_firewall" "allow-apiserver" {
-  name    = "${var.cluster_name}-allow-apiserver"
-  network = "${google_compute_network.network.name}"
-
-  allow {
-    protocol = "tcp"
-    ports    = [443]
-  }
-
-  source_ranges = ["0.0.0.0/0"]
-  target_tags   = ["${var.cluster_name}-controller"]
-}
-
-resource "google_compute_firewall" "allow-ingress" {
-  name    = "${var.cluster_name}-allow-ingress"
-  network = "${google_compute_network.network.name}"
-
-  allow {
-    protocol = "tcp"
-    ports    = [80, 443]
-  }
-
-  source_ranges = ["0.0.0.0/0"]
-  target_tags   = ["${var.cluster_name}-worker"]
-}
-
 resource "google_compute_firewall" "internal-etcd" {
   name    = "${var.cluster_name}-internal-etcd"
   network = "${google_compute_network.network.name}"
 
   allow {
     protocol = "tcp"
-    ports    = [2380]
+    ports    = [2379, 2380]
   }
 
   source_tags = ["${var.cluster_name}-controller"]
@@ -68,6 +42,19 @@ resource "google_compute_firewall" "internal-etcd-metrics" {
 
   source_tags = ["${var.cluster_name}-worker"]
   target_tags = ["${var.cluster_name}-controller"]
+}
+
+resource "google_compute_firewall" "allow-apiserver" {
+  name    = "${var.cluster_name}-allow-apiserver"
+  network = "${google_compute_network.network.name}"
+
+  allow {
+    protocol = "tcp"
+    ports    = [443]
+  }
+
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["${var.cluster_name}-controller"]
 }
 
 # Calico BGP and IPIP
@@ -121,7 +108,7 @@ resource "google_compute_firewall" "internal-node-exporter" {
   target_tags = ["${var.cluster_name}-controller", "${var.cluster_name}-worker"]
 }
 
-# kubelet API to allow apiserver exec and log or metrics scraping
+# Allow apiserver to access kubelets for exec, log, port-forward
 resource "google_compute_firewall" "internal-kubelet" {
   name    = "${var.cluster_name}-internal-kubelet"
   network = "${google_compute_network.network.name}"
@@ -131,24 +118,12 @@ resource "google_compute_firewall" "internal-kubelet" {
     ports    = [10250]
   }
 
+  # allow Prometheus to scrape kubelet metrics too
   source_tags = ["${var.cluster_name}-controller", "${var.cluster_name}-worker"]
   target_tags = ["${var.cluster_name}-controller", "${var.cluster_name}-worker"]
 }
 
-# Allow Prometheus to scrape ingress-controller
-resource "google_compute_firewall" "ingress-health" {
-  name    = "${var.cluster_name}-ingress-health"
-  network = "${google_compute_network.network.name}"
-
-  allow {
-    protocol = "tcp"
-    ports    = [10254]
-  }
-
-  source_tags = ["${var.cluster_name}-worker"]
-  target_tags = ["${var.cluster_name}-worker"]
-}
-
+# Allow heapster / metrics-server to scrape kubelet read-only
 resource "google_compute_firewall" "internal-kubelet-readonly" {
   name    = "${var.cluster_name}-internal-kubelet-readonly"
   network = "${google_compute_network.network.name}"
@@ -162,8 +137,23 @@ resource "google_compute_firewall" "internal-kubelet-readonly" {
   target_tags = ["${var.cluster_name}-controller", "${var.cluster_name}-worker"]
 }
 
+# Workers
+
+resource "google_compute_firewall" "allow-ingress" {
+  name    = "${var.cluster_name}-allow-ingress"
+  network = "${google_compute_network.network.name}"
+
+  allow {
+    protocol = "tcp"
+    ports    = [80, 443]
+  }
+
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["${var.cluster_name}-worker"]
+}
+
 resource "google_compute_firewall" "google-health-checks" {
-  name = "${var.cluster_name}-google-health-checks"
+  name    = "${var.cluster_name}-google-health-checks"
   network = "${google_compute_network.network.name}"
 
   allow {
@@ -173,5 +163,5 @@ resource "google_compute_firewall" "google-health-checks" {
 
   # https://cloud.google.com/compute/docs/load-balancing/tcp-ssl/tcp-proxy#health-checking
   source_ranges = ["130.211.0.0/22", "35.191.0.0/16"]
-  target_tags = ["${var.cluster_name}-worker"]
+  target_tags   = ["${var.cluster_name}-worker"]
 }
