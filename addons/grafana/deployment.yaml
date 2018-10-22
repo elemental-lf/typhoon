@@ -18,10 +18,12 @@ spec:
       labels:
         name: grafana
         phase: prod
+      annotations:
+        seccomp.security.alpha.kubernetes.io/pod: 'docker/default'
     spec:
       containers:
         - name: grafana
-          image: grafana/grafana:5.2.4
+          image: grafana/grafana:5.3.1
           env:
             - name: GF_SERVER_HTTP_PORT
               value: "8080"

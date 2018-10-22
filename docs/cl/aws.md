@@ -1,6 +1,6 @@
 # AWS
 
-In this tutorial, we'll create a Kubernetes v1.11.3 cluster on AWS with Container Linux.
+In this tutorial, we'll create a Kubernetes v1.12.1 cluster on AWS with Container Linux.
 
 We'll declare a Kubernetes cluster using the Typhoon Terraform module. Then apply the changes to create a VPC, gateway, subnets, security groups, controller instances, worker auto-scaling group, network load balancer, and TLS assets.
 
@@ -37,7 +37,7 @@ providers {
 }
 ```
 
-Read [concepts](/architecture/concepts.md) to learn about Terraform, modules, and organizing resources. Change to your infrastructure repository (e.g. `infra`).
+Read [concepts](/architecture/concepts/) to learn about Terraform, modules, and organizing resources. Change to your infrastructure repository (e.g. `infra`).
 
 ```
 cd infra/clusters
@@ -96,7 +96,7 @@ Define a Kubernetes cluster using the module `aws/container-linux/kubernetes`.
 
 ```tf
 module "aws-tempest" {
-  source = "git::https://github.com/poseidon/typhoon//aws/container-linux/kubernetes?ref=v1.11.3"
+  source = "git::https://github.com/poseidon/typhoon//aws/container-linux/kubernetes?ref=v1.12.1"
 
   providers = {
     aws = "aws.default"
@@ -169,9 +169,9 @@ In 4-8 minutes, the Kubernetes cluster will be ready.
 $ export KUBECONFIG=/home/user/.secrets/clusters/tempest/auth/kubeconfig
 $ kubectl get nodes
 NAME             STATUS    AGE       VERSION        
-ip-10-0-12-221   Ready     34m       v1.11.3
-ip-10-0-19-112   Ready     34m       v1.11.3
-ip-10-0-4-22     Ready     34m       v1.11.3
+ip-10-0-12-221   Ready     34m       v1.12.1
+ip-10-0-19-112   Ready     34m       v1.12.1
+ip-10-0-4-22     Ready     34m       v1.12.1
 ```
 
 List the pods.
@@ -197,7 +197,7 @@ kube-system   pod-checkpointer-4kxtl-ip-10-0-12-221     1/1    Running   0      
 
 ## Going Further
 
-Learn about [maintenance](/topics/maintenance.md) and [addons](/addons/overview.md).
+Learn about [maintenance](/topics/maintenance) and [addons](/addons/overview).
 
 !!! note
     On Container Linux clusters, install the `CLUO` addon to coordinate reboots and drains when nodes auto-update. Otherwise, updates may not be applied until the next reboot.
@@ -245,8 +245,8 @@ Reference the DNS zone id with `"${aws_route53_zone.zone-for-clusters.zone_id}"`
 | disk_size | Size of the EBS volume in GB | "40" | "100" |
 | disk_type | Type of the EBS volume | "gp2" | standard, gp2, io1 |
 | worker_price | Spot price in USD for workers. Leave as default empty string for regular on-demand instances | "" | "0.10" |
-| controller_clc_snippets | Controller Container Linux Config snippets | [] | [example](/advanced/customization.md) |
-| worker_clc_snippets | Worker Container Linux Config snippets | [] | [example](/advanced/customization.md) |
+| controller_clc_snippets | Controller Container Linux Config snippets | [] | [example](/advanced/customization/) |
+| worker_clc_snippets | Worker Container Linux Config snippets | [] | [example](/advanced/customization/) |
 | networking | Choice of networking provider | "calico" | "calico" or "flannel" |
 | network_mtu | CNI interface MTU (calico only) | 1480 | 8981 |
 | host_cidr | CIDR IPv4 range to assign to EC2 instances | "10.0.0.0/16" | "10.1.0.0/16" |

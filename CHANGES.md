@@ -4,9 +4,35 @@ Notable changes between versions.
 
 ## Latest
 
+* Kubernetes [v1.12.1](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.12.md#v1121)
+* Update etcd from v3.3.9 to [v3.3.10](https://github.com/etcd-io/etcd/blob/master/CHANGELOG-3.3.md#v3310-2018-10-10)
+* Update CoreDNS from 1.1.3 to 1.2.2
+* Update Calico from v3.2.1 to v3.2.3
+* On multi-controller clusters, raise scheduler and controller-manager replics to equal the number of controller nodes ([#312](https://github.com/poseidon/typhoon/pull/312))
+  * Single-controller clusters continue to run 2 replicas as before
+* Raise default CoreDNS replica count to the larger of 2 or the number of controller nodes ([#313](https://github.com/poseidon/typhoon/pull/313))
+  * Add AntiAffinity preferred rule to favor spreading CoreDNS pods
+* Annotate Kubernetes control plane and addons to start containers with the Docker runtime's default seccomp profile ([#319](https://github.com/poseidon/typhoon/pull/319))
+  * Override Kubernetes default behavior that starts containers with seccomp=unconfined
+
+#### Azure
+
+* Remove admin_password field (disabled) since it is now optional
+  * Require `terraform-provider-azurerm` v1.16+ (action required)
+
+#### Bare-Metal
+
+* Add support for `cached_install` mode with Flatcar Linux ([#315](https://github.com/poseidon/typhoon/pull/315))
+
+#### DigitalOcean
+
+* Require `terraform-provider-digitalocean` v1.0+ (action required)
+
 #### Addons
 
-* Update Prometheus from v2.3.2 to v2.4.2
+* Update nginx-ingress from v0.19.0 to v0.20.0
+* Update Prometheus from v2.3.2 to v2.4.3
+* Update Grafana from v5.2.4 to v5.3.1
 
 ## v1.11.3
 
