@@ -3,7 +3,7 @@
 !!! danger
     Typhoon for Azure is alpha. For production, use AWS, Google Cloud, or bare-metal. As Azure matures, check [errata](https://github.com/poseidon/typhoon/wiki/Errata) for known shortcomings.
 
-In this tutorial, we'll create a Kubernetes v1.11.3 cluster on Azure with Container Linux.
+In this tutorial, we'll create a Kubernetes v1.12.1 cluster on Azure with Container Linux.
 
 We'll declare a Kubernetes cluster using the Typhoon Terraform module. Then apply the changes to create a resource group, virtual network, subnets, security groups, controller availability set, worker scale set, load balancer, and TLS assets.
 
@@ -40,7 +40,7 @@ providers {
 }
 ```
 
-Read [concepts](/architecture/concepts.md) to learn about Terraform, modules, and organizing resources. Change to your infrastructure repository (e.g. `infra`).
+Read [concepts](/architecture/concepts/) to learn about Terraform, modules, and organizing resources. Change to your infrastructure repository (e.g. `infra`).
 
 ```
 cd infra/clusters
@@ -58,7 +58,7 @@ Configure the Azure provider in a `providers.tf` file.
 
 ```tf
 provider "azurerm" {
-  version = "1.13.0"
+  version = "1.16.0"
   alias   = "default"
 }
 
@@ -91,7 +91,7 @@ Define a Kubernetes cluster using the module `azure/container-linux/kubernetes`.
 
 ```tf
 module "azure-ramius" {
-  source = "git::https://github.com/poseidon/typhoon//azure/container-linux/kubernetes?ref=v1.11.3"
+  source = "git::https://github.com/poseidon/typhoon//azure/container-linux/kubernetes?ref=v1.12.1"
 
   providers = {
     azurerm  = "azurerm.default"
@@ -165,10 +165,10 @@ In 4-8 minutes, the Kubernetes cluster will be ready.
 $ export KUBECONFIG=/home/user/.secrets/clusters/ramius/auth/kubeconfig
 $ kubectl get nodes
 NAME                  STATUS  ROLES              AGE  VERSION
-ramius-controller-0   Ready   controller,master  24m  v1.11.3
-ramius-worker-000001  Ready   node               25m  v1.11.3
-ramius-worker-000002  Ready   node               24m  v1.11.3
-ramius-worker-000005  Ready   node               24m  v1.11.3
+ramius-controller-0   Ready   controller,master  24m  v1.12.1
+ramius-worker-000001  Ready   node               25m  v1.12.1
+ramius-worker-000002  Ready   node               24m  v1.12.1
+ramius-worker-000005  Ready   node               24m  v1.12.1
 ```
 
 List the pods.
@@ -196,7 +196,7 @@ kube-system   pod-checkpointer-cnqdg-ramius-controller-0  1/1    Running   0    
 
 ## Going Further
 
-Learn about [maintenance](/topics/maintenance.md) and [addons](/addons/overview.md).
+Learn about [maintenance](/topics/maintenance/) and [addons](/addons/overview/).
 
 !!! note
     On Container Linux clusters, install the `CLUO` addon to coordinate reboots and drains when nodes auto-update. Otherwise, updates may not be applied until the next reboot.
