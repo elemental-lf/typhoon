@@ -30,6 +30,7 @@ resource "aws_instance" "controllers" {
   root_block_device {
     volume_type = "${var.disk_type}"
     volume_size = "${var.disk_size}"
+    iops        = "${var.disk_iops}"
   }
 
   # network
@@ -38,7 +39,10 @@ resource "aws_instance" "controllers" {
   vpc_security_group_ids      = ["${aws_security_group.controller.id}"]
 
   lifecycle {
-    ignore_changes = ["ami"]
+    ignore_changes = [
+      "ami",
+      "user_data",
+    ]
   }
 }
 

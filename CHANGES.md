@@ -4,20 +4,58 @@ Notable changes between versions.
 
 ## Latest
 
-* Kubernetes [v1.12.1](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.12.md#v1121)
-* Update etcd from v3.3.9 to [v3.3.10](https://github.com/etcd-io/etcd/blob/master/CHANGELOG-3.3.md#v3310-2018-10-10)
-* Update CoreDNS from 1.1.3 to 1.2.2
-* Update Calico from v3.2.1 to v3.2.3
-* On multi-controller clusters, raise scheduler and controller-manager replics to equal the number of controller nodes ([#312](https://github.com/poseidon/typhoon/pull/312))
-  * Single-controller clusters continue to run 2 replicas as before
-* Raise default CoreDNS replica count to the larger of 2 or the number of controller nodes ([#313](https://github.com/poseidon/typhoon/pull/313))
-  * Add AntiAffinity preferred rule to favor spreading CoreDNS pods
-* Annotate Kubernetes control plane and addons to start containers with the Docker runtime's default seccomp profile ([#319](https://github.com/poseidon/typhoon/pull/319))
-  * Override Kubernetes default behavior that starts containers with seccomp=unconfined
+## v1.12.2
+
+* Kubernetes [v1.12.2](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.12.md#v1122)
+* Update CoreDNS from 1.2.2 to [1.2.4](https://github.com/coredns/coredns/releases/tag/v1.2.4)
+* Update Calico from v3.2.3 to [v3.3.0](https://docs.projectcalico.org/v3.3/releases/)
+* Disable Kubelet read-only port ([#324](https://github.com/poseidon/typhoon/pull/324))
+* Fix CoreDNS AntiAffinity spec to prefer spreading replicas
+* Ignore controller node user-data changes ([#335](https://github.com/poseidon/typhoon/pull/335))
+  * Once all managed clusters use v1.12.2, it is possible to update `terraform-provider-ct`
+
+#### AWS
+
+* Add `disk_iops` variable for EBS volume IOPS ([#314](https://github.com/poseidon/typhoon/pull/314))
 
 #### Azure
 
-* Remove admin_password field (disabled) since it is now optional
+* Use new `azurerm_network_interface_backend_address_pool_association` ([#332](https://github.com/poseidon/typhoon/pull/332))
+  * Require `terraform-provider-azurerm` v1.17+ (action required)
+* Add `primary` field to `ip_configuration` needed by v1.17+ ([#331](https://github.com/poseidon/typhoon/pull/331))
+
+#### DigitalOcean
+
+* Add AAAA DNS records resolving to worker nodes ([#333](https://github.com/poseidon/typhoon/pull/333))
+  * Hosting IPv6 apps requires editing nginx-ingress with `hostNetwork: true`
+
+#### Google Cloud
+
+* Add an IPv6 address and IPv6 forwarding rules for load balancing IPv6 Ingress ([#334](https://github.com/poseidon/typhoon/pull/334))
+  * Add `ingress_static_ipv6` output variable for use in AAAA DNS records
+  * Allow serving IPv6 applications via Kubernetes Ingress
+
+#### Addons
+
+* Configure Heapster to scrape Kubelets with bearer token auth ([#323](https://github.com/poseidon/typhoon/pull/323))
+* Update Grafana from v5.3.1 to v5.3.2
+
+## v1.12.1
+
+* Kubernetes [v1.12.1](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.12.md#v1121)
+* Update etcd from v3.3.9 to [v3.3.10](https://github.com/etcd-io/etcd/blob/master/CHANGELOG-3.3.md#v3310-2018-10-10)
+* Update CoreDNS from 1.1.3 to [1.2.2](https://github.com/coredns/coredns/releases/tag/v1.2.2)
+* Update Calico from v3.2.1 to [v3.2.3](https://docs.projectcalico.org/v3.2/releases/)
+* Raise scheduler and controller-manager replicas to the larger of 2 or the number of controller nodes ([#312](https://github.com/poseidon/typhoon/pull/312))
+  * Single-controller clusters continue to run 2 replicas as before
+* Raise default CoreDNS replicas to the larger of 2 or the number of controller nodes ([#313](https://github.com/poseidon/typhoon/pull/313))
+  * Add AntiAffinity preferred rule to favor spreading CoreDNS pods
+* Annotate control plane and addon containers to use the Docker runtime seccomp profile ([#319](https://github.com/poseidon/typhoon/pull/319))
+  * Override Kubernetes default behavior that starts containers with `seccomp=unconfined`
+
+#### Azure
+
+* Remove `admin_password` field (disabled) since it is now optional
   * Require `terraform-provider-azurerm` v1.16+ (action required)
 
 #### Bare-Metal

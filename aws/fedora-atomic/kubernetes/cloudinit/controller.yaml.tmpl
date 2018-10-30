@@ -65,6 +65,7 @@ write_files:
         --node-labels=node-role.kubernetes.io/master \
         --node-labels=node-role.kubernetes.io/controller="true" \
         --pod-manifest-path=/etc/kubernetes/manifests \
+        --read-only-port=0 \
         --register-with-taints=node-role.kubernetes.io/master=:NoSchedule \
         --volume-plugin-dir=/var/lib/kubelet/volumeplugins"
   - path: /etc/kubernetes/kubeconfig
@@ -93,7 +94,7 @@ runcmd:
   - [systemctl, daemon-reload]
   - [systemctl, restart, NetworkManager]
   - "atomic install --system --name=etcd quay.io/poseidon/etcd:v3.3.10"
-  - "atomic install --system --name=kubelet quay.io/poseidon/kubelet:v1.12.1"
+  - "atomic install --system --name=kubelet quay.io/poseidon/kubelet:v1.12.2"
   - "atomic install --system --name=bootkube quay.io/poseidon/bootkube:v0.13.0"
   - [systemctl, start, --no-block, etcd.service]
   - [systemctl, enable, cloud-metadata.service]
