@@ -3,7 +3,7 @@
 !!! danger
     Typhoon for Azure is alpha. For production, use AWS, Google Cloud, or bare-metal. As Azure matures, check [errata](https://github.com/poseidon/typhoon/wiki/Errata) for known shortcomings.
 
-In this tutorial, we'll create a Kubernetes v1.12.2 cluster on Azure with Container Linux.
+In this tutorial, we'll create a Kubernetes v1.12.3 cluster on Azure with Container Linux.
 
 We'll declare a Kubernetes cluster using the Typhoon Terraform module. Then apply the changes to create a resource group, virtual network, subnets, security groups, controller availability set, worker scale set, load balancer, and TLS assets.
 
@@ -91,7 +91,7 @@ Define a Kubernetes cluster using the module `azure/container-linux/kubernetes`.
 
 ```tf
 module "azure-ramius" {
-  source = "git::https://github.com/poseidon/typhoon//azure/container-linux/kubernetes?ref=v1.12.2"
+  source = "git::https://github.com/poseidon/typhoon//azure/container-linux/kubernetes?ref=v1.12.3"
 
   providers = {
     azurerm  = "azurerm.default"
@@ -112,7 +112,7 @@ module "azure-ramius" {
   asset_dir          = "/home/user/.secrets/clusters/ramius"
 
   # optional
-  worker_count    = 3
+  worker_count    = 2
   host_cidr       = "10.0.0.0/20"
 }
 ```
@@ -165,10 +165,9 @@ In 4-8 minutes, the Kubernetes cluster will be ready.
 $ export KUBECONFIG=/home/user/.secrets/clusters/ramius/auth/kubeconfig
 $ kubectl get nodes
 NAME                  STATUS  ROLES              AGE  VERSION
-ramius-controller-0   Ready   controller,master  24m  v1.12.2
-ramius-worker-000001  Ready   node               25m  v1.12.2
-ramius-worker-000002  Ready   node               24m  v1.12.2
-ramius-worker-000005  Ready   node               24m  v1.12.2
+ramius-controller-0   Ready   controller,master  24m  v1.12.3
+ramius-worker-000001  Ready   node               25m  v1.12.3
+ramius-worker-000002  Ready   node               24m  v1.12.3
 ```
 
 List the pods.
@@ -177,17 +176,16 @@ List the pods.
 $ kubectl get pods --all-namespaces
 NAMESPACE     NAME                                        READY  STATUS    RESTARTS  AGE
 kube-system   coredns-7c6fbb4f4b-b6qzx                    1/1    Running   0         26m
+kube-system   coredns-7c6fbb4f4b-j2k3d                    1/1    Running   0         26m
+kube-system   flannel-bwf24                               2/2    Running   2         26m
+kube-system   flannel-ks5qb                               2/2    Running   0         26m
+kube-system   flannel-tq2wg                               2/2    Running   0         26m
 kube-system   kube-apiserver-hxgsx                        1/1    Running   3         26m
 kube-system   kube-controller-manager-5ff9cd7bb6-b942n    1/1    Running   0         26m
 kube-system   kube-controller-manager-5ff9cd7bb6-bbr6w    1/1    Running   0         26m
-kube-system   kube-flannel-bwf24                          2/2    Running   2         26m
-kube-system   kube-flannel-ks5qb                          2/2    Running   0         26m
-kube-system   kube-flannel-nghsx                          2/2    Running   2         26m
-kube-system   kube-flannel-tq2wg                          2/2    Running   0         26m
 kube-system   kube-proxy-j4vpq                            1/1    Running   0         26m
 kube-system   kube-proxy-jxr5d                            1/1    Running   0         26m
 kube-system   kube-proxy-lbdw5                            1/1    Running   0         26m
-kube-system   kube-proxy-v8r7c                            1/1    Running   0         26m
 kube-system   kube-scheduler-5f76d69686-s4fbx             1/1    Running   0         26m
 kube-system   kube-scheduler-5f76d69686-vgdgn             1/1    Running   0         26m
 kube-system   pod-checkpointer-cnqdg                      1/1    Running   0         26m

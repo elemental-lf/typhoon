@@ -183,3 +183,9 @@ variable "apiserver_extra_secrets" {
   type        = "map"
   default     = {}
 }
+
+variable "enable_reporting" {
+  type        = "string"
+  description = "Enable usage or analytics reporting to upstreams (Calico)"
+  default     = "false"
+}

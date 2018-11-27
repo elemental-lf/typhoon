@@ -4,6 +4,31 @@ Notable changes between versions.
 
 ## Latest
 
+* Kubernetes [v1.12.3](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.12.md#v1123)
+* Add `enable_reporting` variable (default "false") to provide upstreams with usage data ([#345](https://github.com/poseidon/typhoon/pull/345))
+* Change kube-apiserver `--kubelet-preferred-address-types` to InternalIP,ExternalIP,Hostname
+* Update Calico from v3.3.0 to [v3.3.1](https://docs.projectcalico.org/v3.3/releases/)
+  * Disable Felix usage reporting by default ([#345](https://github.com/poseidon/typhoon/pull/345))
+* Improve flannel manifests
+  * [Rename](https://github.com/poseidon/terraform-render-bootkube/commit/d045a8e6b8eccfbb9d69bb51953b5a93d23f67f7) `kube-flannel` DaemonSet to `flannel` and `kube-flannel-cfg` ConfigMap to `flannel-config` 
+  * [Drop](https://github.com/poseidon/terraform-render-bootkube/commit/39f9afb3360ec642e5b98457c8bd07eda35b6c96) unused mounts and add a CPU resource request
+* Update CoreDNS from v1.2.4 to [v1.2.6](https://coredns.io/2018/11/05/coredns-1.2.6-release/)
+  * Enable CoreDNS `loop` and `loadbalance` plugins ([#340](https://github.com/poseidon/typhoon/pull/340))
+* Fix pod-checkpointer log noise and checkpointable pods detection ([#346](https://github.com/poseidon/typhoon/pull/346))
+* Use kubernetes-incubator/bootkube v0.14.0
+
+#### Azure
+
+* Use eviction policy `Delete` for `Low` priority virtual machine scale set workers ([#343](https://github.com/poseidon/typhoon/pull/343))
+  * Fix issue where Azure defaults to `Deallocate` eviction policy, which required manually restarting deallocated instances. `Delete` policy aligns Azure with AWS and GCP behavior.
+  * Require `terraform-provider-azurerm` v1.19+ (action required)
+
+#### Addons
+
+* Update nginx-ingress from v0.20.0 to v0.21.0
+* Update Prometheus from v2.4.3 to v2.5.0
+* Update Grafana from v5.3.2 to v5.3.4
+
 ## v1.12.2
 
 * Kubernetes [v1.12.2](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.12.md#v1122)

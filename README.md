@@ -11,29 +11,32 @@ Typhoon distributes upstream Kubernetes, architectural conventions, and cluster 
 
 ## Features <a href="https://www.cncf.io/certification/software-conformance/"><img align="right" src="https://storage.googleapis.com/poseidon/certified-kubernetes.png"></a>
 
-* Kubernetes v1.12.2 (upstream, via [kubernetes-incubator/bootkube](https://github.com/kubernetes-incubator/bootkube))
-* Single or multi-master, workloads isolated on workers, [Calico](https://www.projectcalico.org/) or [flannel](https://github.com/coreos/flannel) networking
+* Kubernetes v1.12.3 (upstream, via [kubernetes-incubator/bootkube](https://github.com/kubernetes-incubator/bootkube))
+* Single or multi-master, [Calico](https://www.projectcalico.org/) or [flannel](https://github.com/coreos/flannel) networking
 * On-cluster etcd with TLS, [RBAC](https://kubernetes.io/docs/admin/authorization/rbac/)-enabled, [network policy](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
-* Advanced features like [worker pools](https://typhoon.psdn.io/advanced/worker-pools/) and [preemption](https://typhoon.psdn.io/cl/google-cloud/#preemption) (varies by platform)
-* Ready for Ingress, Prometheus, Grafana, and other optional [addons](https://typhoon.psdn.io/addons/overview/)
+* Advanced features like [worker pools](https://typhoon.psdn.io/advanced/worker-pools/), [preemptible](https://typhoon.psdn.io/cl/google-cloud/#preemption) workers, and [snippets](https://typhoon.psdn.io/advanced/customization/#container-linux) customization
+* Ready for Ingress, Prometheus, Grafana, CSI, or other [addons](https://typhoon.psdn.io/addons/overview/)
 
 ## Modules
 
-Typhoon provides a Terraform Module for each supported operating system and platform.
+Typhoon provides a Terraform Module for each supported operating system and platform. Container Linux is a mature and reliable choice. Also, Kinvolk's Flatcar Linux fork is selectable on AWS and bare-metal.
 
 | Platform      | Operating System | Terraform Module | Status |
 |---------------|------------------|------------------|--------|
 | AWS           | Container Linux  | [aws/container-linux/kubernetes](aws/container-linux/kubernetes) | stable |
-| AWS           | Fedora Atomic    | [aws/fedora-atomic/kubernetes](aws/fedora-atomic/kubernetes) | alpha |
 | Azure         | Container Linux  | [azure/container-linux/kubernetes](cl/azure.md) | alpha |
 | Bare-Metal    | Container Linux  | [bare-metal/container-linux/kubernetes](bare-metal/container-linux/kubernetes) | stable |
-| Bare-Metal    | Fedora Atomic    | [bare-metal/fedora-atomic/kubernetes](bare-metal/fedora-atomic/kubernetes) | alpha |
 | Digital Ocean | Container Linux  | [digital-ocean/container-linux/kubernetes](digital-ocean/container-linux/kubernetes) | beta |
-| Digital Ocean | Fedora Atomic    | [digital-ocean/fedora-atomic/kubernetes](digital-ocean/fedora-atomic/kubernetes) | alpha |
 | Google Cloud  | Container Linux  | [google-cloud/container-linux/kubernetes](google-cloud/container-linux/kubernetes) | stable |
-| Google Cloud  | Fedora Atomic    | [google-cloud/fedora-atomic/kubernetes](google-cloud/fedora-atomic/kubernetes) | alpha |
 
-The AWS and bare-metal `container-linux` modules allow picking Red Hat Container Linux (formerly CoreOS Container Linux) or Kinvolk's Flatcar Linux friendly fork.
+Fedora Atomic support is alpha and will evolve as Fedora Atomic is replaced by Fedora CoreOS.
+
+| Platform      | Operating System | Terraform Module | Status |
+|---------------|------------------|------------------|--------|
+| AWS           | Fedora Atomic    | [aws/fedora-atomic/kubernetes](aws/fedora-atomic/kubernetes) | alpha |
+| Bare-Metal    | Fedora Atomic    | [bare-metal/fedora-atomic/kubernetes](bare-metal/fedora-atomic/kubernetes) | alpha |
+| Digital Ocean | Fedora Atomic    | [digital-ocean/fedora-atomic/kubernetes](digital-ocean/fedora-atomic/kubernetes) | alpha |
+| Google Cloud  | Fedora Atomic    | [google-cloud/fedora-atomic/kubernetes](google-cloud/fedora-atomic/kubernetes) | alpha |
 
 ## Documentation
 
@@ -47,7 +50,7 @@ Define a Kubernetes cluster by using the Terraform module for your chosen platfo
 
 ```tf
 module "google-cloud-yavin" {
-  source = "git::https://github.com/poseidon/typhoon//google-cloud/container-linux/kubernetes?ref=v1.12.2"
+  source = "git::https://github.com/poseidon/typhoon//google-cloud/container-linux/kubernetes?ref=v1.12.3"
   
   providers = {
     google   = "google.default"
@@ -87,10 +90,10 @@ In 4-8 minutes (varies by platform), the cluster will be ready. This Google Clou
 ```sh
 $ export KUBECONFIG=/home/user/.secrets/clusters/yavin/auth/kubeconfig
 $ kubectl get nodes
-NAME                                          STATUS   AGE    VERSION
-yavin-controller-0.c.example-com.internal     Ready    6m     v1.12.2
-yavin-worker-jrbf.c.example-com.internal      Ready    5m     v1.12.2
-yavin-worker-mzdm.c.example-com.internal      Ready    5m     v1.12.2
+NAME                                       ROLES              STATUS  AGE  VERSION
+yavin-controller-0.c.example-com.internal  controller,master  Ready   6m   v1.12.3
+yavin-worker-jrbf.c.example-com.internal   node               Ready   5m   v1.12.3
+yavin-worker-mzdm.c.example-com.internal   node               Ready   5m   v1.12.3
 ```
 
 List the pods.
@@ -102,6 +105,7 @@ kube-system   calico-node-1cs8z                         2/2    Running   0      
 kube-system   calico-node-d1l5b                         2/2    Running   0         6m
 kube-system   calico-node-sp9ps                         2/2    Running   0         6m
 kube-system   coredns-1187388186-zj5dl                  1/1    Running   0         6m
+kube-system   coredns-1187388186-dkh3o                  1/1    Running   0         6m
 kube-system   kube-apiserver-zppls                      1/1    Running   0         6m
 kube-system   kube-controller-manager-3271970485-gh9kt  1/1    Running   0         6m
 kube-system   kube-controller-manager-3271970485-h90v8  1/1    Running   1         6m
@@ -111,6 +115,7 @@ kube-system   kube-proxy-njn47                          1/1    Running   0      
 kube-system   kube-scheduler-3895335239-5x87r           1/1    Running   0         6m
 kube-system   kube-scheduler-3895335239-bzrrt           1/1    Running   1         6m
 kube-system   pod-checkpointer-l6lrt                    1/1    Running   0         6m
+kube-system   pod-checkpointer-l6lrt-controller-0       1/1    Running   0         6m
 ```
 
 ## Non-Goals

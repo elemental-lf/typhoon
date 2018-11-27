@@ -1,6 +1,6 @@
 # AWS
 
-In this tutorial, we'll create a Kubernetes v1.12.2 cluster on AWS with Container Linux.
+In this tutorial, we'll create a Kubernetes v1.12.3 cluster on AWS with Container Linux.
 
 We'll declare a Kubernetes cluster using the Typhoon Terraform module. Then apply the changes to create a VPC, gateway, subnets, security groups, controller instances, worker auto-scaling group, network load balancer, and TLS assets.
 
@@ -96,7 +96,7 @@ Define a Kubernetes cluster using the module `aws/container-linux/kubernetes`.
 
 ```tf
 module "aws-tempest" {
-  source = "git::https://github.com/poseidon/typhoon//aws/container-linux/kubernetes?ref=v1.12.2"
+  source = "git::https://github.com/poseidon/typhoon//aws/container-linux/kubernetes?ref=v1.12.3"
 
   providers = {
     aws = "aws.default"
@@ -168,10 +168,10 @@ In 4-8 minutes, the Kubernetes cluster will be ready.
 ```
 $ export KUBECONFIG=/home/user/.secrets/clusters/tempest/auth/kubeconfig
 $ kubectl get nodes
-NAME             STATUS    AGE       VERSION        
-ip-10-0-12-221   Ready     34m       v1.12.2
-ip-10-0-19-112   Ready     34m       v1.12.2
-ip-10-0-4-22     Ready     34m       v1.12.2
+NAME           STATUS  ROLES              AGE  VERSION
+ip-10-0-3-155  Ready   controller,master  10m  v1.12.3
+ip-10-0-26-65  Ready   node               10m  v1.12.3
+ip-10-0-41-21  Ready   node               10m  v1.12.3
 ```
 
 List the pods.
@@ -183,6 +183,7 @@ kube-system   calico-node-1m5bf                         2/2    Running   0      
 kube-system   calico-node-7jmr1                         2/2    Running   0         34m              
 kube-system   calico-node-bknc8                         2/2    Running   0         34m              
 kube-system   coredns-1187388186-wx1lg                  1/1    Running   0         34m              
+kube-system   coredns-1187388186-qjnvp                  1/1    Running   0         34m
 kube-system   kube-apiserver-4mjbk                      1/1    Running   0         34m              
 kube-system   kube-controller-manager-3597210155-j2jbt  1/1    Running   1         34m              
 kube-system   kube-controller-manager-3597210155-j7g7x  1/1    Running   0         34m              
@@ -192,7 +193,7 @@ kube-system   kube-proxy-sbbsh                          1/1    Running   0      
 kube-system   kube-scheduler-3359497473-5plhf           1/1    Running   0         34m              
 kube-system   kube-scheduler-3359497473-r7zg7           1/1    Running   1         34m              
 kube-system   pod-checkpointer-4kxtl                    1/1    Running   0         34m              
-kube-system   pod-checkpointer-4kxtl-ip-10-0-12-221     1/1    Running   0         33m
+kube-system   pod-checkpointer-4kxtl-ip-10-0-3-155      1/1    Running   0         33m
 ```
 
 ## Going Further
@@ -262,3 +263,8 @@ Check the list of valid [instance types](https://aws.amazon.com/ec2/instance-typ
 
 !!! tip "MTU"
     If your EC2 instance type supports [Jumbo frames](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/network_mtu.html#jumbo_frame_instances) (most do), we recommend you change the `network_mtu` to 8981! You will get better pod-to-pod bandwidth.
+
+#### Spot
+
+Add `worker_price = "0.10"` to use spot instance workers (instead of "on-demand") and set a maximum spot price in USD. Clusters can tolerate spot market interuptions fairly well (reschedules pods, but cannot drain) to save money, with the tradeoff that requests for workers may go unfulfilled.
+
