@@ -1,6 +1,6 @@
 # Google Cloud
 
-In this tutorial, we'll create a Kubernetes v1.12.1 cluster on Google Compute Engine with Container Linux.
+In this tutorial, we'll create a Kubernetes v1.12.3 cluster on Google Compute Engine with Container Linux.
 
 We'll declare a Kubernetes cluster using the Typhoon Terraform module. Then apply the changes to create a network, firewall rules, health checks, controller instances, worker managed instance group, load balancers, and TLS assets.
 
@@ -97,7 +97,7 @@ Define a Kubernetes cluster using the module `google-cloud/container-linux/kuber
 
 ```tf
 module "google-cloud-yavin" {
-  source = "git::https://github.com/poseidon/typhoon//google-cloud/container-linux/kubernetes?ref=v1.12.1"
+  source = "git::https://github.com/poseidon/typhoon//google-cloud/container-linux/kubernetes?ref=v1.12.3"
   
   providers = {
     google   = "google.default"
@@ -171,10 +171,10 @@ In 4-8 minutes, the Kubernetes cluster will be ready.
 ```
 $ export KUBECONFIG=/home/user/.secrets/clusters/yavin/auth/kubeconfig
 $ kubectl get nodes
-NAME                                          STATUS   AGE    VERSION
-yavin-controller-0.c.example-com.internal     Ready    6m     v1.12.1
-yavin-worker-jrbf.c.example-com.internal      Ready    5m     v1.12.1
-yavin-worker-mzdm.c.example-com.internal      Ready    5m     v1.12.1
+NAME                                       ROLES              STATUS  AGE  VERSION
+yavin-controller-0.c.example-com.internal  controller,master  Ready   6m   v1.12.3
+yavin-worker-jrbf.c.example-com.internal   node               Ready   5m   v1.12.3
+yavin-worker-mzdm.c.example-com.internal   node               Ready   5m   v1.12.3
 ```
 
 List the pods.
@@ -185,6 +185,7 @@ NAMESPACE     NAME                                      READY  STATUS    RESTART
 kube-system   calico-node-1cs8z                         2/2    Running   0         6m
 kube-system   calico-node-d1l5b                         2/2    Running   0         6m
 kube-system   calico-node-sp9ps                         2/2    Running   0         6m
+kube-system   coredns-1187388186-dkh3o                  1/1    Running   0         6m
 kube-system   coredns-1187388186-zj5dl                  1/1    Running   0         6m
 kube-system   kube-apiserver-zppls                      1/1    Running   0         6m
 kube-system   kube-controller-manager-3271970485-gh9kt  1/1    Running   0         6m

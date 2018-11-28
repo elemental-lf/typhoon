@@ -88,6 +88,7 @@ systemd:
           --node-labels=node-role.kubernetes.io/master \
           --node-labels=node-role.kubernetes.io/controller="true" \
           --pod-manifest-path=/etc/kubernetes/manifests \
+          --read-only-port=0 \
           --register-with-taints=node-role.kubernetes.io/master=:NoSchedule \
           --volume-plugin-dir=/var/lib/kubelet/volumeplugins
         ExecStop=-/usr/bin/rkt stop --uuid-file=/var/cache/kubelet-pod.uuid
@@ -122,7 +123,7 @@ storage:
       contents:
         inline: |
           KUBELET_IMAGE_URL=docker://k8s.gcr.io/hyperkube
-          KUBELET_IMAGE_TAG=v1.12.1
+          KUBELET_IMAGE_TAG=v1.12.3
     - path: /etc/sysctl.d/max-user-watches.conf
       filesystem: root
       contents:
@@ -142,17 +143,14 @@ storage:
           set -e
           # Move experimental manifests
           [ -n "$(ls /opt/bootkube/assets/manifests-*/* 2>/dev/null)" ] && mv /opt/bootkube/assets/manifests-*/* /opt/bootkube/assets/manifests && rm -rf /opt/bootkube/assets/manifests-*
-          BOOTKUBE_ACI="$${BOOTKUBE_ACI:-quay.io/coreos/bootkube}"
-          BOOTKUBE_VERSION="$${BOOTKUBE_VERSION:-v0.13.0}"
-          BOOTKUBE_ASSETS="$${BOOTKUBE_ASSETS:-/opt/bootkube/assets}"
           exec /usr/bin/rkt run \
             --trust-keys-from-https \
-            --volume assets,kind=host,source=$${BOOTKUBE_ASSETS} \
+            --volume assets,kind=host,source=/opt/bootkube/assets \
             --mount volume=assets,target=/assets \
             --volume bootstrap,kind=host,source=/etc/kubernetes \
             --mount volume=bootstrap,target=/etc/kubernetes \
             $${RKT_OPTS} \
-            $${BOOTKUBE_ACI}:$${BOOTKUBE_VERSION} \
+            quay.io/coreos/bootkube:v0.14.0 \
             --net=host \
             --dns=host \
             --exec=/bootkube -- start --asset-dir=/assets "$@"

@@ -44,12 +44,18 @@ resource "digitalocean_droplet" "controllers" {
   ipv6               = true
   private_networking = true
 
-  user_data = "${element(data.ct_config.controller_ign.*.rendered, count.index)}"
+  user_data = "${element(data.ct_config.controller-ignitions.*.rendered, count.index)}"
   ssh_keys  = ["${var.ssh_fingerprints}"]
 
   tags = [
     "${digitalocean_tag.controllers.id}",
   ]
+
+  lifecycle {
+    ignore_changes = [
+      "user_data",
+    ]
+  }
 }
 
 # Tag to label controllers
@@ -57,8 +63,16 @@ resource "digitalocean_tag" "controllers" {
   name = "${var.cluster_name}-controller"
 }
 
-# Controller Container Linux Config
-data "template_file" "controller_config" {
+# Controller Ignition configs
+data "ct_config" "controller-ignitions" {
+  count        = "${var.controller_count}"
+  content      = "${element(data.template_file.controller-configs.*.rendered, count.index)}"
+  pretty_print = false
+  snippets     = ["${var.controller_clc_snippets}"]
+}
+
+# Controller Container Linux configs
+data "template_file" "controller-configs" {
   count = "${var.controller_count}"
 
   template = "${file("${path.module}/cl/controller.yaml.tmpl")}"
@@ -84,12 +98,4 @@ data "template_file" "etcds" {
     cluster_name = "${var.cluster_name}"
     dns_zone     = "${var.dns_zone}"
   }
-}
-
-data "ct_config" "controller_ign" {
-  count        = "${var.controller_count}"
-  content      = "${element(data.template_file.controller_config.*.rendered, count.index)}"
-  pretty_print = false
-
-  snippets = ["${var.controller_clc_snippets}"]
 }

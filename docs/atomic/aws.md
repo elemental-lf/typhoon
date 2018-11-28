@@ -3,7 +3,7 @@
 !!! danger
     Typhoon for Fedora Atomic is alpha. Expect rough edges and changes.
 
-In this tutorial, we'll create a Kubernetes v1.12.1 cluster on AWS with Fedora Atomic.
+In this tutorial, we'll create a Kubernetes v1.12.3 cluster on AWS with Fedora Atomic.
 
 We'll declare a Kubernetes cluster using the Typhoon Terraform module. Then apply the changes to create a VPC, gateway, subnets, security groups, controller instances, worker auto-scaling group, network load balancer, and TLS assets. Instances are provisioned on first boot with cloud-init.
 
@@ -83,7 +83,7 @@ Define a Kubernetes cluster using the module `aws/fedora-atomic/kubernetes`.
 
 ```tf
 module "aws-tempest" {
-  source = "git::https://github.com/poseidon/typhoon//aws/fedora-atomic/kubernetes?ref=v1.12.1"
+  source = "git::https://github.com/poseidon/typhoon//aws/fedora-atomic/kubernetes?ref=v1.12.3"
 
   providers = {
     aws = "aws.default"
@@ -155,10 +155,10 @@ In 5-10 minutes, the Kubernetes cluster will be ready.
 ```
 $ export KUBECONFIG=/home/user/.secrets/clusters/tempest/auth/kubeconfig
 $ kubectl get nodes
-NAME             STATUS    AGE       VERSION        
-ip-10-0-12-221   Ready     34m       v1.12.1
-ip-10-0-19-112   Ready     34m       v1.12.1
-ip-10-0-4-22     Ready     34m       v1.12.1
+NAME           STATUS  ROLES              AGE  VERSION
+ip-10-0-3-155  Ready   controller,master  10m  v1.12.3
+ip-10-0-26-65  Ready   node               10m  v1.12.3
+ip-10-0-41-21  Ready   node               10m  v1.12.3
 ```
 
 List the pods.
@@ -170,6 +170,7 @@ kube-system   calico-node-1m5bf                         2/2    Running   0      
 kube-system   calico-node-7jmr1                         2/2    Running   0         34m              
 kube-system   calico-node-bknc8                         2/2    Running   0         34m              
 kube-system   coredns-1187388186-wx1lg                  1/1    Running   0         34m              
+kube-system   coredns-1187388186-qjnvp                  1/1    Running   0         34m
 kube-system   kube-apiserver-4mjbk                      1/1    Running   0         34m              
 kube-system   kube-controller-manager-3597210155-j2jbt  1/1    Running   1         34m              
 kube-system   kube-controller-manager-3597210155-j7g7x  1/1    Running   0         34m              
@@ -179,7 +180,7 @@ kube-system   kube-proxy-sbbsh                          1/1    Running   0      
 kube-system   kube-scheduler-3359497473-5plhf           1/1    Running   0         34m              
 kube-system   kube-scheduler-3359497473-r7zg7           1/1    Running   1         34m              
 kube-system   pod-checkpointer-4kxtl                    1/1    Running   0         34m              
-kube-system   pod-checkpointer-4kxtl-ip-10-0-12-221     1/1    Running   0         33m
+kube-system   pod-checkpointer-4kxtl-ip-10-0-3-155      1/1    Running   0         33m
 ```
 
 ## Going Further
@@ -227,6 +228,7 @@ Reference the DNS zone id with `"${aws_route53_zone.zone-for-clusters.zone_id}"`
 | worker_type | EC2 instance type for workers | "t2.small" | See below |
 | disk_size | Size of the EBS volume in GB | "40" | "100" |
 | disk_type | Type of the EBS volume | "gp2" | standard, gp2, io1 |
+| disk_iops | IOPS of the EBS volume | "0" (i.e. auto) | "400" |
 | worker_price | Spot price in USD for workers. Leave as default empty string for regular on-demand instances | "" | "0.10" |
 | networking | Choice of networking provider | "calico" | "calico" or "flannel" |
 | network_mtu | CNI interface MTU (calico only) | 1480 | 8981 |

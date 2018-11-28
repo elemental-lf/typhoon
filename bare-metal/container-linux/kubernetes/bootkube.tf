@@ -16,4 +16,5 @@ module "bootkube" {
   cluster_domain_suffix           = "${var.cluster_domain_suffix}"
   apiserver_extra_arguments       = "${var.apiserver_extra_arguments}"
   apiserver_extra_secrets         = "${var.apiserver_extra_secrets}"
+  enable_reporting                = "${var.enable_reporting}"
 }

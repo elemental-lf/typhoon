@@ -24,12 +24,13 @@ resource "aws_instance" "controllers" {
   instance_type = "${var.controller_type}"
 
   ami       = "${local.ami_id}"
-  user_data = "${element(data.ct_config.controller_ign.*.rendered, count.index)}"
+  user_data = "${element(data.ct_config.controller-ignitions.*.rendered, count.index)}"
 
   # storage
   root_block_device {
     volume_type = "${var.disk_type}"
     volume_size = "${var.disk_size}"
+    iops        = "${var.disk_iops}"
   }
 
   # network
@@ -38,12 +39,23 @@ resource "aws_instance" "controllers" {
   vpc_security_group_ids      = ["${aws_security_group.controller.id}"]
 
   lifecycle {
-    ignore_changes = ["ami"]
+    ignore_changes = [
+      "ami",
+      "user_data",
+    ]
   }
 }
 
-# Controller Container Linux Config
-data "template_file" "controller_config" {
+# Controller Ignition configs
+data "ct_config" "controller-ignitions" {
+  count        = "${var.controller_count}"
+  content      = "${element(data.template_file.controller-configs.*.rendered, count.index)}"
+  pretty_print = false
+  snippets     = ["${var.controller_clc_snippets}"]
+}
+
+# Controller Container Linux configs
+data "template_file" "controller-configs" {
   count = "${var.controller_count}"
 
   template = "${file("${path.module}/cl/controller.yaml.tmpl")}"
@@ -72,11 +84,4 @@ data "template_file" "etcds" {
     cluster_name = "${var.cluster_name}"
     dns_zone     = "${var.dns_zone}"
   }
-}
-
-data "ct_config" "controller_ign" {
-  count        = "${var.controller_count}"
-  content      = "${element(data.template_file.controller_config.*.rendered, count.index)}"
-  pretty_print = false
-  snippets     = ["${var.controller_clc_snippets}"]
 }

@@ -53,6 +53,12 @@ variable "disk_type" {
   description = "Type of the EBS volume (e.g. standard, gp2, io1)"
 }
 
+variable "disk_iops" {
+  type        = "string"
+  default     = "0"
+  description = "IOPS of the EBS volume (e.g. 100)"
+}
+
 variable "worker_price" {
   type        = "string"
   default     = ""
@@ -109,4 +115,10 @@ variable "cluster_domain_suffix" {
   description = "Queries for domains with the suffix will be answered by coredns. Default is cluster.local (e.g. foo.default.svc.cluster.local) "
   type        = "string"
   default     = "cluster.local"
+}
+
+variable "enable_reporting" {
+  type        = "string"
+  description = "Enable usage or analytics reporting to upstreams (Calico)"
+  default     = "false"
 }

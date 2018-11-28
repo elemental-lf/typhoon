@@ -37,7 +37,7 @@ resource "azurerm_virtual_machine_scale_set" "workers" {
   os_profile {
     computer_name_prefix = "${var.name}-worker-"
     admin_username       = "core"
-    custom_data          = "${element(data.ct_config.worker-ignitions.*.rendered, count.index)}"
+    custom_data          = "${data.ct_config.worker-ignition.rendered}"
   }
 
   # Azure mandates setting an ssh_key, even though Ignition custom_data handles it too
@@ -58,6 +58,7 @@ resource "azurerm_virtual_machine_scale_set" "workers" {
 
     ip_configuration {
       name      = "ip0"
+      primary   = true
       subnet_id = "${var.subnet_id}"
 
       # backend address pool to which the NIC should be added
@@ -66,8 +67,9 @@ resource "azurerm_virtual_machine_scale_set" "workers" {
   }
 
   # lifecycle
-  priority            = "${var.priority}"
   upgrade_policy_mode = "Manual"
+  priority            = "${var.priority}"
+  eviction_policy     = "Delete"
 }
 
 # Scale up or down to maintain desired number, tolerating deallocations.
@@ -93,14 +95,14 @@ resource "azurerm_autoscale_setting" "workers" {
 }
 
 # Worker Ignition configs
-data "ct_config" "worker-ignitions" {
-  content      = "${data.template_file.worker-configs.rendered}"
+data "ct_config" "worker-ignition" {
+  content      = "${data.template_file.worker-config.rendered}"
   pretty_print = false
   snippets     = ["${var.clc_snippets}"]
 }
 
 # Worker Container Linux configs
-data "template_file" "worker-configs" {
+data "template_file" "worker-config" {
   template = "${file("${path.module}/cl/worker.yaml.tmpl")}"
 
   vars = {

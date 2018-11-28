@@ -29,6 +29,7 @@ write_files:
         --network-plugin=cni \
         --node-labels=node-role.kubernetes.io/node \
         --pod-manifest-path=/etc/kubernetes/manifests \
+        --read-only-port=0 \
         --volume-plugin-dir=/var/lib/kubelet/volumeplugins"
   - path: /etc/systemd/system/kubelet.path
     content: |
@@ -59,7 +60,7 @@ runcmd:
   - [systemctl, daemon-reload]
   - [systemctl, restart, NetworkManager]
   - [hostnamectl, set-hostname, ${domain_name}]
-  - "atomic install --system --name=kubelet quay.io/poseidon/kubelet:v1.12.1"
+  - "atomic install --system --name=kubelet quay.io/poseidon/kubelet:v1.12.3"
   - [systemctl, enable, kubelet.path]
   - [systemctl, start, --no-block, kubelet.path]
 users:

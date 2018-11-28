@@ -46,12 +46,13 @@ resource "aws_launch_configuration" "worker" {
   spot_price        = "${var.spot_price}"
   enable_monitoring = false
 
-  user_data = "${data.ct_config.worker_ign.rendered}"
+  user_data = "${data.ct_config.worker-ignition.rendered}"
 
   # storage
   root_block_device {
     volume_type = "${var.disk_type}"
     volume_size = "${var.disk_size}"
+    iops        = "${var.disk_iops}"
   }
 
   # network
@@ -64,8 +65,15 @@ resource "aws_launch_configuration" "worker" {
   }
 }
 
-# Worker Container Linux Config
-data "template_file" "worker_config" {
+# Worker Ignition config
+data "ct_config" "worker-ignition" {
+  content      = "${data.template_file.worker-config.rendered}"
+  pretty_print = false
+  snippets     = ["${var.clc_snippets}"]
+}
+
+# Worker Container Linux config
+data "template_file" "worker-config" {
   template = "${file("${path.module}/cl/worker.yaml.tmpl")}"
 
   vars = {
@@ -74,10 +82,4 @@ data "template_file" "worker_config" {
     k8s_dns_service_ip    = "${cidrhost(var.service_cidr, 10)}"
     cluster_domain_suffix = "${var.cluster_domain_suffix}"
   }
-}
-
-data "ct_config" "worker_ign" {
-  content      = "${data.template_file.worker_config.rendered}"
-  pretty_print = false
-  snippets     = ["${var.clc_snippets}"]
 }
