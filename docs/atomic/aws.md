@@ -1,9 +1,9 @@
 # AWS
 
 !!! danger
-    Typhoon for Fedora Atomic is alpha. Expect rough edges and changes.
+    Typhoon for Fedora Atomic will not be updated much beyond Kubernetes v1.13.
 
-In this tutorial, we'll create a Kubernetes v1.12.3 cluster on AWS with Fedora Atomic.
+In this tutorial, we'll create a Kubernetes v1.13.5 cluster on AWS with Fedora Atomic.
 
 We'll declare a Kubernetes cluster using the Typhoon Terraform module. Then apply the changes to create a VPC, gateway, subnets, security groups, controller instances, worker auto-scaling group, network load balancer, and TLS assets. Instances are provisioned on first boot with cloud-init.
 
@@ -21,7 +21,7 @@ Install [Terraform](https://www.terraform.io/downloads.html) v0.11.x on your sys
 
 ```sh
 $ terraform version
-Terraform v0.11.7
+Terraform v0.11.12
 ```
 
 Read [concepts](/architecture/concepts/) to learn about Terraform, modules, and organizing resources. Change to your infrastructure repository (e.g. `infra`).
@@ -44,7 +44,7 @@ Configure the AWS provider to use your access key credentials in a `providers.tf
 
 ```tf
 provider "aws" {
-  version = "~> 1.13.0"
+  version = "~> 2.3.0"
   alias   = "default"
 
   region                  = "eu-central-1"
@@ -83,7 +83,7 @@ Define a Kubernetes cluster using the module `aws/fedora-atomic/kubernetes`.
 
 ```tf
 module "aws-tempest" {
-  source = "git::https://github.com/poseidon/typhoon//aws/fedora-atomic/kubernetes?ref=v1.12.3"
+  source = "git::https://github.com/poseidon/typhoon//aws/fedora-atomic/kubernetes?ref=v1.13.5"
 
   providers = {
     aws = "aws.default"
@@ -156,9 +156,9 @@ In 5-10 minutes, the Kubernetes cluster will be ready.
 $ export KUBECONFIG=/home/user/.secrets/clusters/tempest/auth/kubeconfig
 $ kubectl get nodes
 NAME           STATUS  ROLES              AGE  VERSION
-ip-10-0-3-155  Ready   controller,master  10m  v1.12.3
-ip-10-0-26-65  Ready   node               10m  v1.12.3
-ip-10-0-41-21  Ready   node               10m  v1.12.3
+ip-10-0-3-155  Ready   controller,master  10m  v1.13.5
+ip-10-0-26-65  Ready   node               10m  v1.13.5
+ip-10-0-41-21  Ready   node               10m  v1.13.5
 ```
 
 List the pods.
@@ -224,8 +224,8 @@ Reference the DNS zone id with `"${aws_route53_zone.zone-for-clusters.zone_id}"`
 |:-----|:------------|:--------|:--------|
 | controller_count | Number of controllers (i.e. masters) | 1 | 1 |
 | worker_count | Number of workers | 1 | 3 |
-| controller_type | EC2 instance type for controllers | "t2.small" | See below |
-| worker_type | EC2 instance type for workers | "t2.small" | See below |
+| controller_type | EC2 instance type for controllers | "t3.small" | See below |
+| worker_type | EC2 instance type for workers | "t3.small" | See below |
 | disk_size | Size of the EBS volume in GB | "40" | "100" |
 | disk_type | Type of the EBS volume | "gp2" | standard, gp2, io1 |
 | disk_iops | IOPS of the EBS volume | "0" (i.e. auto) | "400" |

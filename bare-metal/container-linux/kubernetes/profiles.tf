@@ -11,10 +11,10 @@ resource "matchbox_profile" "container-linux-install" {
   count = "${length(var.controller_names) + length(var.worker_names)}"
   name  = "${format("%s-container-linux-install-%s", var.cluster_name, element(concat(var.controller_names, var.worker_names), count.index))}"
 
-  kernel = "http://${local.channel}.release.core-os.net/amd64-usr/${var.os_version}/coreos_production_pxe.vmlinuz"
+  kernel = "${var.download_protocol}://${local.channel}.release.core-os.net/amd64-usr/${var.os_version}/coreos_production_pxe.vmlinuz"
 
   initrd = [
-    "http://${local.channel}.release.core-os.net/amd64-usr/${var.os_version}/coreos_production_pxe_image.cpio.gz",
+    "${var.download_protocol}://${local.channel}.release.core-os.net/amd64-usr/${var.os_version}/coreos_production_pxe_image.cpio.gz",
   ]
 
   args = [
@@ -34,7 +34,7 @@ data "template_file" "container-linux-install-configs" {
 
   template = "${file("${path.module}/cl/install.yaml.tmpl")}"
 
-  vars {
+  vars = {
     os_flavor           = "${local.flavor}"
     os_channel          = "${local.channel}"
     os_version          = "${var.os_version}"
@@ -77,7 +77,7 @@ data "template_file" "cached-container-linux-install-configs" {
 
   template = "${file("${path.module}/cl/install.yaml.tmpl")}"
 
-  vars {
+  vars = {
     os_flavor           = "${local.flavor}"
     os_channel          = "${local.channel}"
     os_version          = "${var.os_version}"
@@ -96,10 +96,10 @@ resource "matchbox_profile" "flatcar-install" {
   count = "${length(var.controller_names) + length(var.worker_names)}"
   name  = "${format("%s-flatcar-install-%s", var.cluster_name, element(concat(var.controller_names, var.worker_names), count.index))}"
 
-  kernel = "http://${local.channel}.release.flatcar-linux.net/amd64-usr/${var.os_version}/flatcar_production_pxe.vmlinuz"
+  kernel = "${var.download_protocol}://${local.channel}.release.flatcar-linux.net/amd64-usr/${var.os_version}/flatcar_production_pxe.vmlinuz"
 
   initrd = [
-    "http://${local.channel}.release.flatcar-linux.net/amd64-usr/${var.os_version}/flatcar_production_pxe_image.cpio.gz",
+    "${var.download_protocol}://${local.channel}.release.flatcar-linux.net/amd64-usr/${var.os_version}/flatcar_production_pxe_image.cpio.gz",
   ]
 
   args = [
@@ -160,14 +160,14 @@ data "template_file" "controller-configs" {
   template = "${file("${path.module}/cl/controller.yaml.tmpl")}"
 
   vars {
-    domain_name           = "${element(var.controller_domains, count.index)}"
-    etcd_name             = "${element(var.controller_names, count.index)}"
-    etcd_initial_cluster  = "${join(",", formatlist("%s=https://%s:2380", var.controller_names, var.controller_domains))}"
-    k8s_dns_service_ip    = "${module.bootkube.kube_dns_service_ip}"
-    cluster_domain_suffix = "${var.cluster_domain_suffix}"
-    ssh_authorized_key    = "${var.ssh_authorized_key}"
-    apiserver_vip         = "${var.apiserver_vip}"
-    etcd_cluster_exists   = "${var.etcd_cluster_exists}"
+    domain_name            = "${element(var.controller_domains, count.index)}"
+    etcd_name              = "${element(var.controller_names, count.index)}"
+    etcd_initial_cluster   = "${join(",", formatlist("%s=https://%s:2380", var.controller_names, var.controller_domains))}"
+    cluster_dns_service_ip = "${module.bootkube.cluster_dns_service_ip}"
+    cluster_domain_suffix  = "${var.cluster_domain_suffix}"
+    ssh_authorized_key     = "${var.ssh_authorized_key}"
+    apiserver_vip          = "${var.apiserver_vip}"
+    etcd_cluster_exists    = "${var.etcd_cluster_exists}"
   }
 }
 
@@ -192,11 +192,11 @@ data "template_file" "worker-configs" {
 
   template = "${file("${path.module}/cl/worker.yaml.tmpl")}"
 
-  vars {
-    domain_name           = "${element(var.worker_domains, count.index)}"
-    k8s_dns_service_ip    = "${module.bootkube.kube_dns_service_ip}"
-    cluster_domain_suffix = "${var.cluster_domain_suffix}"
-    ssh_authorized_key    = "${var.ssh_authorized_key}"
+  vars = {
+    domain_name            = "${element(var.worker_domains, count.index)}"
+    cluster_dns_service_ip = "${module.bootkube.cluster_dns_service_ip}"
+    cluster_domain_suffix  = "${var.cluster_domain_suffix}"
+    ssh_authorized_key     = "${var.ssh_authorized_key}"
   }
 }
 

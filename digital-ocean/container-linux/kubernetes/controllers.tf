@@ -83,9 +83,9 @@ data "template_file" "controller-configs" {
     etcd_domain = "${var.cluster_name}-etcd${count.index}.${var.dns_zone}"
 
     # etcd0=https://cluster-etcd0.example.com,etcd1=https://cluster-etcd1.example.com,...
-    etcd_initial_cluster  = "${join(",", data.template_file.etcds.*.rendered)}"
-    k8s_dns_service_ip    = "${cidrhost(var.service_cidr, 10)}"
-    cluster_domain_suffix = "${var.cluster_domain_suffix}"
+    etcd_initial_cluster   = "${join(",", data.template_file.etcds.*.rendered)}"
+    cluster_dns_service_ip = "${cidrhost(var.service_cidr, 10)}"
+    cluster_domain_suffix  = "${var.cluster_domain_suffix}"
   }
 }
 
@@ -93,7 +93,7 @@ data "template_file" "etcds" {
   count    = "${var.controller_count}"
   template = "etcd$${index}=https://$${cluster_name}-etcd$${index}.$${dns_zone}:2380"
 
-  vars {
+  vars = {
     index        = "${count.index}"
     cluster_name = "${var.cluster_name}"
     dns_zone     = "${var.dns_zone}"
