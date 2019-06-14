@@ -115,7 +115,7 @@ systemd:
         Type=oneshot
         RemainAfterExit=true
         WorkingDirectory=/opt/bootkube
-        ExecStart=/opt/bootkube/bootkube-start
+        ExecStart=/opt/bootkube/bootkube-start --required-pods=kube-system/pod-checkpointer,kube-system/kube-apiserver,kube-system/kube-scheduler,kube-system/kube-controller-manager,kube-system/kube-apiserver-vip
         ExecStartPost=/bin/touch /opt/bootkube/init_bootkube.done
 storage:
   files:
