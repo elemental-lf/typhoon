@@ -75,7 +75,7 @@ systemd:
           --pod-manifest-path=/etc/kubernetes/manifests \
           --read-only-port=0 \
           --volume-plugin-dir=/var/lib/kubelet/volumeplugins \
-          --max-pods=250
+          --max-pods=220
         ExecStop=-/usr/bin/rkt stop --uuid-file=/var/cache/kubelet-pod.uuid
         Restart=always
         RestartSec=5
