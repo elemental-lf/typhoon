@@ -71,6 +71,12 @@ variable "asset_dir" {
   type        = "string"
 }
 
+variable "networking" {
+  description = "Choice of networking provider (flannel or calico)"
+  type        = "string"
+  default     = "flannel"
+}
+
 variable "pod_cidr" {
   description = "CIDR IPv4 range to assign Kubernetes pods"
   type        = "string"
@@ -96,5 +102,11 @@ variable "cluster_domain_suffix" {
 variable "enable_reporting" {
   type        = "string"
   description = "Enable usage or analytics reporting to upstreams (Calico)"
+  default     = "false"
+}
+
+variable "enable_aggregation" {
+  description = "Enable the Kubernetes Aggregation Layer (defaults to false)"
+  type        = "string"
   default     = "false"
 }

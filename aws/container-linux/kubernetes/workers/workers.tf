@@ -3,9 +3,9 @@ resource "aws_autoscaling_group" "workers" {
   name = "${var.name}-worker ${aws_launch_configuration.worker.name}"
 
   # count
-  desired_capacity          = "${var.count}"
-  min_size                  = "${var.count}"
-  max_size                  = "${var.count + 2}"
+  desired_capacity          = "${var.worker_count}"
+  min_size                  = "${var.worker_count}"
+  max_size                  = "${var.worker_count + 2}"
   default_cooldown          = 30
   health_check_grace_period = 30
 
@@ -19,6 +19,7 @@ resource "aws_autoscaling_group" "workers" {
   target_group_arns = [
     "${aws_lb_target_group.workers-http.id}",
     "${aws_lb_target_group.workers-https.id}",
+    "${var.target_groups}",
   ]
 
   lifecycle {

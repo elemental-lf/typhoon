@@ -78,16 +78,16 @@ resource "google_compute_firewall" "internal-bgp" {
   target_tags = ["${var.cluster_name}-controller", "${var.cluster_name}-worker"]
 }
 
-# flannel
-resource "google_compute_firewall" "internal-flannel" {
+# flannel VXLAN
+resource "google_compute_firewall" "internal-vxlan" {
   count = "${var.networking == "flannel" ? 1 : 0}"
 
-  name    = "${var.cluster_name}-internal-flannel"
+  name    = "${var.cluster_name}-internal-vxlan"
   network = "${google_compute_network.network.name}"
 
   allow {
     protocol = "udp"
-    ports    = [8472]
+    ports    = [4789]
   }
 
   source_tags = ["${var.cluster_name}-controller", "${var.cluster_name}-worker"]
@@ -138,8 +138,8 @@ resource "google_compute_firewall" "allow-ingress" {
   target_tags   = ["${var.cluster_name}-worker"]
 }
 
-resource "google_compute_firewall" "google-health-checks" {
-  name    = "${var.cluster_name}-google-health-checks"
+resource "google_compute_firewall" "google-ingress-health-checks" {
+  name    = "${var.cluster_name}-ingress-health"
   network = "${google_compute_network.network.name}"
 
   allow {
@@ -147,7 +147,19 @@ resource "google_compute_firewall" "google-health-checks" {
     ports    = [10254]
   }
 
-  # https://cloud.google.com/compute/docs/load-balancing/tcp-ssl/tcp-proxy#health-checking
-  source_ranges = ["130.211.0.0/22", "35.191.0.0/16"]
-  target_tags   = ["${var.cluster_name}-worker"]
+  # https://cloud.google.com/load-balancing/docs/health-check-concepts#method
+  source_ranges = [
+    # Global LB health checks
+    "35.191.0.0/16",
+
+    "130.211.0.0/22",
+
+    # Region LB health checks
+    "35.191.0.0/16",
+
+    "209.85.152.0/22",
+    "209.85.204.0/22",
+  ]
+
+  target_tags = ["${var.cluster_name}-worker"]
 }
