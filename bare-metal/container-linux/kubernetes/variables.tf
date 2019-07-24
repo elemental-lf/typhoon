@@ -94,10 +94,10 @@ variable "network_ip_autodetection_method" {
   default     = "first-found"
 }
 
-variable "network_ipip_mode" {
-  description = "IPIP mode to use (applies to calico only)"
+variable "network_encapsulation" {
+  description = "Network encapsulation mode ipip, vxlan or never (only applies to calico)"
   type        = "string"
-  default     = "always"
+  default     = "ipip"
 }
 
 variable "pod_cidr" {
