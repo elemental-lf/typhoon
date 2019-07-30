@@ -4,6 +4,35 @@ Notable changes between versions.
 
 ## Latest
 
+* Migrate from Terraform v0.11 to v0.12.x (**action required!**)
+  * [Migration](https://typhoon.psdn.io/topics/maintenance/#terraform-v012x) instructions for Terraform v0.12
+* Require `terraform-provider-ct` v0.3.2+ to support Terraform v0.12 (action required)
+
+#### AWS
+
+* Require `terraform-provider-aws` v2.7+ to support Terraform v0.12 (action required)
+
+#### Azure
+
+* Require `terraform-provider-azurerm` v1.27+ to support Terraform v0.12 (action required)
+* Avoid unneeded rotations of Regular priority virtual machine scale sets
+  * Azure only allows `eviction_policy` to be set for Low priority VMs. Supporting Low priority VMs meant when Regular VMs were used, each `terraform apply` rolled workers, to set eviction_policy to null.
+  * Terraform v0.12 nullable variables fix the issue so plan does not produce a diff. 
+
+#### Bare-Metal
+
+* Require `terraform-provider-matchbox` v0.3.0+ to support Terraform v0.12 (action required)
+
+#### DigitalOcean
+
+* Require `terraform-provider-digitalocean` v1.3+ to support Terraform v0.12 (action required)
+
+#### Google Cloud
+
+* Require `terraform-provider-google` v2.5+ to support Terraform v0.12 (action required)
+
+## v1.14.3
+
 ## v1.14.3
 
 * Kubernetes [v1.14.3](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.14.md#v1143)
@@ -12,7 +41,7 @@ Notable changes between versions.
 * Fix trailing slash in terraform-render-bootkube version ([#479](https://github.com/poseidon/typhoon/pull/479))
 * Recommend updating `terraform-provider-ct` plugin from v0.3.1 to [v0.3.2](https://github.com/poseidon/terraform-provider-ct/releases/tag/v0.3.2) ([#487](https://github.com/poseidon/typhoon/pull/487))
 
-### AWS
+#### AWS
 
 * Rename `worker` pool module `count` variable to `worker_count` ([#485](https://github.com/poseidon/typhoon/pull/485)) (action required)
   * `count` will become a reserved variable name in Terraform v0.12
@@ -20,7 +49,6 @@ Notable changes between versions.
 #### Azure
 
 * Replace `azurerm_autoscale_setting` with `azurerm_monitor_autoscale_setting` ([#482](https://github.com/poseidon/typhoon/pull/482))
-  * Require `terraform-provider-azurerm` v1.22+ (action required)
 * Rename `worker` pool module `count` variable to `worker_count` ([#485](https://github.com/poseidon/typhoon/pull/485)) (action required)
   * `count` will become a reserved variable name in Terraform v0.12
 
@@ -31,7 +59,7 @@ Notable changes between versions.
 #### Google Cloud
 
 * Rename `worker` pool module `count` variable to `worker_count` ([#485](https://github.com/poseidon/typhoon/pull/485)) (action required)
-  * `count` will become a reserved variable name in Terraform v0.12
+  * `count` is a reserved variable in Terraform v0.12
 
 #### Addons
 
