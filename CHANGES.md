@@ -4,6 +4,124 @@ Notable changes between versions.
 
 ## Latest
 
+## v1.14.3
+
+* Kubernetes [v1.14.3](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.14.md#v1143)
+* Update CoreDNS from v1.3.1 to v1.5.0
+  * Add `ready` plugin to improve readinessProbe
+* Fix trailing slash in terraform-render-bootkube version ([#479](https://github.com/poseidon/typhoon/pull/479))
+* Recommend updating `terraform-provider-ct` plugin from v0.3.1 to [v0.3.2](https://github.com/poseidon/terraform-provider-ct/releases/tag/v0.3.2) ([#487](https://github.com/poseidon/typhoon/pull/487))
+
+### AWS
+
+* Rename `worker` pool module `count` variable to `worker_count` ([#485](https://github.com/poseidon/typhoon/pull/485)) (action required)
+  * `count` will become a reserved variable name in Terraform v0.12
+
+#### Azure
+
+* Replace `azurerm_autoscale_setting` with `azurerm_monitor_autoscale_setting` ([#482](https://github.com/poseidon/typhoon/pull/482))
+  * Require `terraform-provider-azurerm` v1.22+ (action required)
+* Rename `worker` pool module `count` variable to `worker_count` ([#485](https://github.com/poseidon/typhoon/pull/485)) (action required)
+  * `count` will become a reserved variable name in Terraform v0.12
+
+#### Bare-Metal
+
+* Recommend updating `terraform-provider-matchbox` plugin from v0.2.3 to [v0.3.0](https://github.com/poseidon/terraform-provider-matchbox/releases/tag/v0.3.0) ([#487](https://github.com/poseidon/typhoon/pull/487))
+
+#### Google Cloud
+
+* Rename `worker` pool module `count` variable to `worker_count` ([#485](https://github.com/poseidon/typhoon/pull/485)) (action required)
+  * `count` will become a reserved variable name in Terraform v0.12
+
+#### Addons
+
+* Update Prometheus from v2.9.2 to v2.10.0
+* Update Grafana from v6.1.6 to v6.2.1
+
+## v1.14.2
+ 
+* Kubernetes [v1.14.2](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.14.md#v1142)
+* Update etcd from v3.3.12 to [v3.3.13](https://github.com/etcd-io/etcd/releases/tag/v3.3.13)
+* Upgrade Calico from v3.6.1 to [v3.7.2](https://docs.projectcalico.org/v3.7/release-notes/)
+* Change flannel VXLAN port from 8472 (kernel default) to 4789 (IANA VXLAN)
+
+#### AWS
+
+* Only set internal VXLAN rules when `networking` is "flannel" (default: calico)
+
+#### Azure
+
+* Allow choosing Calico as the network provider (experimental) ([#472](https://github.com/poseidon/typhoon/pull/472))
+  * Add a `networking` variable accepting "flannel" (default) or "calico"
+  * Use VXLAN encapsulation since Azure doesn't support IPIP
+
+#### DigitalOcean
+
+* Allow choosing Calico as the network provider (experimental) ([#472](https://github.com/poseidon/typhoon/pull/472))
+  * Add a `networking` variable accepting "flannel" (default) or "calico"
+  * Use VXLAN encapsulation since DigitalOcean doesn't support IPIP
+* Add explicit ordering between firewall rule creation and secure copying Kubelet credentials ([#469](https://github.com/poseidon/typhoon/pull/469))
+  * Fix race scenario if copies to nodes were before rule creation, blocking cluster creation
+
+#### Addons
+
+* Update Prometheus from v2.8.1 to v2.9.2
+  * Update kube-state-metrics from v1.5.0 to v1.6.0
+* Update node-exporter from v0.17.0 to v0.18.0
+* Update Grafana from v6.1.3 to v6.1.6
+* Reduce nginx-ingress Role RBAC permissions ([#458](https://github.com/poseidon/typhoon/pull/458))
+
+## v1.14.1
+
+* Kubernetes [v1.14.1](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.14.md#v1141)
+
+#### Addons
+
+* Update Grafana from v6.1.1 to v6.1.3
+* Update nginx-ingress from v0.23.0 to v0.24.1
+
+## v1.14.0
+
+* Kubernetes [v1.14.0](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.14.md#v1140)
+* Update Calico from v3.6.0 to v3.6.1
+* Add `enable_aggregation` option for CNCF conformance ([#436](https://github.com/poseidon/typhoon/pull/436))
+  * Aggregation is disabled by default to retain our security stance
+  * Aggregation increases the security surface area. Extensions become part of the control plane and must be scrutinized carefully and trusted. Favor leaving aggregation disabled.
+
+#### AWS
+
+* Add ability to load balance TCP applications ([#443](https://github.com/poseidon/typhoon/pull/443))
+  * Output the network load balancer ARN as `nlb_id`
+  * Accept a `worker_target_groups` (ARN) list to which worker instances should be added
+
+#### Azure
+
+* Add ability to load balance TCP/UDP applications ([#447](https://github.com/poseidon/typhoon/pull/447))
+  * Output the load balancer ID as `loadbalancer_id`
+* Output `worker_security_group_name` and `worker_address_prefix` for extending firewall rules ([#447](https://github.com/poseidon/typhoon/pull/447))
+
+#### DigitalOcean
+
+* Harden internal (node-to-node) firewall rules to align with other platforms ([#444](https://github.com/poseidon/typhoon/pull/444))
+* Add ability to load balance TCP applications ([#444](https://github.com/poseidon/typhoon/pull/444))
+  * Output `controller_tag` and `worker_tag` for extending firewall rules ([#444](https://github.com/poseidon/typhoon/pull/444))
+
+#### Google Cloud
+
+* Add ability to load balance TCP/UDP applications ([#442](https://github.com/poseidon/typhoon/pull/442))
+  * Add worker instances to a target pool, output as `worker_target_pool`
+  * Health check for workers with Ingress controllers. Forward rules don't support differing internal/external ports, but some Ingress controllers support TCP/UDP proxy as a workaround 
+* Remove Haswell minimum CPU platform requirement ([#439](https://github.com/poseidon/typhoon/pull/439))
+  * Google Cloud API implements `min_cpu_platform` to mean "use exactly this CPU". Revert [#405](https://github.com/poseidon/typhoon/pull/405) added in v1.13.4.
+  * Fix error creating clusters in new regions without Haswell (e.g. europe-west2) ([#438](https://github.com/poseidon/typhoon/issues/438))
+
+#### Addons
+
+* Update Prometheus from v2.8.0 to v2.8.1
+* Update Grafana from v6.0.2 to [v6.1.1](http://docs.grafana.org/guides/whats-new-in-v6-1/)
+  * Add dashboard for pods in a workload (deployment/daemonset/statefulset) ([#446](https://github.com/poseidon/typhoon/pull/446))
+  * Add dashboard for workloads by namespace
+
 ## v1.13.5
 
 * Kubernetes [v1.13.5](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.13.md#v1135)
@@ -11,7 +129,7 @@ Notable changes between versions.
   * Reverse DNS lookups for service IPv4 addresses unchanged
 * Upgrade Calico from v3.5.2 to [v3.6.0](https://docs.projectcalico.org/v3.6/release-notes/) ([#430](https://github.com/poseidon/typhoon/pull/430))
   * Change pod IPAM from `host-local` to `calico-ipam`. `pod_cidr` is still divided into `/24` subnets per node, but managed as `ippools` and `ipamblocks`
-* Suggest updating [terraform-provider-ct](https://github.com/coreos/terraform-provider-ct) from v0.3.0 to [v0.3.1](https://github.com/coreos/terraform-provider-ct/releases/tag/v0.3.1) ([#434](https://github.com/poseidon/typhoon/pull/434))
+* Recommend updating [terraform-provider-ct](https://github.com/poseidon/terraform-provider-ct) from v0.3.0 to [v0.3.1](https://github.com/poseidon/terraform-provider-ct/releases/tag/v0.3.1) ([#434](https://github.com/poseidon/typhoon/pull/434))
 * Announce: Fedora Atomic modules will be not be updated beyond Kubernetes v1.13.x ([#437](https://github.com/poseidon/typhoon/pull/437))
   * Thank you Project Atomic team and users, please see the deprecation [notice](https://typhoon.psdn.io/announce/#march-27-2019)
 
@@ -56,7 +174,7 @@ Notable changes between versions.
 
 #### Bare-Metal
 
-* Recommend updating [terraform-provider-matchbox](https://github.com/coreos/terraform-provider-matchbox) plugin from v0.2.2 to [v0.2.3](https://github.com/coreos/terraform-provider-matchbox/releases/tag/v0.2.3) ([#402](https://github.com/poseidon/typhoon/pull/402))
+* Recommend updating [terraform-provider-matchbox](https://github.com/poseidon/terraform-provider-matchbox) plugin from v0.2.2 to [v0.2.3](https://github.com/poseidon/terraform-provider-matchbox/releases/tag/v0.2.3) ([#402](https://github.com/poseidon/typhoon/pull/402))
 * Improve docs on using Ubiquiti EdgeOS with bare-metal clusters ([#413](https://github.com/poseidon/typhoon/pull/413))
 
 #### Google Cloud
@@ -568,15 +686,15 @@ Notable changes between versions.
 
 #### AWS
 
-* [Require](https://typhoon.psdn.io/topics/maintenance/#terraform-provider-ct-v021) updating `terraform-provider-ct` plugin from v0.2.0 to [v0.2.1](https://github.com/coreos/terraform-provider-ct/releases/tag/v0.2.1) (action required!)
+* [Require](https://typhoon.psdn.io/topics/maintenance/#terraform-provider-ct-v021) updating `terraform-provider-ct` plugin from v0.2.0 to [v0.2.1](https://github.com/poseidon/terraform-provider-ct/releases/tag/v0.2.1) (action required!)
 
 #### Digital Ocean
 
-* [Require](https://typhoon.psdn.io/topics/maintenance/#terraform-provider-ct-v021) updating `terraform-provider-ct` plugin from v0.2.0 to [v0.2.1](https://github.com/coreos/terraform-provider-ct/releases/tag/v0.2.1) (action required!)
+* [Require](https://typhoon.psdn.io/topics/maintenance/#terraform-provider-ct-v021) updating `terraform-provider-ct` plugin from v0.2.0 to [v0.2.1](https://github.com/poseidon/terraform-provider-ct/releases/tag/v0.2.1) (action required!)
 
 #### Google Cloud
 
-* [Require](https://typhoon.psdn.io/topics/maintenance/#terraform-provider-ct-v021) updating `terraform-provider-ct` plugin from v0.2.0 to [v0.2.1](https://github.com/coreos/terraform-provider-ct/releases/tag/v0.2.1) (action required!)
+* [Require](https://typhoon.psdn.io/topics/maintenance/#terraform-provider-ct-v021) updating `terraform-provider-ct` plugin from v0.2.0 to [v0.2.1](https://github.com/poseidon/terraform-provider-ct/releases/tag/v0.2.1) (action required!)
 * Relax `os_image` to optional. Default to "coreos-stable".
 
 #### Addons
@@ -596,7 +714,7 @@ Notable changes between versions.
 * Upgrade etcd from v3.2.15 to v3.3.2
 * Update Calico from v3.0.2 to v3.0.3
 * Use kubernetes-incubator/bootkube v0.11.0
-* [Recommend](https://typhoon.psdn.io/topics/maintenance/#terraform-provider-ct-v021) updating `terraform-provider-ct` plugin from v0.2.0 to [v0.2.1](https://github.com/coreos/terraform-provider-ct/releases/tag/v0.2.1) (action recommended)
+* [Recommend](https://typhoon.psdn.io/topics/maintenance/#terraform-provider-ct-v021) updating `terraform-provider-ct` plugin from v0.2.0 to [v0.2.1](https://github.com/poseidon/terraform-provider-ct/releases/tag/v0.2.1) (action recommended)
 
 #### AWS
 

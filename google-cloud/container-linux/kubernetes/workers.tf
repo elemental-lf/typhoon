@@ -1,12 +1,12 @@
 module "workers" {
-  source       = "workers"
+  source       = "./workers"
   name         = "${var.cluster_name}"
   cluster_name = "${var.cluster_name}"
 
   # GCE
   region       = "${var.region}"
   network      = "${google_compute_network.network.name}"
-  count        = "${var.worker_count}"
+  worker_count        = "${var.worker_count}"
   machine_type = "${var.worker_type}"
   os_image     = "${var.os_image}"
   disk_size    = "${var.disk_size}"

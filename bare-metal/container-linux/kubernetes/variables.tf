@@ -94,10 +94,10 @@ variable "network_ip_autodetection_method" {
   default     = "first-found"
 }
 
-variable "network_ipip_mode" {
-  description = "IPIP mode to use (applies to calico only)"
+variable "network_encapsulation" {
+  description = "Network encapsulation mode ipip, vxlan or never (only applies to calico)"
   type        = "string"
-  default     = "always"
+  default     = "ipip"
 }
 
 variable "pod_cidr" {
@@ -131,8 +131,8 @@ variable "cluster_domain_suffix" {
 }
 
 variable "download_protocol" {
-  type = "string"
-  default = "https"
+  type        = "string"
+  default     = "https"
   description = "Protocol iPXE should use to download the kernel and initrd. Defaults to https, which requires iPXE compiled with crypto support. Unused if cached_install is true."
 }
 
@@ -193,5 +193,11 @@ variable "apiserver_extra_secrets" {
 variable "enable_reporting" {
   type        = "string"
   description = "Enable usage or analytics reporting to upstreams (Calico)"
+  default     = "false"
+}
+
+variable "enable_aggregation" {
+  description = "Enable the Kubernetes Aggregation Layer (defaults to false)"
+  type        = "string"
   default     = "false"
 }

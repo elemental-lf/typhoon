@@ -1,4 +1,4 @@
-# Regional managed instance group of workers
+# Managed instance group of workers
 resource "google_compute_region_instance_group_manager" "workers" {
   name        = "${var.name}-worker-group"
   description = "Compute instance group of ${var.name} workers"
@@ -8,7 +8,8 @@ resource "google_compute_region_instance_group_manager" "workers" {
   instance_template  = "${google_compute_instance_template.worker.self_link}"
   region             = "${var.region}"
 
-  target_size = "${var.count}"
+  target_size  = "${var.worker_count}"
+  target_pools = ["${google_compute_target_pool.workers.self_link}"]
 
   named_port {
     name = "http"
@@ -23,10 +24,9 @@ resource "google_compute_region_instance_group_manager" "workers" {
 
 # Worker instance template
 resource "google_compute_instance_template" "worker" {
-  name_prefix      = "${var.name}-worker-"
-  description      = "Worker Instance template"
-  machine_type     = "${var.machine_type}"
-  min_cpu_platform = "Intel Haswell"
+  name_prefix  = "${var.name}-worker-"
+  description  = "Worker Instance template"
+  machine_type = "${var.machine_type}"
 
   metadata = {
     user-data = "${data.ct_config.worker-ignition.rendered}"
