@@ -5,10 +5,8 @@ Typhoon AWS, Azure, and Google Cloud allow additional groups of workers to be de
 Internal Terraform Modules:
 
 * `aws/container-linux/kubernetes/workers`
-* `aws/fedora-atomic/kubernetes/workers`
 * `azure/container-linux/kubernetes/workers`
 * `google-cloud/container-linux/kubernetes/workers`
-* `google-cloud/fedora-atomic/kubernetes/workers`
 
 ## AWS
 
@@ -16,7 +14,7 @@ Create a cluster following the AWS [tutorial](../cl/aws.md#cluster). Define a wo
 
 ```tf
 module "tempest-worker-pool" {
-  source = "git::https://github.com/poseidon/typhoon//aws/container-linux/kubernetes/workers?ref=v1.14.4"
+  source = "git::https://github.com/poseidon/typhoon//aws/container-linux/kubernetes/workers?ref=v1.14.3"
 
   # AWS
   vpc_id          = module.aws-tempest.vpc_id
@@ -78,7 +76,7 @@ Create a cluster following the Azure [tutorial](../cl/azure.md#cluster). Define 
 
 ```tf
 module "ramius-worker-pool" {
-  source = "git::https://github.com/poseidon/typhoon//azure/container-linux/kubernetes/workers?ref=v1.14.3"
+  source = "git::https://github.com/poseidon/typhoon//azure/container-linux/kubernetes/workers?ref=v1.15.1"
   
   # Azure
   region                  = module.azure-ramius.region
@@ -144,7 +142,7 @@ Create a cluster following the Google Cloud [tutorial](../cl/google-cloud.md#clu
 
 ```tf
 module "yavin-worker-pool" {
-  source = "git::https://github.com/poseidon/typhoon//google-cloud/container-linux/kubernetes/workers?ref=v1.14.3"
+  source = "git::https://github.com/poseidon/typhoon//google-cloud/container-linux/kubernetes/workers?ref=v1.15.1"
 
   # Google Cloud
   region       = "europe-west2"
@@ -175,11 +173,11 @@ Verify a managed instance group of workers joins the cluster within a few minute
 ```
 $ kubectl get nodes
 NAME                                             STATUS   AGE    VERSION
-yavin-controller-0.c.example-com.internal        Ready    6m     v1.14.3
-yavin-worker-jrbf.c.example-com.internal         Ready    5m     v1.14.3
-yavin-worker-mzdm.c.example-com.internal         Ready    5m     v1.14.3
-yavin-16x-worker-jrbf.c.example-com.internal     Ready    3m     v1.14.3
-yavin-16x-worker-mzdm.c.example-com.internal     Ready    3m     v1.14.3
+yavin-controller-0.c.example-com.internal        Ready    6m     v1.15.1
+yavin-worker-jrbf.c.example-com.internal         Ready    5m     v1.15.1
+yavin-worker-mzdm.c.example-com.internal         Ready    5m     v1.15.1
+yavin-16x-worker-jrbf.c.example-com.internal     Ready    3m     v1.15.1
+yavin-16x-worker-mzdm.c.example-com.internal     Ready    3m     v1.15.1
 ```
 
 ### Variables

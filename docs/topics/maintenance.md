@@ -18,7 +18,7 @@ module "google-cloud-yavin" {
 }
 
 module "bare-metal-mercury" {
-  source = "git::https://github.com/poseidon/typhoon//bare-metal/container-linux/kubernetes?ref=v1.14.3"
+  source = "git::https://github.com/poseidon/typhoon//bare-metal/container-linux/kubernetes?ref=v1.15.1"
   ...
 }
 ```
@@ -273,21 +273,21 @@ Google Cloud creates a new worker template and edits the worker instance group i
 
 ## Terraform v0.12.x
 
-Terraform [v0.12](https://www.hashicorp.com/blog/announcing-terraform-0-12) introduces major changes to the provider plugin protocol and HCL language (first-class expressions, formal list and map types, nullable variables, variable constraints, and short-circuting ternary operators).
+Terraform [v0.12](https://www.hashicorp.com/blog/announcing-terraform-0-12) introduced major changes to the provider plugin protocol and HCL language (first-class expressions, formal list and map types, nullable variables, variable constraints, and short-circuiting ternary operators).
 
-Typhoon modules have been adapted for Terraform v0.12. Provider plugins requirements now enforce v0.12 compatibility. However, some HCL language changes were breaking. List [type hint](https://www.terraform.io/upgrade-guides/0-12.html#referring-to-list-variables) workarounds in v0.11 now have new meaning. We cannot offer both v0.11 and v0.12 compatibility at the same time. Upgrading Terraform to v0.12 is neccessary.
+Typhoon modules have been adapted for Terraform v0.12. Provider plugins requirements now enforce v0.12 compatibility. However, some HCL language changes were breaking (list [type hint](https://www.terraform.io/upgrade-guides/0-12.html#referring-to-list-variables) workarounds in v0.11 now have new meaning). Typhoon cannot offer both v0.11 and v0.12 compatibility in the same release. Upcoming releases require upgrading Terraform to v0.12.
 
 | Typhoon Release   | Terraform version   |
 |-------------------|---------------------|
-| v1.14.4 - ?       | v0.12.x             |
-| v1.10.3 - v1.14.3 | v0.11.x             |
+| v1.15.1 - ?       | v0.12.x             |
+| v1.10.3 - v1.15.1 | v0.11.x             |
 | v1.9.2 - v1.10.2  | v0.10.4+ or v0.11.x |
 | v1.7.3 - v1.9.1   | v0.10.x             |
 | v1.6.4 - v1.7.2   | v0.9.x              |
 
 ### New users
 
-New users can start with Terraform v0.12.x and follow the docs for Typhoon v1.14.4+ without issue.
+New users can start with Terraform v0.12.x and follow the docs for Typhoon v1.15.1+ without issue.
 
 ### Existing users
 
@@ -300,24 +300,24 @@ sudo ln -sf ~/Downloads/terraform-0.12.0/terraform /usr/local/bin/terraform12
 ```
 
 !!! note
-    For example, `terraform` may refer Terraform v0.11.14, while `terraform12` is symlinked to Terraform v0.12.0. Once migration is complete, Terraform v0.11.x can be deleted and `terraform12` renamed.
+    For example, `terraform` may refer Terraform v0.11.14, while `terraform12` is symlinked to Terraform v0.12.1. Once migration is complete, Terraform v0.11.x can be deleted and `terraform12` renamed.
 
 #### In-place
 
-For existing Typhoon v1.14.2 or v1.14.3 clusters, edit the Typhoon `ref` to the first SHA that introduced Terraform v0.12 support (aim is to minimize the diff). For example:
+For existing Typhoon v1.14.2 or v1.14.3 clusters, edit the Typhoon `ref` to first SHA that introduced Terraform v0.12 support (`3276bf587850218b8f967978a4bf2b05d5f440a2`). The aim is to minimize the diff and convert to using Terraform v0.12.x. For example:
 
 ```tf
  module "bare-metal-mercury" {
 -  source = "git::https://github.com/poseidon/typhoon//bare-metal/container-linux/kubernetes?ref=v1.14.3"
-+  source = "git::https://github.com/poseidon/typhoon//bare-metal/container-linux/kubernetes?ref=v1.14.4"
++  source = "git::https://github.com/poseidon/typhoon//bare-metal/container-linux/kubernetes?ref=3276bf587850218b8f967978a4bf2b05d5f440a2"
    ...
 ```
 
-Typhoon clusters no longer require the `providers` block (unless you actually need to pass an [aliased provider](https://www.terraform.io/docs/configuration/providers.html#alias-multiple-provider-instances)). A regression in Terraform v0.11 made it neccessary to explicitly pass aliased providers in order for Typhoon to continue to enforce constraints (see [terraform#16824](https://github.com/hashicorp/terraform/issues/16824)). Terraform v0.12 resolves this issue.
+With Terraform v0.12, Typhoon clusters no longer require the `providers` block (unless you actually need to pass an [aliased provider](https://www.terraform.io/docs/configuration/providers.html#alias-multiple-provider-instances)). A regression in Terraform v0.11 made it neccessary to explicitly pass aliased providers in order for Typhoon to continue to enforce constraints (see [terraform#16824](https://github.com/hashicorp/terraform/issues/16824)). Terraform v0.12 resolves this issue.
 
 ```tf
  module "bare-metal-mercury" {
-   source = "git::https://github.com/poseidon/typhoon//bare-metal/container-linux/kubernetes?ref=v1.14.4"
+   source = "git::https://github.com/poseidon/typhoon//bare-metal/container-linux/kubernetes?ref=3276bf587850218b8f967978a4bf2b05d5f440a2"
 
 -  providers = {
 -    local = "local.default"
@@ -327,7 +327,7 @@ Typhoon clusters no longer require the `providers` block (unless you actually ne
 -  }
 ```
 
-Provider constrains ensure suitable plugin versions are used. Install new versions of `terraform-provider-ct` and `terraform-provider-matchbox` (bare-metal only) according to tutorial docs. Remove the now uneccessary `local`, `null`, `template`, and `tls` blocks in `providers.tf`.
+Provider constrains ensure suitable plugin versions are used. Install new versions of `terraform-provider-ct` (v0.3.2+) and `terraform-provider-matchbox` (bare-metal only, v0.3.0+) according to the [changelog](https://github.com/poseidon/typhoon/blob/master/CHANGES.md#v1144) or tutorial docs. The `local`, `null`, `template`, and `tls` blocks in `providers.tf` are no longer needed.
 
 ```tf
  provider "matchbox" {
@@ -383,7 +383,7 @@ Finally, plan.
 terraform12 plan
 ```
 
-Verify no changes are proposed and commit changes to version control. You've migrated to Terraform v0.12! Use the Terraform v0.12 binary going forward.
+Verify no changes are proposed and commit changes to version control. You've migrated to Terraform v0.12! Repeat for other config directories. Use the Terraform v0.12 binary going forward.
 
 !!! note
     It is known that plan may propose re-creating `template_dir` resources. This is harmless.
@@ -404,7 +404,7 @@ tree .
 └── infraB  <- new Terraform v0.12.x configs
 ```
 
-Define Typhoon clusters in the new config directory using Terraform v0.12 syntax. Follow the Typhoon v1.14.4+ docs (e.g. use `terraform12` in the `infraB` dir). See [AWS](/cl/aws), [Azure](/cl/azure), [Bare-Metal](/cl/bare-metal), [Digital Ocean](/cl/digital-ocean), or [Google-Cloud](/cl/google-cloud)) to create new clusters. Follow the usual [upgrade](/topics/maintenance/#upgrades) process to apply workloads and shift traffic. Later, switch back to the old config directory and deprovision clusters with Terraform v0.11.
+Define Typhoon clusters in the new config directory using Terraform v0.12 syntax. Follow the Typhoon v1.15.1+ docs (e.g. use `terraform12` in the `infraB` dir). See [AWS](/cl/aws), [Azure](/cl/azure), [Bare-Metal](/cl/bare-metal), [Digital Ocean](/cl/digital-ocean), or [Google-Cloud](/cl/google-cloud)) to create new clusters. Follow the usual [upgrade](/topics/maintenance/#upgrades) process to apply workloads and shift traffic. Later, switch back to the old config directory and deprovision clusters with Terraform v0.11.
 
 ```shell
 terraform12 init

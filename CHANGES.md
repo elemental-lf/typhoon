@@ -4,13 +4,48 @@ Notable changes between versions.
 
 ## Latest
 
+## v1.15.1
+
+* Kubernetes [v1.15.1](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.15.md#v1151)
+* Upgrade Calico from v3.7.3 to [v3.8.0](https://docs.projectcalico.org/v3.8/release-notes/)
+  * Enable CNI `bandwidth` plugin for [traffic shaping](https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/#support-traffic-shaping)
+* Run `kube-apiserver` with lower privilege user (nobody) ([#506](https://github.com/poseidon/typhoon/pull/506))
+* Relax `terraform-provider-ct` version constraint (v0.3.2+)
+  * Allow provider versions below v1.0.0 (e.g. upgrading to v0.4)
+
+#### Azure
+
+* Fix to add all controller nodes to the apiserver load balancer backend address pool ([#518](https://github.com/poseidon/typhoon/pull/518))
+  * kube-apiserver availability relied on the 0th controller
+
+#### Google Cloud
+
+* Allow controller nodes to span more than 3 zones if available in a region ([#504](https://github.com/poseidon/typhoon/pull/504))
+* Eliminate extraneous controller instance groups in single-controller clusters ([#504](https://github.com/poseidon/typhoon/pull/504))
+* Raise network deletion timeout from 4m to 6m ([#505](https://github.com/poseidon/typhoon/pull/505))
+
+#### Addons
+
+* Update Prometheus from v2.10.0 to v2.11.0
+  * Refresh rules, alerts, and dashboards from upstreams
+  * Update kube-state-metrics from v1.6.0 to v1.7.1
+* Update Grafana from v6.2.4 to v6.2.5
+* Update nginx-ingress from v0.24.1 to v0.25.0
+  * Support `networking.k8s.io/v1beta1` apiVersion
+
+## v1.15.0
+
+* Kubernetes [v1.15.0](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.15.md#v1150)
 * Migrate from Terraform v0.11 to v0.12.x (**action required!**)
   * [Migration](https://typhoon.psdn.io/topics/maintenance/#terraform-v012x) instructions for Terraform v0.12
 * Require `terraform-provider-ct` v0.3.2+ to support Terraform v0.12 (action required)
+* Update Calico from v3.7.2 to [v3.7.3](https://docs.projectcalico.org/v3.7/release-notes/)
+* Remove Fedora Atomic modules (deprecated in March) ([#501](https://github.com/poseidon/typhoon/pull/501))
 
 #### AWS
 
 * Require `terraform-provider-aws` v2.7+ to support Terraform v0.12 (action required)
+* Allow using Flatcar Linux Edge by setting `os_image` to "flatcar-edge"
 
 #### Azure
 
@@ -22,16 +57,21 @@ Notable changes between versions.
 #### Bare-Metal
 
 * Require `terraform-provider-matchbox` v0.3.0+ to support Terraform v0.12 (action required)
+* Allow using Flatcar Linux Edge by setting `os_channel` to "flatcar-edge"
 
 #### DigitalOcean
 
 * Require `terraform-provider-digitalocean` v1.3+ to support Terraform v0.12 (action required)
+* Change the default `worker_type` from `s-1vcpu1-1gb` to `s-1vcpu-2gb`
 
 #### Google Cloud
 
 * Require `terraform-provider-google` v2.5+ to support Terraform v0.12 (action required)
 
-## v1.14.3
+#### Addons
+
+* Update Grafana from v6.2.1 to v6.2.4
+* Update node-exporter from v0.18.0 to v0.18.1
 
 ## v1.14.3
 
