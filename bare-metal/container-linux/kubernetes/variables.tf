@@ -94,12 +94,6 @@ variable "network_ip_autodetection_method" {
   default     = "first-found"
 }
 
-variable "network_encapsulation" {
-  description = "Network encapsulation mode ipip, vxlan or never (only applies to calico)"
-  type        = "string"
-  default     = "ipip"
-}
-
 variable "pod_cidr" {
   description = "CIDR IPv4 range to assign Kubernetes pods"
   type        = string
@@ -115,12 +109,6 @@ EOD
 
   type = string
   default = "10.3.0.0/16"
-}
-
-variable "apiserver_vip" {
-  description = "VIP to use for apiserver HA via keepalived"       
-  type        = "string"
-  default     = ""  
 }
 
 # optional
@@ -159,36 +147,6 @@ variable "kernel_args" {
   description = "Additional kernel arguments to provide at PXE boot."
   type = list(string)
   default = []
-}
-
-variable "controller_install_disks" {
-  type        = "list"
-  description = "Controller install disks"
-  default     = []
-}
-
-variable "worker_install_disks" {
-  type        = "list"
-  description = "Worker install disks"
-  default     = []
-}
-
-variable "etcd_cluster_exists" {
-  type        = "string"
-  description = "Wheter it should be assumed that the etcd cluster already exists or not"
-  default     = "false"
-}
-
-variable "apiserver_extra_arguments" {
-  description = "List of extra arguments for the kube-apiserver"
-  type        = "list"
-  default     = []
-}
-
-variable "apiserver_extra_secrets" {
-  description = "Map of extra data to insert into the kube-apiserver Secrets (values must be BASE64 encoded)"
-  type        = "map"
-  default     = {}
 }
 
 variable "enable_reporting" {
