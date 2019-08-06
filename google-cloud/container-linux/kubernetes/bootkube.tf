@@ -1,6 +1,6 @@
 # Self-hosted Kubernetes assets (kubeconfig, manifests)
 module "bootkube" {
-  source = "git::https://github.com/poseidon/terraform-render-bootkube.git?ref=0103bc06bb3f597455a765bf5d916f9b241cbea0"
+  source = "git::https://github.com/poseidon/terraform-render-bootkube.git?ref=5b9faa903182505ac534f42a2cf250d5d215941b"
 
   cluster_name          = var.cluster_name
   api_servers           = [format("%s.%s", var.cluster_name, var.dns_zone)]
@@ -15,6 +15,6 @@ module "bootkube" {
   enable_aggregation    = var.enable_aggregation
 
   // temporary
-  apiserver_port = 443
+  external_apiserver_port = 443
 }
 

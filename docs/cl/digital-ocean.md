@@ -1,6 +1,6 @@
 # Digital Ocean
 
-In this tutorial, we'll create a Kubernetes v1.14.3 cluster on DigitalOcean with Container Linux.
+In this tutorial, we'll create a Kubernetes v1.15.1 cluster on DigitalOcean with Container Linux.
 
 We'll declare a Kubernetes cluster using the Typhoon Terraform module. Then apply the changes to create controller droplets, worker droplets, DNS records, tags, and TLS assets.
 
@@ -18,7 +18,7 @@ Install [Terraform](https://www.terraform.io/downloads.html) v0.12.x on your sys
 
 ```sh
 $ terraform version
-Terraform v0.12.0
+Terraform v0.12.2
 ```
 
 Add the [terraform-provider-ct](https://github.com/poseidon/terraform-provider-ct) plugin binary for your system to `~/.terraform.d/plugins/`, noting the final name.
@@ -50,7 +50,7 @@ Configure the DigitalOcean provider to use your token in a `providers.tf` file.
 
 ```tf
 provider "digitalocean" {
-  version = "1.3.0"
+  version = "1.4.0"
   token = "${chomp(file("~/.config/digital-ocean/token"))}"
 }
 
@@ -65,7 +65,7 @@ Define a Kubernetes cluster using the module `digital-ocean/container-linux/kube
 
 ```tf
 module "digital-ocean-nemo" {
-  source = "git::https://github.com/poseidon/typhoon//digital-ocean/container-linux/kubernetes?ref=v1.14.4"
+  source = "git::https://github.com/poseidon/typhoon//digital-ocean/container-linux/kubernetes?ref=v1.15.1"
 
   # Digital Ocean
   cluster_name = "nemo"
@@ -78,7 +78,6 @@ module "digital-ocean-nemo" {
   
   # optional
   worker_count = 2
-  worker_type  = "s-1vcpu-1gb"
 }
 ```
 
@@ -131,9 +130,9 @@ In 3-6 minutes, the Kubernetes cluster will be ready.
 $ export KUBECONFIG=/home/user/.secrets/clusters/nemo/auth/kubeconfig
 $ kubectl get nodes
 NAME               STATUS  ROLES              AGE  VERSION
-10.132.110.130     Ready   controller,master  10m  v1.14.3
-10.132.115.81      Ready   node               10m  v1.14.3
-10.132.124.107     Ready   node               10m  v1.14.3
+10.132.110.130     Ready   controller,master  10m  v1.15.1
+10.132.115.81      Ready   node               10m  v1.15.1
+10.132.124.107     Ready   node               10m  v1.15.1
 ```
 
 List the pods.
@@ -220,7 +219,7 @@ Digital Ocean requires the SSH public key be uploaded to your account, so you ma
 | controller_count | Number of controllers (i.e. masters) | 1 | 1 |
 | worker_count | Number of workers | 1 | 3 |
 | controller_type | Droplet type for controllers | s-2vcpu-2gb | s-2vcpu-2gb, s-2vcpu-4gb, s-4vcpu-8gb, ... |
-| worker_type | Droplet type for workers | s-1vcpu-1gb | s-1vcpu-1gb, s-1vcpu-2gb, s-2vcpu-2gb, ... |
+| worker_type | Droplet type for workers | s-1vcpu-2gb | s-1vcpu-2gb, s-2vcpu-2gb, ... |
 | image | Container Linux image for instances | "coreos-stable" | coreos-stable, coreos-beta, coreos-alpha |
 | controller_clc_snippets | Controller Container Linux Config snippets | [] | [example](/advanced/customization/) |
 | worker_clc_snippets | Worker Container Linux Config snippets | [] | [example](/advanced/customization/) |

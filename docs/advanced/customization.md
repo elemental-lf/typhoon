@@ -78,12 +78,12 @@ module "digital-ocean-nemo" {
   controller_count        = 1
   worker_count            = 2
   controller_clc_snippets = [
-    "${file("./custom-files")}",
-    "${file("./custom-units")}",
+    file("./custom-files"),
+    file("./custom-units"),
   ]
   worker_clc_snippets = [
-    "${file("./custom-files")}",
-    "${file("./custom-units")}",
+    file("./custom-files"),
+    file("./custom-units")",
   ]
   ...
 }
@@ -100,12 +100,10 @@ module "bare-metal-mercury" {
     "node3",
   ]
   clc_snippets = {
-    "node2" = [
-      "${file("./units/hello.yaml")}"
-    ]
+    "node2" = [file("./units/hello.yaml")]
     "node3" = [
-      "${file("./units/world.yaml")}",
-      "${file("./units/hello.yaml")}",
+      file("./units/world.yaml"),
+      file("./units/hello.yaml"),
     ]
   }
   ...
@@ -137,10 +135,6 @@ Container Linux Configs (and the CoreOS Ignition system) create immutable infras
 
 !!! danger
     Destroying and recreating controller instances is destructive! etcd runs on controller instances and stores data there. Do not modify controller snippets. See [blue/green](/topics/maintenance/#upgrades) clusters.
-
-### Fedora Atomic
-
-Cloud-Init and kickstart (bare-metal only) declare how a Fedora Atomic instance should be provisioned. Customizing these declarations in ways beyond the provided Terraform variables is unsupported.
 
 ## Architecture
 

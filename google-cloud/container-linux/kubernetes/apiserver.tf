@@ -45,16 +45,11 @@ resource "google_compute_backend_service" "apiserver" {
   timeout_sec      = "300"
 
   # controller(s) spread across zonal instance groups
-  backend {
-    group = google_compute_instance_group.controllers[0].self_link
-  }
-
-  backend {
-    group = google_compute_instance_group.controllers[1].self_link
-  }
-
-  backend {
-    group = google_compute_instance_group.controllers[2].self_link
+  dynamic "backend" {
+    for_each = google_compute_instance_group.controllers
+    content {
+      group = backend.value.self_link
+    }
   }
 
   health_checks = [google_compute_health_check.apiserver.self_link]
@@ -62,18 +57,14 @@ resource "google_compute_backend_service" "apiserver" {
 
 # Instance group of heterogeneous (unmanged) controller instances
 resource "google_compute_instance_group" "controllers" {
-  count = length(local.zones)
+  count = min(var.controller_count, length(local.zones))
 
-  name = format(
-    "%s-controllers-%s",
-    var.cluster_name,
-    element(local.zones, count.index),
-  )
+  name = format("%s-controllers-%s", var.cluster_name, element(local.zones, count.index))
   zone = element(local.zones, count.index)
 
   named_port {
     name = "apiserver"
-    port = "443"
+    port = "6443"
   }
 
   # add instances in the zone into the instance group
@@ -96,7 +87,7 @@ resource "google_compute_health_check" "apiserver" {
   unhealthy_threshold = 3
 
   tcp_health_check {
-    port = "443"
+    port = "6443"
   }
 }
 

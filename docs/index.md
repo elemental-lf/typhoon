@@ -11,7 +11,7 @@ Typhoon distributes upstream Kubernetes, architectural conventions, and cluster 
 
 ## Features <a href="https://www.cncf.io/certification/software-conformance/"><img align="right" src="https://storage.googleapis.com/poseidon/certified-kubernetes.png"></a>
 
-* Kubernetes v1.14.3 (upstream, via [kubernetes-incubator/bootkube](https://github.com/kubernetes-incubator/bootkube))
+* Kubernetes v1.15.1 (upstream, via [kubernetes-incubator/bootkube](https://github.com/kubernetes-incubator/bootkube))
 * Single or multi-master, [Calico](https://www.projectcalico.org/) or [flannel](https://github.com/coreos/flannel) networking
 * On-cluster etcd with TLS, [RBAC](https://kubernetes.io/docs/admin/authorization/rbac/)-enabled, [network policy](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
 * Advanced features like [worker pools](advanced/worker-pools/), [preemptible](cl/google-cloud/#preemption) workers, and [snippets](advanced/customization/#container-linux) customization
@@ -19,24 +19,22 @@ Typhoon distributes upstream Kubernetes, architectural conventions, and cluster 
 
 ## Modules
 
-Typhoon provides a Terraform Module for each supported operating system and platform. Container Linux is a mature and reliable choice. Also, Kinvolk's Flatcar Linux fork is selectable on AWS and bare-metal.
+Typhoon provides a Terraform Module for each supported operating system and platform.
 
 | Platform      | Operating System | Terraform Module | Status |
 |---------------|------------------|------------------|--------|
-| AWS           | Container Linux  | [aws/container-linux/kubernetes](cl/aws.md) | stable |
+| AWS           | Container Linux / Flatcar Linux  | [aws/container-linux/kubernetes](cl/aws.md) | stable |
 | Azure         | Container Linux  | [azure/container-linux/kubernetes](cl/azure.md) | alpha |
-| Bare-Metal    | Container Linux  | [bare-metal/container-linux/kubernetes](cl/bare-metal.md) | stable |
+| Bare-Metal    | Container Linux / Flatcar Linux | [bare-metal/container-linux/kubernetes](cl/bare-metal.md) | stable |
 | Digital Ocean | Container Linux  | [digital-ocean/container-linux/kubernetes](cl/digital-ocean.md) | beta |
 | Google Cloud  | Container Linux  | [google-cloud/container-linux/kubernetes](cl/google-cloud.md) | stable |
 
-Fedora Atomic support is alpha and will evolve as Fedora Atomic is replaced by Fedora CoreOS.
+A preview of Typhoon for [Fedora CoreOS](https://getfedora.org/coreos/) is available for testing.
 
 | Platform      | Operating System | Terraform Module | Status |
 |---------------|------------------|------------------|--------|
-| AWS           | Fedora Atomic    | [aws/fedora-atomic/kubernetes](atomic/aws.md) | deprecated |
-| Bare-Metal    | Fedora Atomic    | [bare-metal/fedora-atomic/kubernetes](atomic/bare-metal.md) | deprecated |
-| Digital Ocean | Fedora Atomic    | [digital-ocean/fedora-atomic/kubernetes](atomic/digital-ocean.md) | deprecated |
-| Google Cloud  | Fedora Atomic    | [google-cloud/fedora-atomic/kubernetes](atomic/google-cloud.md) | deprecated |
+| AWS           | Fedora CoreOS | [aws/fedora-coreos/kubernetes](fedora-coreos/aws.md) | preview |
+| Bare-Metal    | Fedora CoreOS | [bare-metal/fedora-coreos/kubernetes](fedora-coreos/bare-metal.md) | preview |
 
 ## Documentation
 
@@ -49,7 +47,7 @@ Define a Kubernetes cluster by using the Terraform module for your chosen platfo
 
 ```tf
 module "google-cloud-yavin" {
-  source = "git::https://github.com/poseidon/typhoon//google-cloud/container-linux/kubernetes?ref=v1.14.4"
+  source = "git::https://github.com/poseidon/typhoon//google-cloud/container-linux/kubernetes?ref=v1.15.1"
 
   # Google Cloud
   cluster_name  = "yavin"
@@ -82,9 +80,9 @@ In 4-8 minutes (varies by platform), the cluster will be ready. This Google Clou
 $ export KUBECONFIG=/home/user/.secrets/clusters/yavin/auth/kubeconfig
 $ kubectl get nodes
 NAME                                       ROLES              STATUS  AGE  VERSION
-yavin-controller-0.c.example-com.internal  controller,master  Ready   6m   v1.14.3
-yavin-worker-jrbf.c.example-com.internal   node               Ready   5m   v1.14.3
-yavin-worker-mzdm.c.example-com.internal   node               Ready   5m   v1.14.3
+yavin-controller-0.c.example-com.internal  controller,master  Ready   6m   v1.15.1
+yavin-worker-jrbf.c.example-com.internal   node               Ready   5m   v1.15.1
+yavin-worker-mzdm.c.example-com.internal   node               Ready   5m   v1.15.1
 ```
 
 List the pods.

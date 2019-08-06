@@ -1,6 +1,6 @@
 # Google Cloud
 
-In this tutorial, we'll create a Kubernetes v1.14.3 cluster on Google Compute Engine with Container Linux.
+In this tutorial, we'll create a Kubernetes v1.15.1 cluster on Google Compute Engine with Container Linux.
 
 We'll declare a Kubernetes cluster using the Typhoon Terraform module. Then apply the changes to create a network, firewall rules, health checks, controller instances, worker managed instance group, load balancers, and TLS assets.
 
@@ -18,7 +18,7 @@ Install [Terraform](https://www.terraform.io/downloads.html) v0.12.x on your sys
 
 ```sh
 $ terraform version
-Terraform v0.12.0
+Terraform v0.12.2
 ```
 
 Add the [terraform-provider-ct](https://github.com/poseidon/terraform-provider-ct) plugin binary for your system to `~/.terraform.d/plugins/`, noting the final name.
@@ -49,7 +49,7 @@ Configure the Google Cloud provider to use your service account key, project-id,
 
 ```tf
 provider "google" {
-  version     = "2.7.0"
+  version     = "2.9.0"
   project     = "project-id"
   region      = "us-central1"
   credentials = "${file("~/.config/google-cloud/terraform.json")}"
@@ -71,7 +71,7 @@ Define a Kubernetes cluster using the module `google-cloud/container-linux/kuber
 
 ```tf
 module "google-cloud-yavin" {
-  source = "git::https://github.com/poseidon/typhoon//google-cloud/container-linux/kubernetes?ref=v1.14.4"
+  source = "git::https://github.com/poseidon/typhoon//google-cloud/container-linux/kubernetes?ref=v1.15.1"
 
   # Google Cloud
   cluster_name  = "yavin"
@@ -138,9 +138,9 @@ In 4-8 minutes, the Kubernetes cluster will be ready.
 $ export KUBECONFIG=/home/user/.secrets/clusters/yavin/auth/kubeconfig
 $ kubectl get nodes
 NAME                                       ROLES              STATUS  AGE  VERSION
-yavin-controller-0.c.example-com.internal  controller,master  Ready   6m   v1.14.3
-yavin-worker-jrbf.c.example-com.internal   node               Ready   5m   v1.14.3
-yavin-worker-mzdm.c.example-com.internal   node               Ready   5m   v1.14.3
+yavin-controller-0.c.example-com.internal  controller,master  Ready   6m   v1.15.1
+yavin-worker-jrbf.c.example-com.internal   node               Ready   5m   v1.15.1
+yavin-worker-mzdm.c.example-com.internal   node               Ready   5m   v1.15.1
 ```
 
 List the pods.
