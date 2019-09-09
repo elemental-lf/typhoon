@@ -18,5 +18,6 @@ module "bootkube" {
   apiserver_extra_secrets         = var.apiserver_extra_secrets
   enable_reporting                = var.enable_reporting
   enable_aggregation              = var.enable_aggregation
+  container_images                = var.container_images
 }
 
