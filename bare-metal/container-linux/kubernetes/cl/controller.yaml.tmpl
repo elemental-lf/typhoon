@@ -146,7 +146,8 @@ storage:
       filesystem: root
       contents:
         inline: |
-          fs.inotify.max_user_watches=16184
+          fs.inotify.max_user_watches=524288
+          fs.inotify.max_user_instances=1024
     - path: /opt/bootkube/bootkube-start
       filesystem: root
       mode: 0544
