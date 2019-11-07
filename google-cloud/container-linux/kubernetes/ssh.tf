@@ -1,47 +1,56 @@
-# Secure copy etcd TLS assets to controllers.
+# Secure copy assets to controllers.
 resource "null_resource" "copy-controller-secrets" {
   count = var.controller_count
+  
+  depends_on = [
+    module.bootstrap,
+  ]
 
   connection {
     type    = "ssh"
-    host    = element(local.controllers_ipv4_public, count.index)
+    host    = local.controllers_ipv4_public[count.index]
     user    = "core"
     timeout = "15m"
   }
 
   provisioner "file" {
-    content     = module.bootkube.etcd_ca_cert
+    content     = module.bootstrap.etcd_ca_cert
     destination = "$HOME/etcd-client-ca.crt"
   }
 
   provisioner "file" {
-    content     = module.bootkube.etcd_client_cert
+    content     = module.bootstrap.etcd_client_cert
     destination = "$HOME/etcd-client.crt"
   }
 
   provisioner "file" {
-    content     = module.bootkube.etcd_client_key
+    content     = module.bootstrap.etcd_client_key
     destination = "$HOME/etcd-client.key"
   }
 
   provisioner "file" {
-    content     = module.bootkube.etcd_server_cert
+    content     = module.bootstrap.etcd_server_cert
     destination = "$HOME/etcd-server.crt"
   }
 
   provisioner "file" {
-    content     = module.bootkube.etcd_server_key
+    content     = module.bootstrap.etcd_server_key
     destination = "$HOME/etcd-server.key"
   }
 
   provisioner "file" {
-    content     = module.bootkube.etcd_peer_cert
+    content     = module.bootstrap.etcd_peer_cert
     destination = "$HOME/etcd-peer.crt"
   }
 
   provisioner "file" {
-    content     = module.bootkube.etcd_peer_key
+    content     = module.bootstrap.etcd_peer_key
     destination = "$HOME/etcd-peer.key"
+  }
+  
+  provisioner "file" {
+    source      = var.asset_dir
+    destination = "$HOME/assets"
   }
 
   provisioner "remote-exec" {
@@ -56,36 +65,34 @@ resource "null_resource" "copy-controller-secrets" {
       "sudo mv etcd-peer.key /etc/ssl/etcd/etcd/peer.key",
       "sudo chown -R etcd:etcd /etc/ssl/etcd",
       "sudo chmod -R 500 /etc/ssl/etcd",
+      "sudo mv $HOME/assets /opt/bootstrap/assets",
+      "sudo mkdir -p /etc/kubernetes/manifests",
+      "sudo mkdir -p /etc/kubernetes/bootstrap-secrets",
+      "sudo cp -r /opt/bootstrap/assets/tls/* /etc/kubernetes/bootstrap-secrets/",
+      "sudo cp /opt/bootstrap/assets/auth/kubeconfig /etc/kubernetes/bootstrap-secrets/",
+      "sudo cp -r /opt/bootstrap/assets/static-manifests/* /etc/kubernetes/manifests/",
     ]
   }
 }
 
-# Secure copy bootkube assets to ONE controller and start bootkube to perform
-# one-time self-hosted cluster bootstrapping.
-resource "null_resource" "bootkube-start" {
+# Connect to a controller to perform one-time cluster bootstrap.
+resource "null_resource" "bootstrap" {
   depends_on = [
-    module.bootkube,
+    null_resource.copy-controller-secrets,
     module.workers,
     google_dns_record_set.apiserver,
-    null_resource.copy-controller-secrets,
   ]
 
   connection {
     type    = "ssh"
-    host    = element(local.controllers_ipv4_public, 0)
+    host    = local.controllers_ipv4_public[0]
     user    = "core"
     timeout = "15m"
   }
 
-  provisioner "file" {
-    source      = var.asset_dir
-    destination = "$HOME/assets"
-  }
-
   provisioner "remote-exec" {
     inline = [
-      "sudo mv $HOME/assets /opt/bootkube",
-      "sudo systemctl start bootkube",
+      "sudo systemctl start bootstrap",
     ]
   }
 }

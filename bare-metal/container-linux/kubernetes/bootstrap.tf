@@ -1,11 +1,11 @@
-# Self-hosted Kubernetes assets (kubeconfig, manifests)
-module "bootkube" {
+# Kubernetes assets (kubeconfig, manifests)
+module "bootstrap" {
   source = "../../../../terraform-render-bootkube"
 
   cluster_name                    = var.cluster_name
   api_servers                     = [var.k8s_domain_name]
   apiserver_vip                   = var.apiserver_vip
-  etcd_servers                    = var.controller_domains
+  etcd_servers                    = var.controllers.*.domain
   asset_dir                       = var.asset_dir
   networking                      = var.networking
   network_mtu                     = var.network_mtu

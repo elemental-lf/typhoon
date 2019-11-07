@@ -1,10 +1,10 @@
 # Google Cloud
 
-In this tutorial, we'll create a Kubernetes v1.15.1 cluster on Google Compute Engine with Container Linux.
+In this tutorial, we'll create a Kubernetes v1.16.2 cluster on Google Compute Engine with Container Linux.
 
 We'll declare a Kubernetes cluster using the Typhoon Terraform module. Then apply the changes to create a network, firewall rules, health checks, controller instances, worker managed instance group, load balancers, and TLS assets.
 
-Controllers are provisioned to run an `etcd-member` peer and a `kubelet` service. Workers run just a `kubelet` service. A one-time [bootkube](https://github.com/kubernetes-incubator/bootkube) bootstrap schedules the `apiserver`, `scheduler`, `controller-manager`, and `coredns` on controllers and schedules `kube-proxy` and `calico` (or `flannel`) on every node. A generated `kubeconfig` provides `kubectl` access to the cluster.
+Controller hosts are provisioned to run an `etcd-member` peer and a `kubelet` service. Worker hosts run a `kubelet` service. Controller nodes run `kube-apiserver`, `kube-scheduler`, `kube-controller-manager`, and `coredns`, while `kube-proxy` and `calico` (or `flannel`) run on every node. A generated `kubeconfig` provides `kubectl` access to the cluster.
 
 ## Requirements
 
@@ -18,15 +18,15 @@ Install [Terraform](https://www.terraform.io/downloads.html) v0.12.x on your sys
 
 ```sh
 $ terraform version
-Terraform v0.12.2
+Terraform v0.12.9
 ```
 
 Add the [terraform-provider-ct](https://github.com/poseidon/terraform-provider-ct) plugin binary for your system to `~/.terraform.d/plugins/`, noting the final name.
 
 ```sh
-wget https://github.com/poseidon/terraform-provider-ct/releases/download/v0.3.2/terraform-provider-ct-v0.3.2-linux-amd64.tar.gz
-tar xzf terraform-provider-ct-v0.3.2-linux-amd64.tar.gz
-mv terraform-provider-ct-v0.3.2-linux-amd64/terraform-provider-ct ~/.terraform.d/plugins/terraform-provider-ct_v0.3.2
+wget https://github.com/poseidon/terraform-provider-ct/releases/download/v0.4.0/terraform-provider-ct-v0.4.0-linux-amd64.tar.gz
+tar xzf terraform-provider-ct-v0.4.0-linux-amd64.tar.gz
+mv terraform-provider-ct-v0.4.0-linux-amd64/terraform-provider-ct ~/.terraform.d/plugins/terraform-provider-ct_v0.4.0
 ```
 
 Read [concepts](/architecture/concepts/) to learn about Terraform, modules, and organizing resources. Change to your infrastructure repository (e.g. `infra`).
@@ -49,14 +49,14 @@ Configure the Google Cloud provider to use your service account key, project-id,
 
 ```tf
 provider "google" {
-  version     = "2.9.0"
+  version     = "2.16.0"
   project     = "project-id"
   region      = "us-central1"
-  credentials = "${file("~/.config/google-cloud/terraform.json")}"
+  credentials = file("~/.config/google-cloud/terraform.json")
 }
 
 provider "ct" {
-  version = "0.3.2"
+  version = "0.4.0"
 }
 ```
 
@@ -71,7 +71,7 @@ Define a Kubernetes cluster using the module `google-cloud/container-linux/kuber
 
 ```tf
 module "google-cloud-yavin" {
-  source = "git::https://github.com/poseidon/typhoon//google-cloud/container-linux/kubernetes?ref=v1.15.1"
+  source = "git::https://github.com/poseidon/typhoon//google-cloud/container-linux/kubernetes?ref=v1.16.2"
 
   # Google Cloud
   cluster_name  = "yavin"
@@ -92,7 +92,7 @@ Reference the [variables docs](#variables) or the [variables.tf](https://github.
 
 ## ssh-agent
 
-Initial bootstrapping requires `bootkube.service` be started on one controller node. Terraform uses `ssh-agent` to automate this step. Add your SSH private key to `ssh-agent`.
+Initial bootstrapping requires `bootstrap.service` be started on one controller node. Terraform uses `ssh-agent` to automate this step. Add your SSH private key to `ssh-agent`.
 
 ```sh
 ssh-add ~/.ssh/id_rsa
@@ -118,12 +118,11 @@ Apply the changes to create the cluster.
 
 ```sh
 $ terraform apply
-module.google-cloud-yavin.null_resource.bootkube-start: Still creating... (10s elapsed)
+module.google-cloud-yavin.null_resource.bootstrap: Still creating... (10s elapsed)
 ...
-
-module.google-cloud-yavin.null_resource.bootkube-start: Still creating... (5m30s elapsed)
-module.google-cloud-yavin.null_resource.bootkube-start: Still creating... (5m40s elapsed)
-module.google-cloud-yavin.null_resource.bootkube-start: Creation complete (ID: 5768638456220583358)
+module.google-cloud-yavin.null_resource.bootstrap: Still creating... (5m30s elapsed)
+module.google-cloud-yavin.null_resource.bootstrap: Still creating... (5m40s elapsed)
+module.google-cloud-yavin.null_resource.bootstrap: Creation complete (ID: 5768638456220583358)
 
 Apply complete! Resources: 64 added, 0 changed, 0 destroyed.
 ```
@@ -137,10 +136,10 @@ In 4-8 minutes, the Kubernetes cluster will be ready.
 ```
 $ export KUBECONFIG=/home/user/.secrets/clusters/yavin/auth/kubeconfig
 $ kubectl get nodes
-NAME                                       ROLES              STATUS  AGE  VERSION
-yavin-controller-0.c.example-com.internal  controller,master  Ready   6m   v1.15.1
-yavin-worker-jrbf.c.example-com.internal   node               Ready   5m   v1.15.1
-yavin-worker-mzdm.c.example-com.internal   node               Ready   5m   v1.15.1
+NAME                                       ROLES    STATUS  AGE  VERSION
+yavin-controller-0.c.example-com.internal  <none>   Ready   6m   v1.16.2
+yavin-worker-jrbf.c.example-com.internal   <none>   Ready   5m   v1.16.2
+yavin-worker-mzdm.c.example-com.internal   <none>   Ready   5m   v1.16.2
 ```
 
 List the pods.
@@ -153,15 +152,12 @@ kube-system   calico-node-d1l5b                         2/2    Running   0      
 kube-system   calico-node-sp9ps                         2/2    Running   0         6m
 kube-system   coredns-1187388186-dkh3o                  1/1    Running   0         6m
 kube-system   coredns-1187388186-zj5dl                  1/1    Running   0         6m
-kube-system   kube-apiserver-zppls                      1/1    Running   0         6m
-kube-system   kube-controller-manager-3271970485-gh9kt  1/1    Running   0         6m
-kube-system   kube-controller-manager-3271970485-h90v8  1/1    Running   1         6m
+kube-system   kube-apiserver-controller-0               1/1    Running   0         6m
+kube-system   kube-controller-manager-controller-0      1/1    Running   0         6m
 kube-system   kube-proxy-117v6                          1/1    Running   0         6m
 kube-system   kube-proxy-9886n                          1/1    Running   0         6m
 kube-system   kube-proxy-njn47                          1/1    Running   0         6m
-kube-system   kube-scheduler-3895335239-5x87r           1/1    Running   0         6m
-kube-system   kube-scheduler-3895335239-bzrrt           1/1    Running   1         6m
-kube-system   pod-checkpointer-l6lrt                    1/1    Running   0         6m
+kube-system   kube-scheduler-controller-0               1/1    Running   0         6m
 ```
 
 ## Going Further
@@ -184,7 +180,7 @@ Check the [variables.tf](https://github.com/poseidon/typhoon/blob/master/google-
 | dns_zone | Google Cloud DNS zone | "google-cloud.example.com" |
 | dns_zone_name | Google Cloud DNS zone name | "example-zone" |
 | ssh_authorized_key | SSH public key for user 'core' | "ssh-rsa AAAAB3NZ..." |
-| asset_dir | Path to a directory where generated assets should be placed (contains secrets) | "/home/user/.secrets/clusters/yavin" |
+| asset_dir | Absolute path to a directory where generated assets should be placed (contains secrets) | "/home/user/.secrets/clusters/yavin" |
 
 Check the list of valid [regions](https://cloud.google.com/compute/docs/regions-zones/regions-zones) and list Container Linux [images](https://cloud.google.com/compute/docs/images) with `gcloud compute images list | grep coreos`.
 
@@ -221,11 +217,11 @@ resource "google_dns_managed_zone" "zone-for-clusters" {
 | networking | Choice of networking provider | "calico" | "calico" or "flannel" |
 | pod_cidr | CIDR IPv4 range to assign to Kubernetes pods | "10.2.0.0/16" | "10.22.0.0/16" |
 | service_cidr | CIDR IPv4 range to assign to Kubernetes services | "10.3.0.0/16" | "10.3.0.0/24" |
-| cluster_domain_suffix | FQDN suffix for Kubernetes services answered by coredns. | "cluster.local" | "k8s.example.com" |
+| worker_node_labels | List of initial worker node labels | [] | ["worker-pool=default"] |
 
 Check the list of valid [machine types](https://cloud.google.com/compute/docs/machine-types).
 
 #### Preemption
 
-Add `worker_preemeptible = "true"` to allow worker nodes to be [preempted](https://cloud.google.com/compute/docs/instances/preemptible) at random, but pay [significantly](https://cloud.google.com/compute/pricing) less. Clusters tolerate stopping instances fairly well (reschedules pods, but cannot drain) and preemption provides a nice reward for running fault-tolerant cluster systems.`
+Add `worker_preemptible = "true"` to allow worker nodes to be [preempted](https://cloud.google.com/compute/docs/instances/preemptible) at random, but pay [significantly](https://cloud.google.com/compute/pricing) less. Clusters tolerate stopping instances fairly well (reschedules pods, but cannot drain) and preemption provides a nice reward for running fault-tolerant cluster systems.`
 

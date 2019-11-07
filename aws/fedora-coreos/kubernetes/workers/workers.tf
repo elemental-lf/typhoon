@@ -46,7 +46,7 @@ resource "aws_autoscaling_group" "workers" {
 resource "aws_launch_configuration" "worker" {
   image_id          = data.aws_ami.fedora-coreos.image_id
   instance_type     = var.instance_type
-  spot_price        = var.spot_price
+  spot_price        = var.spot_price > 0 ? var.spot_price : null
   enable_monitoring = false
 
   user_data = data.ct_config.worker-ignition.rendered
@@ -56,6 +56,7 @@ resource "aws_launch_configuration" "worker" {
     volume_type = var.disk_type
     volume_size = var.disk_size
     iops        = var.disk_iops
+    encrypted   = true
   }
 
   # network
@@ -84,6 +85,7 @@ data "template_file" "worker-config" {
     ssh_authorized_key     = var.ssh_authorized_key
     cluster_dns_service_ip = cidrhost(var.service_cidr, 10)
     cluster_domain_suffix  = var.cluster_domain_suffix
+    node_labels            = join(",", var.node_labels)
   }
 }
 

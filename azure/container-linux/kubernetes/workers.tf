@@ -15,10 +15,11 @@ module "workers" {
   priority     = var.worker_priority
 
   # configuration
-  kubeconfig            = module.bootkube.kubeconfig-kubelet
+  kubeconfig            = module.bootstrap.kubeconfig-kubelet
   ssh_authorized_key    = var.ssh_authorized_key
   service_cidr          = var.service_cidr
   cluster_domain_suffix = var.cluster_domain_suffix
   clc_snippets          = var.worker_clc_snippets
+  node_labels           = var.worker_node_labels
 }
 
