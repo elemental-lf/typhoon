@@ -147,8 +147,8 @@ storage:
       mode: 0644
       contents:
         inline: |
-          KUBELET_IMAGE_URL=docker://${kubelet_image}
-          KUBELET_IMAGE_TAG=${kubelet_tag}
+          KUBELET_IMAGE_URL=docker://${hyperkube_image}
+          KUBELET_IMAGE_TAG=${hyperkube_tag}
     - path: /etc/hostname
       filesystem: root
       mode: 0644

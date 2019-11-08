@@ -52,12 +52,11 @@ variable "container_images" {
     flannel = "quay.io/coreos/flannel:v0.11.0-amd64"
     flannel_cni = "quay.io/coreos/flannel-cni:v0.3.0"
     kube_router = "cloudnativelabs/kube-router:v0.3.1"
-    hyperkube = "k8s.gcr.io/hyperkube:v1.15.5"
+    hyperkube = "k8s.gcr.io/hyperkube:v1.16.2"
     coredns = "k8s.gcr.io/coredns:1.6.2"
     pod_checkpointer = "quay.io/coreos/pod-checkpointer:83e25e5968391b9eb342042c435d1b3eeddb2be1"
     keepalived_vip   = "osixia/keepalived:2.0.17"
     tiller           = "gcr.io/kubernetes-helm/tiller:v2.14.3"
-    kubelet          = "k8s.gcr.io/hyperkube:v1.15.5"
   }
 }
 

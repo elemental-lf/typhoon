@@ -162,8 +162,8 @@ data "template_file" "controller-configs" {
     ssh_authorized_key     = var.ssh_authorized_key
     apiserver_vip          = var.apiserver_vip
     etcd_cluster_exists    = var.etcd_cluster_exists
-    kubelet_image          = split(":", var.container_images["kubelet"])[0]
-    kubelet_tag            = split(":", var.container_images["kubelet"])[1]
+    hyperkube_image          = split(":", var.container_images["hyperkube"])[0]
+    hyperkube_tag            = split(":", var.container_images["hyperkube"])[1]
     enable_rbd_nbd         = var.enable_rbd_nbd
   }
 }
@@ -193,8 +193,8 @@ data "template_file" "worker-configs" {
     cluster_dns_service_ip = module.bootstrap.cluster_dns_service_ip
     cluster_domain_suffix  = var.cluster_domain_suffix
     ssh_authorized_key     = var.ssh_authorized_key
-    kubelet_image          = split(":", var.container_images["kubelet"])[0]
-    kubelet_tag            = split(":", var.container_images["kubelet"])[1]
+    hyperkube_image          = split(":", var.container_images["hyperkube"])[0]
+    hyperkube_tag            = split(":", var.container_images["hyperkube"])[1]
     enable_rbd_nbd         = var.enable_rbd_nbd
   }
 }
