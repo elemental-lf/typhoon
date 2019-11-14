@@ -15,7 +15,6 @@ module "bootstrap" {
   service_cidr                    = var.service_cidr
   cluster_domain_suffix           = var.cluster_domain_suffix
   apiserver_extra_arguments       = var.apiserver_extra_arguments
-  apiserver_extra_secrets         = var.apiserver_extra_secrets
   enable_reporting                = var.enable_reporting
   enable_aggregation              = var.enable_aggregation
   container_images                = var.container_images
