@@ -16,6 +16,8 @@ resource "null_resource" "copy-extras-assets" {
     inline = [
       "sudo mkdir -p /etc/kubernetes/extra-assets",
       "sudo cp -r /opt/bootstrap/assets/extra-assets/* /etc/kubernetes/extra-assets/",
+      "sudo chmod a+x /etc/kubernetes/extra-assets/apiserver-vip/*.sh",
+      "sudo cp /opt/bootstrap/assets/auth/kubeconfig-localhost /etc/kubernetes/bootstrap-secrets/",
     ]
   }
 }
