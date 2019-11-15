@@ -2,25 +2,25 @@
 
 variable "network_encapsulation" {
   description = "Network encapsulation mode ipip, vxlan or never (only applies to calico)"
-  type        = "string"
+  type        = string
   default     = "ipip"
 }
 
 variable "apiserver_vip" {
   description = "VIP to use for apiserver HA via keepalived"
-  type        = "string"
+  type        = string
   default     = ""
 }
 
 variable "etcd_cluster_exists" {
-  type        = "string"
+  type        = string
   description = "Wheter it should be assumed that the etcd cluster already exists or not"
   default     = "false"
 }
 
 variable "apiserver_extra_arguments" {
   description = "List of extra arguments for the kube-apiserver"
-  type        = "list"
+  type        = list(string)
   default     = []
 }
 
@@ -43,6 +43,6 @@ variable "container_images" {
 
 variable "enable_rbd_nbd" {
   description = "Enable rbd-nbd by blacklisting the KRBD driver inside the kubelet container"
-  type        = "string"
+  type        = string
   default     = "false"
 }
