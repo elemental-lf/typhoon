@@ -125,7 +125,7 @@ resource "null_resource" "bootstrap" {
   depends_on = [
     null_resource.copy-controller-secrets,
     null_resource.copy-worker-secrets,
-    null_resource.copy-extras-assets,
+    null_resource.copy-extra-assets,
   ]
 
   connection {

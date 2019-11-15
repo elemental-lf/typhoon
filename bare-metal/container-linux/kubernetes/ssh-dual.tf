@@ -1,4 +1,4 @@
-resource "null_resource" "copy-extras-assets" {
+resource "null_resource" "copy-extra-assets" {
   count = length(var.controllers)
 
   depends_on = [
