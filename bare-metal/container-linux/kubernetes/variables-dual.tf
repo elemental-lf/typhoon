@@ -37,7 +37,7 @@ variable "container_images" {
     hyperkube = "k8s.gcr.io/hyperkube:v1.16.3"
     coredns = "k8s.gcr.io/coredns:1.6.2"
     keepalived_vip   = "osixia/keepalived:2.0.17"
-    tiller           = "gcr.io/kubernetes-helm/tiller:v2.14.3"
+    tiller           = "gcr.io/kubernetes-helm/tiller:v2.16.1"
   }
 }
 
