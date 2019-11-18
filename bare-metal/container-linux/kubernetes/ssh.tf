@@ -9,6 +9,7 @@ resource "null_resource" "copy-controller-secrets" {
     matchbox_group.controller,
     matchbox_group.worker,
     module.bootstrap,
+    null_resource.external_dependencies,
   ]
 
   connection {
@@ -96,6 +97,7 @@ resource "null_resource" "copy-worker-secrets" {
     matchbox_group.install,
     matchbox_group.controller,
     matchbox_group.worker,
+    null_resource.external_dependencies,
   ]
 
   connection {
