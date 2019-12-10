@@ -55,9 +55,9 @@ systemd:
 %{ endif ~}
           --insecure-options=image"
         Environment=KUBELET_CGROUP_DRIVER=${cgroup_driver}
-        ExecStartPre=/bin/mkdir -p /opt/cni/bin
-        ExecStartPre=/bin/mkdir -p /etc/kubernetes/manifests
         ExecStartPre=/bin/mkdir -p /etc/kubernetes/cni/net.d
+        ExecStartPre=/bin/mkdir -p /etc/kubernetes/manifests
+        ExecStartPre=/bin/mkdir -p /opt/cni/bin
         ExecStartPre=/bin/mkdir -p /var/lib/cni
         ExecStartPre=/bin/mkdir -p /var/lib/calico
         ExecStartPre=/bin/mkdir -p /var/lib/kubelet/volumeplugins
@@ -77,7 +77,7 @@ systemd:
           --kubeconfig=/etc/kubernetes/kubeconfig \
           --lock-file=/var/run/lock/kubelet.lock \
           --network-plugin=cni \
-          --node-labels=node-role.kubernetes.io/node \
+          --node-labels=node.kubernetes.io/node \
           --pod-manifest-path=/etc/kubernetes/manifests \
           --read-only-port=0 \
           --volume-plugin-dir=/var/lib/kubelet/volumeplugins \
@@ -97,8 +97,8 @@ storage:
       mode: 0644
       contents:
         inline: |
-          KUBELET_IMAGE_URL=docker://${kubelet_image}
-          KUBELET_IMAGE_TAG=${kubelet_tag}
+          KUBELET_IMAGE_URL=docker://${hyperkube_image}
+          KUBELET_IMAGE_TAG=${hyperkube_tag}
     - path: /etc/hostname
       filesystem: root
       mode: 0644

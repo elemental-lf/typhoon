@@ -1,6 +1,6 @@
-# Secure copy etcd TLS assets and kubeconfig to controllers. Activates kubelet.service
+# Secure copy assets to controllers. Activates kubelet.service
 resource "null_resource" "copy-controller-secrets" {
-  count = length(var.controller_names)
+  count = length(var.controllers)
 
   # Without depends_on, remote-exec could start and wait for machines before
   # matchbox groups are written, causing a deadlock.
@@ -8,53 +8,60 @@ resource "null_resource" "copy-controller-secrets" {
     matchbox_group.install,
     matchbox_group.controller,
     matchbox_group.worker,
+    module.bootstrap,
+    null_resource.external_dependencies,
   ]
 
   connection {
     type    = "ssh"
-    host    = element(var.controller_domains, count.index)
+    host    = var.controllers.*.domain[count.index]
     user    = "core"
     timeout = "60m"
   }
 
   provisioner "file" {
-    content     = module.bootkube.kubeconfig-kubelet
+    content     = module.bootstrap.kubeconfig-kubelet
     destination = "$HOME/kubeconfig"
   }
 
   provisioner "file" {
-    content     = module.bootkube.etcd_ca_cert
+    content     = module.bootstrap.etcd_ca_cert
     destination = "$HOME/etcd-client-ca.crt"
   }
 
   provisioner "file" {
-    content     = module.bootkube.etcd_client_cert
+    content     = module.bootstrap.etcd_client_cert
     destination = "$HOME/etcd-client.crt"
   }
 
   provisioner "file" {
-    content     = module.bootkube.etcd_client_key
+    content     = module.bootstrap.etcd_client_key
     destination = "$HOME/etcd-client.key"
   }
 
   provisioner "file" {
-    content     = module.bootkube.etcd_server_cert
+    content     = module.bootstrap.etcd_server_cert
     destination = "$HOME/etcd-server.crt"
   }
 
   provisioner "file" {
-    content     = module.bootkube.etcd_server_key
+    content     = module.bootstrap.etcd_server_key
     destination = "$HOME/etcd-server.key"
   }
 
   provisioner "file" {
-    content     = module.bootkube.etcd_peer_cert
+    content     = module.bootstrap.etcd_peer_cert
     destination = "$HOME/etcd-peer.crt"
   }
 
   provisioner "file" {
-    content     = module.bootkube.etcd_peer_key
+    content     = module.bootstrap.etcd_peer_key
     destination = "$HOME/etcd-peer.key"
+  }
+  
+  provisioner "file" {
+    source      = var.asset_dir
+    destination = "$HOME/assets"
   }
 
   provisioner "remote-exec" {
@@ -69,14 +76,21 @@ resource "null_resource" "copy-controller-secrets" {
       "sudo mv etcd-peer.key /etc/ssl/etcd/etcd/peer.key",
       "sudo chown -R etcd:etcd /etc/ssl/etcd",
       "sudo chmod -R 500 /etc/ssl/etcd",
+      "sudo rsync -a --delete $HOME/assets/ /opt/bootstrap/assets/",
+      "sudo rm -rf $HOME/assets",
+      "sudo mkdir -p /etc/kubernetes/manifests",
+      "sudo mkdir -p /etc/kubernetes/bootstrap-secrets",
       "sudo mv $HOME/kubeconfig /etc/kubernetes/kubeconfig",
+      "sudo cp -r /opt/bootstrap/assets/tls/* /etc/kubernetes/bootstrap-secrets/",
+      "sudo cp /opt/bootstrap/assets/auth/kubeconfig /etc/kubernetes/bootstrap-secrets/",
+      "sudo cp -r /opt/bootstrap/assets/static-manifests/* /etc/kubernetes/manifests/",
     ]
   }
 }
 
 # Secure copy kubeconfig to all workers. Activates kubelet.service
 resource "null_resource" "copy-worker-secrets" {
-  count = length(var.worker_names)
+  count = length(var.workers)
 
   # Without depends_on, remote-exec could start and wait for machines before
   # matchbox groups are written, causing a deadlock.
@@ -84,17 +98,18 @@ resource "null_resource" "copy-worker-secrets" {
     matchbox_group.install,
     matchbox_group.controller,
     matchbox_group.worker,
+    null_resource.external_dependencies,
   ]
 
   connection {
     type    = "ssh"
-    host    = element(var.worker_domains, count.index)
+    host    = var.workers.*.domain[count.index]
     user    = "core"
     timeout = "60m"
   }
 
   provisioner "file" {
-    content     = module.bootkube.kubeconfig-kubelet
+    content     = module.bootstrap.kubeconfig-kubelet
     destination = "$HOME/kubeconfig"
   }
 
@@ -105,35 +120,27 @@ resource "null_resource" "copy-worker-secrets" {
   }
 }
 
-# Secure copy bootkube assets to ONE controller and start bootkube to perform
-# one-time self-hosted cluster bootstrapping.
-resource "null_resource" "bootkube-start" {
+# Connect to a controller to perform one-time cluster bootstrap.
+resource "null_resource" "bootstrap" {
   # Without depends_on, this remote-exec may start before the kubeconfig copy.
   # Terraform only does one task at a time, so it would try to bootstrap
   # while no Kubelets are running.
   depends_on = [
     null_resource.copy-controller-secrets,
     null_resource.copy-worker-secrets,
+    null_resource.copy-extra-assets,
   ]
 
   connection {
     type    = "ssh"
-    host    = element(var.controller_domains, 0)
+    host    = var.controllers[0].domain
     user    = "core"
     timeout = "15m"
   }
 
-  provisioner "file" {
-    source      = var.asset_dir
-    destination = "$HOME/assets"
-  }
-
   provisioner "remote-exec" {
     inline = [
-      "sudo ip addr add ${var.apiserver_vip}/32 dev lo",
-      "sudo mv $HOME/assets /opt/bootkube",
-      "sudo systemctl start bootkube",
-      "sudo ip addr del ${var.apiserver_vip}/32 dev lo",
+      "sudo systemctl start bootstrap",
     ]
   }
 }

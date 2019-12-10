@@ -11,7 +11,7 @@ Typhoon distributes upstream Kubernetes, architectural conventions, and cluster 
 
 ## Features <a href="https://www.cncf.io/certification/software-conformance/"><img align="right" src="https://storage.googleapis.com/poseidon/certified-kubernetes.png"></a>
 
-* Kubernetes v1.15.1 (upstream, via [kubernetes-incubator/bootkube](https://github.com/kubernetes-incubator/bootkube))
+* Kubernetes v1.16.2 (upstream)
 * Single or multi-master, [Calico](https://www.projectcalico.org/) or [flannel](https://github.com/coreos/flannel) networking
 * On-cluster etcd with TLS, [RBAC](https://kubernetes.io/docs/admin/authorization/rbac/)-enabled, [network policy](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
 * Advanced features like [worker pools](advanced/worker-pools/), [preemptible](cl/google-cloud/#preemption) workers, and [snippets](advanced/customization/#container-linux) customization
@@ -47,7 +47,7 @@ Define a Kubernetes cluster by using the Terraform module for your chosen platfo
 
 ```tf
 module "google-cloud-yavin" {
-  source = "git::https://github.com/poseidon/typhoon//google-cloud/container-linux/kubernetes?ref=v1.15.1"
+  source = "git::https://github.com/poseidon/typhoon//google-cloud/container-linux/kubernetes?ref=v1.16.2"
 
   # Google Cloud
   cluster_name  = "yavin"
@@ -79,10 +79,10 @@ In 4-8 minutes (varies by platform), the cluster will be ready. This Google Clou
 ```
 $ export KUBECONFIG=/home/user/.secrets/clusters/yavin/auth/kubeconfig
 $ kubectl get nodes
-NAME                                       ROLES              STATUS  AGE  VERSION
-yavin-controller-0.c.example-com.internal  controller,master  Ready   6m   v1.15.1
-yavin-worker-jrbf.c.example-com.internal   node               Ready   5m   v1.15.1
-yavin-worker-mzdm.c.example-com.internal   node               Ready   5m   v1.15.1
+NAME                                       ROLES    STATUS  AGE  VERSION
+yavin-controller-0.c.example-com.internal  <none>   Ready   6m   v1.16.2
+yavin-worker-jrbf.c.example-com.internal   <none>   Ready   5m   v1.16.2
+yavin-worker-mzdm.c.example-com.internal   <none>   Ready   5m   v1.16.2
 ```
 
 List the pods.
@@ -95,16 +95,12 @@ kube-system   calico-node-d1l5b                         2/2    Running   0      
 kube-system   calico-node-sp9ps                         2/2    Running   0         6m
 kube-system   coredns-1187388186-dkh3o                  1/1    Running   0         6m
 kube-system   coredns-1187388186-zj5dl                  1/1    Running   0         6m
-kube-system   kube-apiserver-zppls                      1/1    Running   0         6m
-kube-system   kube-controller-manager-3271970485-gh9kt  1/1    Running   0         6m
-kube-system   kube-controller-manager-3271970485-h90v8  1/1    Running   1         6m
+kube-system   kube-apiserver-controller-0               1/1    Running   0         6m
+kube-system   kube-controller-manager-controller-0      1/1    Running   0         6m
 kube-system   kube-proxy-117v6                          1/1    Running   0         6m
 kube-system   kube-proxy-9886n                          1/1    Running   0         6m
 kube-system   kube-proxy-njn47                          1/1    Running   0         6m
-kube-system   kube-scheduler-3895335239-5x87r           1/1    Running   0         6m
-kube-system   kube-scheduler-3895335239-bzrrt           1/1    Running   1         6m
-kube-system   pod-checkpointer-l6lrt                    1/1    Running   0         6m
-kube-system   pod-checkpointer-l6lrt-controller-0       1/1    Running   0         6m
+kube-system   kube-scheduler-controller-0               1/1    Running   0         6m
 ```
 
 ## Help

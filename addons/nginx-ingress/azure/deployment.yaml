@@ -20,11 +20,9 @@ spec:
       annotations:
         seccomp.security.alpha.kubernetes.io/pod: 'docker/default'
     spec:
-      nodeSelector:
-        node-role.kubernetes.io/node: ""
       containers:
         - name: nginx-ingress-controller
-          image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.25.0
+          image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.26.1
           args:
             - /nginx-ingress-controller
             - --ingress-class=public
@@ -67,6 +65,11 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 5
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - /wait-shutdown
           securityContext:
             capabilities:
               add:
@@ -75,4 +78,4 @@ spec:
               - ALL
             runAsUser: 33 # www-data
       restartPolicy: Always
-      terminationGracePeriodSeconds: 60
+      terminationGracePeriodSeconds: 300

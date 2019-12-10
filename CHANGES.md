@@ -4,6 +4,132 @@ Notable changes between versions.
 
 ## Latest
 
+* Kubernetes [v1.16.2](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.16.md#v1162)
+* Update etcd from v3.4.1 to v3.4.2 ([#570](https://github.com/poseidon/typhoon/pull/570))
+* Update Calico from v3.9.1 to [v3.9.2](https://docs.projectcalico.org/v3.9/release-notes/)
+  * Default to using Calico and supporting NetworkPolicy on all platforms
+
+#### Azure
+
+* Change default networking provider from "flannel" to "calico" ([#573](https://github.com/poseidon/typhoon/pull/573))
+
+#### Bare-Metal
+
+* Add `controllers` and `workers` as typed lists of machine detail objects ([#566](https://github.com/poseidon/typhoon/pull/566))
+  * Define clusters' machines cleanly and with Terraform v0.12 type constraints (**action required**, see PR example)
+  * Remove `controller_names`, `controller_macs`, and `controller_domains` variables
+  * Remove `worker_names`, `worker_macs`, and `worker_domains` variables
+
+#### DigitalOcean
+
+* Change default networking provider from "flannel" to "calico" ([#573](https://github.com/poseidon/typhoon/pull/573))
+
+#### Addons
+
+* Update Grafana from v6.4.1 to [v6.4.2](https://github.com/grafana/grafana/releases/tag/v6.4.2)
+* Change CLUO label from "app" to "name"
+
+## v1.16.1
+
+* Kubernetes [v1.16.1](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.16.md#v1161)
+* Update etcd from v3.4.0 to [v3.4.1](https://github.com/etcd-io/etcd/releases/tag/v3.4.1)
+* Update Calico from v3.8.2 to [v3.9.1](https://docs.projectcalico.org/v3.9/release-notes/)
+* Add Terraform v0.12 variables types ([#553](https://github.com/poseidon/typhoon/pull/553), [#557](https://github.com/poseidon/typhoon/pull/557), [#560](https://github.com/poseidon/typhoon/pull/560), [#556](https://github.com/poseidon/typhoon/pull/556), [#562](https://github.com/poseidon/typhoon/pull/562))
+  * Deprecate `cluster_domain_suffix` variable
+
+#### AWS
+
+* Add `worker_node_labels` variable to set initial worker node labels ([#550](https://github.com/poseidon/typhoon/pull/550))
+* Add `node_labels` variable to internal `workers` pool module ([#550](https://github.com/poseidon/typhoon/pull/550))
+* For Fedora CoreOS, detect most recent AMI in the region
+
+#### Azure
+
+* Promote `networking` provider Calico VXLAN out of experimental (set `networking = "calico"`)
+* Add `worker_node_labels` variable to set initial worker node labels ([#550](https://github.com/poseidon/typhoon/pull/550))
+* Add `node_labels` variable to internal `workers` pool module ([#550](https://github.com/poseidon/typhoon/pull/550))
+* Change `workers` module default `vm_type` to `Standard_DS1_v2` (followup to [#539](https://github.com/poseidon/typhoon/pull/539))
+
+#### Bare-Metal
+
+* For Fedora CoreOS, use new kernel, initrd, and raw paths ([#563](https://github.com/poseidon/typhoon/pull/563))
+* Fix Terraform missing comma error ([#549](https://github.com/poseidon/typhoon/pull/549))
+* Remove deprecated `container_linux_oem` variable ([#562](https://github.com/poseidon/typhoon/pull/562))
+
+#### DigitalOcean
+
+* Promote `networking` provider Calico VXLAN out of experimental (set `networking = "calico"`)
+* Fix Terraform missing comma error ([#549](https://github.com/poseidon/typhoon/pull/549))
+
+#### Google Cloud
+
+* Add `worker_node_labels` variable to set initial worker node labels ([#550](https://github.com/poseidon/typhoon/pull/550))
+* Add `node_labels` variable to internal `workers` module ([#550](https://github.com/poseidon/typhoon/pull/550))
+
+#### Addons
+
+* Update Prometheus from v2.12.0 to [v2.13.0](https://github.com/prometheus/prometheus/releases/tag/v2.13.0)
+  * Fix Prometheus etcd target discovery and scraping ([#561](https://github.com/poseidon/typhoon/pull/561), regressed with Kubernetes v1.16.0)
+* Update kube-state-metrics from v1.7.2 to v1.8.0
+* Update nginx-ingress from v0.25.1 to [v0.26.1](https://github.com/kubernetes/ingress-nginx/releases/tag/nginx-0.26.1) ([#555](https://github.com/poseidon/typhoon/pull/555))
+  * Add lifecycle hook to allow draining for up to 5 minutes
+* Update Grafana from v6.3.5 to [v6.4.1](https://github.com/grafana/grafana/releases/tag/v6.4.1)
+
+## v1.16.0
+
+* Kubernetes [v1.16.0](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.16.md#v1160) ([#543](https://github.com/poseidon/typhoon/pull/543))
+  * Read about several Kubernetes API [deprecations](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.16.md#deprecations-and-removals)!
+  * Remove legacy node role labels (no longer shown in `kubectl get nodes`)
+  * Rename node labels to `node.kubernetes.io/master` and `node.kubernetes.io/node` (migratory)
+* Migrate control plane from self-hosted to static pods ([#536](https://github.com/poseidon/typhoon/pull/536))
+  * Run `kube-apiserver`, `kube-scheduler`, and `kube-controller-manager` as static pods on each controller
+  * `kubectl` edits to `kube-apiserver`, `kube-scheduler`, and `kube-controller-manager` are no longer possible (change)
+  * Remove bootkube, self-hosted pivot, and `pod-checkpointer`
+* Update CoreDNS from v1.5.0 to v1.6.2 ([#535](https://github.com/poseidon/typhoon/pull/535))
+* Update etcd from v3.3.15 to [v3.4.0](https://github.com/etcd-io/etcd/releases/tag/v3.4.0)
+* Recommend updating `terraform-provider-ct` plugin from v0.3.2 to [v0.4.0](https://github.com/poseidon/terraform-provider-ct/releases/tag/v0.4.0)
+
+#### Azure
+
+* Change default `controller_type` to `Standard_B2s` ([#539](https://github.com/poseidon/typhoon/pull/539))
+  * `B2s` is cheaper by $17/month and provides 2 vCPU, 4GB RAM
+* Change default `worker_type` to `Standard_DS1_v2` ([#539](https://github.com/poseidon/typhoon/pull/539))
+  * `F1` is previous generation. `DS1_v2` is newer, similar cost, and supports Low Priority mode
+
+#### Addons
+
+* Update Grafana from v6.3.3 to v6.3.5
+
+## v1.15.3
+
+* Kubernetes [v1.15.3](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.15.md#v1153)
+* Update etcd from v3.3.13 to [v3.3.15](https://github.com/etcd-io/etcd/releases/tag/v3.3.15)
+* Update Calico from v3.8.1 to [v3.8.2](https://docs.projectcalico.org/v3.8/release-notes/)
+
+#### AWS
+
+* Enable root block device encryption by default ([#527](https://github.com/poseidon/typhoon/pull/527))
+  * Require `terraform-provider-aws` v2.23+ (**action required**)
+
+#### Addons
+
+* Update Prometheus from v2.11.0 to [v2.12.0](https://github.com/prometheus/prometheus/releases/tag/v2.12.0)
+  * Update kube-state-metrics from v1.7.1 to v1.7.2
+* Update Grafana from v6.2.5 to v6.3.3
+  * Use stable IDs for etcd, CoreDNS, and Nginx Ingress dashboards ([#530](https://github.com/poseidon/typhoon/pull/530))
+* Update nginx-ingress from v0.25.0 to [v0.25.1](https://github.com/kubernetes/ingress-nginx/releases/tag/nginx-0.25.1)
+  * Fix Nginx security advisories
+
+## v1.15.2
+
+* Kubernetes [v1.15.2](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.15.md#v1152)
+* Update Calico from v3.8.0 to [v3.8.1](https://docs.projectcalico.org/v3.8/release-notes/)
+* Publish new load balancing, TCP/UDP, and firewall [docs](https://typhoon.psdn.io/architecture/aws/) ([#523](https://github.com/poseidon/typhoon/pull/523))
+
+#### Addons
+
+* Add new Grafana dashboards for CoreDNS and Nginx Ingress Controller ([#525](https://github.com/poseidon/typhoon/pull/525))
+
 ## v1.15.1
 
 * Kubernetes [v1.15.1](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.15.md#v1151)

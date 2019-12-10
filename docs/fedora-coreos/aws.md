@@ -3,11 +3,11 @@
 !!! danger
     Typhoon for Fedora CoreOS is an early preview! Fedora CoreOS itself is a preview! Expect bugs and design shifts. Please help both projects solve problems. Report Fedora CoreOS bugs to [Fedora](https://github.com/coreos/fedora-coreos-tracker/issues). Report Typhoon issues to Typhoon.
 
-In this tutorial, we'll create a Kubernetes v1.15.1 cluster on AWS with Fedora CoreOS.
+In this tutorial, we'll create a Kubernetes v1.16.2 cluster on AWS with Fedora CoreOS.
 
 We'll declare a Kubernetes cluster using the Typhoon Terraform module. Then apply the changes to create a VPC, gateway, subnets, security groups, controller instances, worker auto-scaling group, network load balancer, and TLS assets.
 
-Controllers are provisioned to run an `etcd-member` peer and a `kubelet` service. Workers run just a `kubelet` service. A one-time [bootkube](https://github.com/kubernetes-incubator/bootkube) bootstrap schedules the `apiserver`, `scheduler`, `controller-manager`, and `coredns` on controllers and schedules `kube-proxy` and `calico` (or `flannel`) on every node. A generated `kubeconfig` provides `kubectl` access to the cluster.
+Controller hosts are provisioned to run an `etcd-member` peer and a `kubelet` service. Worker hosts run a `kubelet` service. Controller nodes run `kube-apiserver`, `kube-scheduler`, `kube-controller-manager`, and `coredns`, while `kube-proxy` and `calico` (or `flannel`) run on every node. A generated `kubeconfig` provides `kubectl` access to the cluster.
 
 ## Requirements
 
@@ -21,7 +21,7 @@ Install [Terraform](https://www.terraform.io/downloads.html) v0.12.x on your sys
 
 ```sh
 $ terraform version
-Terraform v0.12.2
+Terraform v0.12.9
 ```
 
 Add the [terraform-provider-ct](https://github.com/poseidon/terraform-provider-ct) plugin binary for your system to `~/.terraform.d/plugins/`, noting the final name.
@@ -52,8 +52,8 @@ Configure the AWS provider to use your access key credentials in a `providers.tf
 
 ```tf
 provider "aws" {
-  version                 = "2.19.0"
-  region                  = "us-east-1"   # MUST be us-east-1 right now!
+  version                 = "2.31.0"
+  region                  = "eu-central-1"
   shared_credentials_file = "/home/user/.config/aws/credentials"
 }
 
@@ -73,7 +73,7 @@ Define a Kubernetes cluster using the module `aws/fedora-coreos/kubernetes`.
 
 ```tf
 module "aws-tempest" {
-  source = "git::https://github.com/poseidon/typhoon//aws/fedora-coreos/kubernetes?ref=DEVELOPMENT_SHA"
+  source = "git::https://github.com/poseidon/typhoon//aws/fedora-coreos/kubernetes?ref=v1.16.2"
 
   # AWS
   cluster_name = "tempest"
@@ -94,7 +94,7 @@ Reference the [variables docs](#variables) or the [variables.tf](https://github.
 
 ## ssh-agent
 
-Initial bootstrapping requires `bootkube.service` be started on one controller node. Terraform uses `ssh-agent` to automate this step. Add your SSH private key to `ssh-agent`.
+Initial bootstrapping requires `bootstrap.service` be started on one controller node. Terraform uses `ssh-agent` to automate this step. Add your SSH private key to `ssh-agent`.
 
 ```sh
 ssh-add ~/.ssh/id_rsa
@@ -121,9 +121,9 @@ Apply the changes to create the cluster.
 ```sh
 $ terraform apply
 ...
-module.aws-tempest.null_resource.bootkube-start: Still creating... (4m50s elapsed)
-module.aws-tempest.null_resource.bootkube-start: Still creating... (5m0s elapsed)
-module.aws-tempest.null_resource.bootkube-start: Creation complete after 11m8s (ID: 3961816482286168143)
+module.aws-tempest.null_resource.bootstrap: Still creating... (4m50s elapsed)
+module.aws-tempest.null_resource.bootstrap: Still creating... (5m0s elapsed)
+module.aws-tempest.null_resource.bootstrap: Creation complete after 5m8s (ID: 3961816482286168143)
 
 Apply complete! Resources: 98 added, 0 changed, 0 destroyed.
 ```
@@ -137,32 +137,28 @@ In 4-8 minutes, the Kubernetes cluster will be ready.
 ```
 $ export KUBECONFIG=/home/user/.secrets/clusters/tempest/auth/kubeconfig
 $ kubectl get nodes
-NAME           STATUS  ROLES              AGE  VERSION
-ip-10-0-3-155  Ready   controller,master  10m  v1.15.1
-ip-10-0-26-65  Ready   node               10m  v1.15.1
-ip-10-0-41-21  Ready   node               10m  v1.15.1
+NAME           STATUS  ROLES    AGE  VERSION
+ip-10-0-3-155  Ready   <none>   10m  v1.16.2
+ip-10-0-26-65  Ready   <none>   10m  v1.16.2
+ip-10-0-41-21  Ready   <none>   10m  v1.16.2
 ```
 
 List the pods.
 
 ```
 $ kubectl get pods --all-namespaces
-NAMESPACE     NAME                                      READY  STATUS    RESTARTS  AGE              
-kube-system   calico-node-1m5bf                         2/2    Running   0         34m              
-kube-system   calico-node-7jmr1                         2/2    Running   0         34m              
-kube-system   calico-node-bknc8                         2/2    Running   0         34m              
-kube-system   coredns-1187388186-wx1lg                  1/1    Running   0         34m              
-kube-system   coredns-1187388186-qjnvp                  1/1    Running   0         34m
-kube-system   kube-apiserver-4mjbk                      1/1    Running   0         34m              
-kube-system   kube-controller-manager-3597210155-j2jbt  1/1    Running   1         34m              
-kube-system   kube-controller-manager-3597210155-j7g7x  1/1    Running   0         34m              
-kube-system   kube-proxy-14wxv                          1/1    Running   0         34m              
-kube-system   kube-proxy-9vxh2                          1/1    Running   0         34m              
-kube-system   kube-proxy-sbbsh                          1/1    Running   0         34m              
-kube-system   kube-scheduler-3359497473-5plhf           1/1    Running   0         34m              
-kube-system   kube-scheduler-3359497473-r7zg7           1/1    Running   1         34m              
-kube-system   pod-checkpointer-4kxtl                    1/1    Running   0         34m              
-kube-system   pod-checkpointer-4kxtl-ip-10-0-3-155      1/1    Running   0         33m
+NAMESPACE     NAME                                   READY  STATUS    RESTARTS  AGE
+kube-system   calico-node-1m5bf                      2/2    Running   0         34m
+kube-system   calico-node-7jmr1                      2/2    Running   0         34m
+kube-system   calico-node-bknc8                      2/2    Running   0         34m
+kube-system   coredns-1187388186-wx1lg               1/1    Running   0         34m
+kube-system   coredns-1187388186-qjnvp               1/1    Running   0         34m
+kube-system   kube-apiserver-ip-10-0-3-155           1/1    Running   0         34m
+kube-system   kube-controller-manager-ip-10-0-3-155  1/1    Running   0         34m
+kube-system   kube-proxy-14wxv                       1/1    Running   0         34m
+kube-system   kube-proxy-9vxh2                       1/1    Running   0         34m
+kube-system   kube-proxy-sbbsh                       1/1    Running   0         34m
+kube-system   kube-scheduler-ip-10-0-3-155           1/1    Running   1         34m
 ```
 
 ## Going Further
@@ -195,7 +191,7 @@ resource "aws_route53_zone" "zone-for-clusters" {
 }
 ```
 
-Reference the DNS zone id with `"${aws_route53_zone.zone-for-clusters.zone_id}"`.
+Reference the DNS zone id with `aws_route53_zone.zone-for-clusters.zone_id`.
 
 !!! tip ""
     If you have an existing domain name with a zone file elsewhere, just delegate a subdomain that can be managed on Route53 (e.g. aws.mydomain.com) and [update nameservers](http://docs.aws.amazon.com/Route53/latest/DeveloperGuide/SOA-NSrecords.html).
@@ -209,11 +205,11 @@ Reference the DNS zone id with `"${aws_route53_zone.zone-for-clusters.zone_id}"`
 | controller_type | EC2 instance type for controllers | "t3.small" | See below |
 | worker_type | EC2 instance type for workers | "t3.small" | See below |
 | os_image | AMI channel for Fedora CoreOS | not yet used | ? |
-| disk_size | Size of the EBS volume in GB | "40" | "100" |
+| disk_size | Size of the EBS volume in GB | 40 | 100 |
 | disk_type | Type of the EBS volume | "gp2" | standard, gp2, io1 |
-| disk_iops | IOPS of the EBS volume | "0" (i.e. auto) | "400" |
-| worker_target_groups | Target group ARNs to which worker instances should be added | [] | ["${aws_lb_target_group.app.id}"] |
-| worker_price | Spot price in USD for workers. Leave as default empty string for regular on-demand instances | "" | "0.10" |
+| disk_iops | IOPS of the EBS volume | 0 (i.e. auto) | 400 |
+| worker_target_groups | Target group ARNs to which worker instances should be added | [] | [aws_lb_target_group.app.id] |
+| worker_price | Spot price in USD for worker instances or 0 to use on-demand instances | 0 | 0.10 |
 | controller_snippets | Controller Fedora CoreOS Config snippets | [] | UNSUPPORTED |
 | worker_clc_snippets | Worker Fedora CoreOS Config snippets | [] | UNSUPPORTED |
 | networking | Choice of networking provider | "calico" | "calico" or "flannel" |
@@ -221,7 +217,7 @@ Reference the DNS zone id with `"${aws_route53_zone.zone-for-clusters.zone_id}"`
 | host_cidr | CIDR IPv4 range to assign to EC2 instances | "10.0.0.0/16" | "10.1.0.0/16" |
 | pod_cidr | CIDR IPv4 range to assign to Kubernetes pods | "10.2.0.0/16" | "10.22.0.0/16" |
 | service_cidr | CIDR IPv4 range to assign to Kubernetes services | "10.3.0.0/16" | "10.3.0.0/24" |
-| cluster_domain_suffix | FQDN suffix for Kubernetes services answered by coredns. | "cluster.local" | "k8s.example.com" |
+| worker_node_labels | List of initial worker node labels | [] | ["worker-pool=default"] |
 
 Check the list of valid [instance types](https://aws.amazon.com/ec2/instance-types/).
 

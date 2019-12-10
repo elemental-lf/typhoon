@@ -3,11 +3,11 @@
 !!! danger
     Typhoon for Fedora CoreOS is an early preview! Fedora CoreOS itself is a preview! Expect bugs and design shifts. Please help both projects solve problems. Report Fedora CoreOS bugs to [Fedora](https://github.com/coreos/fedora-coreos-tracker/issues). Report Typhoon issues to Typhoon.
 
-In this tutorial, we'll network boot and provision a Kubernetes v1.15.1 cluster on bare-metal with Fedora CoreOS.
+In this tutorial, we'll network boot and provision a Kubernetes v1.16.2 cluster on bare-metal with Fedora CoreOS.
 
 First, we'll deploy a [Matchbox](https://github.com/poseidon/matchbox) service and setup a network boot environment. Then, we'll declare a Kubernetes cluster using the Typhoon Terraform module and power on machines. On PXE boot, machines will install Fedora CoreOS to disk, reboot into the disk install, and provision themselves as Kubernetes controllers or workers via Ignition.
 
-Controllers are provisioned to run an `etcd-member` peer and a `kubelet` service. Workers run just a `kubelet` service. A one-time [bootkube](https://github.com/kubernetes-incubator/bootkube) bootstrap schedules the `apiserver`, `scheduler`, `controller-manager`, and `coredns` on controllers and schedules `kube-proxy` and `calico` (or `flannel`) on every node. A generated `kubeconfig` provides `kubectl` access to the cluster.
+Controller hosts are provisioned to run an `etcd-member` peer and a `kubelet` service. Worker hosts run a `kubelet` service. Controller nodes run `kube-apiserver`, `kube-scheduler`, `kube-controller-manager`, and `coredns`, while `kube-proxy` and `calico` (or `flannel`) run on every node. A generated `kubeconfig` provides `kubectl` access to the cluster.
 
 ## Requirements
 
@@ -106,7 +106,7 @@ Read about the [many ways](https://coreos.com/matchbox/docs/latest/network-setup
     TFTP chainloading to modern boot firmware, like iPXE, avoids issues with old NICs and allows faster transfer protocols like HTTP to be used.
 
 !!! warning
-    Compile iPXE from [source](https://github.com/ipxe/ipxe) with support for [HTTPS downloads](https://ipxe.org/crypto). iPXE's pre-built firmware binaries do not enable this. If you cannot enable HTTPS downloads, set `download_protocol = "http"` (discouraged).
+    Compile iPXE from [source](https://github.com/ipxe/ipxe) with support for [HTTPS downloads](https://ipxe.org/crypto). iPXE's pre-built firmware binaries do not enable this. Fedora does not provide images over HTTP.
 
 ## Terraform Setup
 
@@ -114,7 +114,7 @@ Install [Terraform](https://www.terraform.io/downloads.html) v0.12.x on your sys
 
 ```sh
 $ terraform version
-Terraform v0.12.2
+Terraform v0.12.9
 ```
 
 Add the [terraform-provider-matchbox](https://github.com/poseidon/terraform-provider-matchbox) plugin binary for your system to `~/.terraform.d/plugins/`, noting the final name.
@@ -147,9 +147,9 @@ Configure the Matchbox provider to use your Matchbox API endpoint and client cer
 provider "matchbox" {
   version     = "0.3.0"
   endpoint    = "matchbox.example.com:8081"
-  client_cert = "${file("~/.config/matchbox/client.crt")}"
-  client_key  = "${file("~/.config/matchbox/client.key")}"
-  ca          = "${file("~/.config/matchbox/ca.crt")}"
+  client_cert = file("~/.config/matchbox/client.crt")
+  client_key  = file("~/.config/matchbox/client.key")
+  ca          = file("~/.config/matchbox/ca.crt")
 }
 
 provider "ct" {
@@ -163,14 +163,14 @@ Define a Kubernetes cluster using the module `bare-metal/fedora-coreos/kubernete
 
 ```tf
 module "bare-metal-mercury" {
-  source = "git::https://github.com/poseidon/typhoon//bare-metal/fedora-coreos/kubernetes?ref=DEVELOPMENT_SHA"
+  source = "git::https://github.com/poseidon/typhoon//bare-metal/fedora-coreos/kubernetes?ref=v1.16.2"
   
   # bare-metal
   cluster_name            = "mercury"
   matchbox_http_endpoint  = "http://matchbox.example.com"
   os_stream               = "testing"
-  os_version              = "30.20190716.1"
-  cached_install          = false
+  os_version              = "30.20191002.0"
+  cached_install          = true
 
   # configuration
   k8s_domain_name    = "node1.example.com"
@@ -178,20 +178,22 @@ module "bare-metal-mercury" {
   asset_dir          = "/home/user/.secrets/clusters/mercury"
 
   # machines
-  controller_names   = ["node1"]
-  controller_macs    = ["52:54:00:a1:9c:ae"]
-  controller_domains = ["node1.example.com"]
-  worker_names = [
-    "node2",
-    "node3",
-  ]
-  worker_macs = [
-    "52:54:00:b2:2f:86",
-    "52:54:00:c3:61:77",
-  ]
-  worker_domains = [
-    "node2.example.com",
-    "node3.example.com",
+  controllers = [{
+    name   = "node1"
+    mac    = "52:54:00:a1:9c:ae"
+    domain = "node1.example.com"
+  }]
+  workers = [
+    {
+      name   = "node2",
+      mac    = "52:54:00:b2:2f:86"
+      domain = "node2.example.com"
+    },
+    {
+      name   = "node3",
+      mac    = "52:54:00:c3:61:77"
+      domain = "node3.example.com"
+    }
   ]
 }
 ```
@@ -200,7 +202,7 @@ Reference the [variables docs](#variables) or the [variables.tf](https://github.
 
 ## ssh-agent
 
-Initial bootstrapping requires `bootkube.service` be started on one controller node. Terraform uses `ssh-agent` to automate this step. Add your SSH private key to `ssh-agent`.
+Initial bootstrapping requires `bootstrap.service` be started on one controller node. Terraform uses `ssh-agent` to automate this step. Add your SSH private key to `ssh-agent`.
 
 ```sh
 ssh-add ~/.ssh/id_rsa
@@ -222,7 +224,7 @@ $ terraform plan
 Plan: 55 to add, 0 to change, 0 to destroy.
 ```
 
-Apply the changes. Terraform will generate bootkube assets to `asset_dir` and create Matchbox profiles (e.g. controller, worker) and matching rules via the Matchbox API.
+Apply the changes. Terraform will generate bootstrap assets to `asset_dir` and create Matchbox profiles (e.g. controller, worker) and matching rules via the Matchbox API.
 
 ```sh
 $ terraform apply
@@ -251,14 +253,14 @@ Machines will network boot, install Fedora CoreOS to disk, reboot into the disk 
 
 ### Bootstrap
 
-Wait for the `bootkube-start` step to finish bootstrapping the Kubernetes control plane. This may take 5-15 minutes depending on your network.
+Wait for the `bootstrap` step to finish bootstrapping the Kubernetes control plane. This may take 5-15 minutes depending on your network.
 
 ```
-module.bare-metal-mercury.null_resource.bootkube-start: Still creating... (6m10s elapsed)
-module.bare-metal-mercury.null_resource.bootkube-start: Still creating... (6m20s elapsed)
-module.bare-metal-mercury.null_resource.bootkube-start: Still creating... (6m30s elapsed)
-module.bare-metal-mercury.null_resource.bootkube-start: Still creating... (6m40s elapsed)
-module.bare-metal-mercury.null_resource.bootkube-start: Creation complete (ID: 5441741360626669024)
+module.bare-metal-mercury.null_resource.bootstrap: Still creating... (6m10s elapsed)
+module.bare-metal-mercury.null_resource.bootstrap: Still creating... (6m20s elapsed)
+module.bare-metal-mercury.null_resource.bootstrap: Still creating... (6m30s elapsed)
+module.bare-metal-mercury.null_resource.bootstrap: Still creating... (6m40s elapsed)
+module.bare-metal-mercury.null_resource.bootstrap: Creation complete (ID: 5441741360626669024)
 
 Apply complete! Resources: 55 added, 0 changed, 0 destroyed.
 ```
@@ -267,13 +269,12 @@ To watch the bootstrap process in detail, SSH to the first controller and journa
 
 ```
 $ ssh core@node1.example.com
-$ journalctl -f -u bootkube
-bootkube[5]:         Pod Status:        pod-checkpointer        Running
-bootkube[5]:         Pod Status:          kube-apiserver        Running
-bootkube[5]:         Pod Status:          kube-scheduler        Running
-bootkube[5]:         Pod Status: kube-controller-manager        Running
-bootkube[5]: All self-hosted control plane components successfully started
-bootkube[5]: Tearing down temporary bootstrap control plane...
+$ journalctl -f -u bootstrap
+podman[1750]: The connection to the server cluster.example.com:6443 was refused - did you specify the right host or port?
+podman[1750]: Waiting for static pod control plane
+...
+podman[1750]: serviceaccount/calico-node unchanged
+systemd[1]: Started Kubernetes control plane.
 ```
 
 ## Verify
@@ -283,10 +284,10 @@ bootkube[5]: Tearing down temporary bootstrap control plane...
 ```
 $ export KUBECONFIG=/home/user/.secrets/clusters/mercury/auth/kubeconfig
 $ kubectl get nodes
-NAME                STATUS  ROLES              AGE  VERSION
-node1.example.com   Ready   controller,master  10m  v1.15.1
-node2.example.com   Ready   node               10m  v1.15.1
-node3.example.com   Ready   node               10m  v1.15.1
+NAME                STATUS  ROLES   AGE  VERSION
+node1.example.com   Ready   <none>  10m  v1.16.2
+node2.example.com   Ready   <none>  10m  v1.16.2
+node3.example.com   Ready   <none>  10m  v1.16.2
 ```
 
 List the pods.
@@ -299,16 +300,12 @@ kube-system   calico-node-gnjrm                          2/2       Running   0  
 kube-system   calico-node-llbgt                          2/2       Running   0          11m
 kube-system   coredns-1187388186-dj3pd                   1/1       Running   0          11m
 kube-system   coredns-1187388186-mx9rt                   1/1       Running   0          11m
-kube-system   kube-apiserver-7336w                       1/1       Running   0          11m
-kube-system   kube-controller-manager-3271970485-b9chx   1/1       Running   0          11m
-kube-system   kube-controller-manager-3271970485-v30js   1/1       Running   1          11m
+kube-system   kube-apiserver-node1.example.com           1/1       Running   0          11m
+kube-system   kube-controller-manager-node1.example.com  1/1       Running   1          11m
 kube-system   kube-proxy-50sd4                           1/1       Running   0          11m
 kube-system   kube-proxy-bczhp                           1/1       Running   0          11m
 kube-system   kube-proxy-mp2fw                           1/1       Running   0          11m
-kube-system   kube-scheduler-3895335239-fd3l7            1/1       Running   1          11m
-kube-system   kube-scheduler-3895335239-hfjv0            1/1       Running   0          11m
-kube-system   pod-checkpointer-wf65d                     1/1       Running   0          11m
-kube-system   pod-checkpointer-wf65d-node1.example.com   1/1       Running   0          11m
+kube-system   kube-scheduler-node1.example.com           1/1       Running   0          11m
 ```
 
 ## Going Further
@@ -323,19 +320,15 @@ Check the [variables.tf](https://github.com/poseidon/typhoon/blob/master/bare-me
 
 | Name | Description | Example |
 |:-----|:------------|:--------|
-| cluster_name | Unique cluster name | mercury |
-| matchbox_http_endpoint | Matchbox HTTP read-only endpoint | http://matchbox.example.com:port |
-| os_stream | Fedora CoreOS release stream | testing |
-| os_version | Fedora CoreOS version to PXE and install | 30.20190716.1 |
+| cluster_name | Unique cluster name | "mercury" |
+| matchbox_http_endpoint | Matchbox HTTP read-only endpoint | "http://matchbox.example.com:port" |
+| os_stream | Fedora CoreOS release stream | "testing" |
+| os_version | Fedora CoreOS version to PXE and install | "30.20190716.1" |
 | k8s_domain_name | FQDN resolving to the controller(s) nodes. Workers and kubectl will communicate with this endpoint | "myk8s.example.com" |
 | ssh_authorized_key | SSH public key for user 'core' | "ssh-rsa AAAAB3Nz..." |
 | asset_dir | Absolute path to a directory where generated assets should be placed (contains secrets) | "/home/user/.secrets/clusters/mercury" |
-| controller_names | Ordered list of controller short names | ["node1"] |
-| controller_macs | Ordered list of controller identifying MAC addresses | ["52:54:00:a1:9c:ae"] |
-| controller_domains | Ordered list of controller FQDNs | ["node1.example.com"] |
-| worker_names | Ordered list of worker short names | ["node2", "node3"] |
-| worker_macs | Ordered list of worker identifying MAC addresses | ["52:54:00:b2:2f:86", "52:54:00:c3:61:77"] |
-| worker_domains | Ordered list of worker FQDNs | ["node2.example.com", "node3.example.com"] |
+| controllers | List of controller machine detail objects (unique name, identifying MAC address, FQDN) | `[{name="node1", mac="52:54:00:a1:9c:ae", domain="node1.example.com"}]` |
+| workers | List of worker machine detail objects (unique name, identifying MAC address, FQDN) | `[{name="node2", mac="52:54:00:b2:2f:86", domain="node2.example.com"}, {name="node3", mac="52:54:00:c3:61:77", domain="node3.example.com"}]` |
 
 ### Optional
 
@@ -346,9 +339,8 @@ Check the [variables.tf](https://github.com/poseidon/typhoon/blob/master/bare-me
 | networking | Choice of networking provider | "calico" | "calico" or "flannel" |
 | network_mtu | CNI interface MTU (calico-only) | 1480 | - | 
 | snippets | Map from machine names to lists of Fedora CoreOS Config snippets | {} | UNSUPPORTED |
-| network_ip_autodetection_method | Method to detect host IPv4 address (calico-only) | first-found | can-reach=10.0.0.1 |
+| network_ip_autodetection_method | Method to detect host IPv4 address (calico-only) | "first-found" | "can-reach=10.0.0.1" |
 | pod_cidr | CIDR IPv4 range to assign to Kubernetes pods | "10.2.0.0/16" | "10.22.0.0/16" |
 | service_cidr | CIDR IPv4 range to assign to Kubernetes services | "10.3.0.0/16" | "10.3.0.0/24" |
-| cluster_domain_suffix | FQDN suffix for Kubernetes services answered by coredns. | "cluster.local" | "k8s.example.com" |
-| kernel_args | Additional kernel args to provide at PXE boot | [] | "kvm-intel.nested=1" |
+| kernel_args | Additional kernel args to provide at PXE boot | [] | ["kvm-intel.nested=1"] |
 
