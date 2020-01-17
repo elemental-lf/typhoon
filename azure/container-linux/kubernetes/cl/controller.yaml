@@ -7,7 +7,7 @@ systemd:
         - name: 40-etcd-cluster.conf
           contents: |
             [Service]
-            Environment="ETCD_IMAGE_TAG=v3.4.2"
+            Environment="ETCD_IMAGE_TAG=v3.4.3"
             Environment="ETCD_NAME=${etcd_name}"
             Environment="ETCD_ADVERTISE_CLIENT_URLS=https://${etcd_domain}:2379"
             Environment="ETCD_INITIAL_ADVERTISE_PEER_URLS=https://${etcd_domain}:2380"
@@ -29,15 +29,6 @@ systemd:
       enable: true
     - name: locksmithd.service
       mask: true
-    - name: kubelet.path
-      enable: true
-      contents: |
-        [Unit]
-        Description=Watch for kubeconfig
-        [Path]
-        PathExists=/etc/kubernetes/kubeconfig
-        [Install]
-        WantedBy=multi-user.target
     - name: wait-for-dns.service
       enable: true
       contents: |
@@ -53,36 +44,52 @@ systemd:
         RequiredBy=kubelet.service
         RequiredBy=etcd-member.service
     - name: kubelet.service
+      enable: true
       contents: |
         [Unit]
         Description=Kubelet via Hyperkube
-        Requires=coreos-metadata.service
-        After=coreos-metadata.service
         Wants=rpc-statd.service
         [Service]
-        EnvironmentFile=/etc/kubernetes/kubelet.env
-        EnvironmentFile=/run/metadata/coreos
-        Environment="RKT_RUN_ARGS=--uuid-file-save=/var/cache/kubelet-pod.uuid \
-          --volume=resolv,kind=host,source=/etc/resolv.conf \
-          --mount volume=resolv,target=/etc/resolv.conf \
-          --volume var-lib-cni,kind=host,source=/var/lib/cni \
-          --mount volume=var-lib-cni,target=/var/lib/cni \
-          --volume var-lib-calico,kind=host,source=/var/lib/calico \
-          --mount volume=var-lib-calico,target=/var/lib/calico \
-          --volume opt-cni-bin,kind=host,source=/opt/cni/bin \
-          --mount volume=opt-cni-bin,target=/opt/cni/bin \
-          --volume var-log,kind=host,source=/var/log \
-          --mount volume=var-log,target=/var/log \
-          --insecure-options=image"
         ExecStartPre=/bin/mkdir -p /etc/kubernetes/cni/net.d
         ExecStartPre=/bin/mkdir -p /etc/kubernetes/manifests
         ExecStartPre=/bin/mkdir -p /opt/cni/bin
-        ExecStartPre=/bin/mkdir -p /var/lib/cni
         ExecStartPre=/bin/mkdir -p /var/lib/calico
         ExecStartPre=/bin/mkdir -p /var/lib/kubelet/volumeplugins
         ExecStartPre=/usr/bin/bash -c "grep 'certificate-authority-data' /etc/kubernetes/kubeconfig | awk '{print $2}' | base64 -d > /etc/kubernetes/ca.crt"
         ExecStartPre=-/usr/bin/rkt rm --uuid-file=/var/cache/kubelet-pod.uuid
-        ExecStart=/usr/lib/coreos/kubelet-wrapper \
+        ExecStart=/usr/bin/rkt run \
+          --uuid-file-save=/var/cache/kubelet-pod.uuid \
+          --stage1-from-dir=stage1-fly.aci \
+          --hosts-entry host \
+          --insecure-options=image \
+          --volume etc-kubernetes,kind=host,source=/etc/kubernetes,readOnly=true \
+          --mount volume=etc-kubernetes,target=/etc/kubernetes \
+          --volume etc-machine-id,kind=host,source=/etc/machine-id,readOnly=true \
+          --mount volume=etc-machine-id,target=/etc/machine-id \
+          --volume etc-os-release,kind=host,source=/usr/lib/os-release,readOnly=true \
+          --mount volume=etc-os-release,target=/etc/os-release \
+          --volume=etc-resolv,kind=host,source=/etc/resolv.conf,readOnly=true \
+          --mount volume=etc-resolv,target=/etc/resolv.conf \
+          --volume etc-ssl-certs,kind=host,source=/etc/ssl/certs,readOnly=true \
+          --mount volume=etc-ssl-certs,target=/etc/ssl/certs \
+          --volume lib-modules,kind=host,source=/lib/modules,readOnly=true \
+          --mount volume=lib-modules,target=/lib/modules \
+          --volume run,kind=host,source=/run \
+          --mount volume=run,target=/run \
+          --volume usr-share-certs,kind=host,source=/usr/share/ca-certificates,readOnly=true \
+          --mount volume=usr-share-certs,target=/usr/share/ca-certificates \
+          --volume var-lib-calico,kind=host,source=/var/lib/calico \
+          --mount volume=var-lib-calico,target=/var/lib/calico \
+          --volume var-lib-docker,kind=host,source=/var/lib/docker \
+          --mount volume=var-lib-docker,target=/var/lib/docker \
+          --volume var-lib-kubelet,kind=host,source=/var/lib/kubelet,recursive=true \
+          --mount volume=var-lib-kubelet,target=/var/lib/kubelet \
+          --volume var-log,kind=host,source=/var/log \
+          --mount volume=var-log,target=/var/log \
+          --volume opt-cni-bin,kind=host,source=/opt/cni/bin \
+          --mount volume=opt-cni-bin,target=/opt/cni/bin \
+          docker://k8s.gcr.io/hyperkube:v1.17.1 \
+          --exec=/usr/local/bin/kubelet -- \
           --anonymous-auth=false \
           --authentication-token-webhook \
           --authorization-mode=Webhook \
@@ -91,7 +98,7 @@ systemd:
           --cluster_domain=${cluster_domain_suffix} \
           --cni-conf-dir=/etc/kubernetes/cni/net.d \
           --exit-on-lock-contention \
-          --hostname-override=$${COREOS_DIGITALOCEAN_IPV4_PRIVATE_0} \
+          --healthz-port=0 \
           --kubeconfig=/etc/kubernetes/kubeconfig \
           --lock-file=/var/run/lock/kubelet.lock \
           --network-plugin=cni \
@@ -118,12 +125,14 @@ systemd:
         ExecStartPre=-/usr/bin/bash -c 'set -x && [ -n "$(ls /opt/bootstrap/assets/manifests-*/* 2>/dev/null)" ] && mv /opt/bootstrap/assets/manifests-*/* /opt/bootstrap/assets/manifests && rm -rf /opt/bootstrap/assets/manifests-*'
         ExecStart=/usr/bin/rkt run \
             --trust-keys-from-https \
+            --volume config,kind=host,source=/etc/kubernetes/bootstrap-secrets \
+            --mount volume=config,target=/etc/kubernetes/secrets \
             --volume assets,kind=host,source=/opt/bootstrap/assets \
             --mount volume=assets,target=/assets \
             --volume script,kind=host,source=/opt/bootstrap/apply \
             --mount volume=script,target=/apply \
             --insecure-options=image \
-            docker://k8s.gcr.io/hyperkube:v1.16.2 \
+            docker://k8s.gcr.io/hyperkube:v1.17.1 \
             --net=host \
             --dns=host \
             --exec=/apply
@@ -132,20 +141,41 @@ systemd:
         WantedBy=multi-user.target
 storage:
   files:
-    - path: /etc/kubernetes/kubelet.env
+    - path: /etc/kubernetes/kubeconfig
       filesystem: root
       mode: 0644
       contents:
         inline: |
-          KUBELET_IMAGE_URL=docker://k8s.gcr.io/hyperkube
-          KUBELET_IMAGE_TAG=v1.16.2
+          ${kubeconfig}
+    - path: /opt/bootstrap/layout
+      filesystem: root
+      mode: 0544
+      contents:
+        inline: |
+          #!/bin/bash -e
+          mkdir -p -- auth tls/etcd tls/k8s static-manifests manifests/coredns manifests-networking
+          awk '/#####/ {filename=$2; next} {print > filename}' assets
+          mkdir -p /etc/ssl/etcd/etcd
+          mkdir -p /etc/kubernetes/bootstrap-secrets
+          mv tls/etcd/{peer*,server*} /etc/ssl/etcd/etcd/
+          mv tls/etcd/etcd-client* /etc/kubernetes/bootstrap-secrets/
+          chown -R etcd:etcd /etc/ssl/etcd
+          chmod -R 500 /etc/ssl/etcd
+          mv auth/kubeconfig /etc/kubernetes/bootstrap-secrets/
+          mv tls/k8s/* /etc/kubernetes/bootstrap-secrets/
+          sudo mkdir -p /etc/kubernetes/manifests
+          sudo mv static-manifests/* /etc/kubernetes/manifests/
+          sudo mkdir -p /opt/bootstrap/assets
+          sudo mv manifests /opt/bootstrap/assets/manifests
+          sudo mv manifests-networking /opt/bootstrap/assets/manifests-networking
+          rm -rf assets auth static-manifests tls
     - path: /opt/bootstrap/apply
       filesystem: root
       mode: 0544
       contents:
         inline: |
           #!/bin/bash -e
-          export KUBECONFIG=/assets/auth/kubeconfig
+          export KUBECONFIG=/etc/kubernetes/secrets/kubeconfig
           until kubectl version; do
             echo "Waiting for static pod control plane"
             sleep 5
@@ -159,3 +189,8 @@ storage:
       contents:
         inline: |
           fs.inotify.max_user_watches=16184
+passwd:
+  users:
+    - name: core
+      ssh_authorized_keys:
+        - "${ssh_authorized_key}"

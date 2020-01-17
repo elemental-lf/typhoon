@@ -1,6 +1,6 @@
 # Digital Ocean
 
-In this tutorial, we'll create a Kubernetes v1.16.2 cluster on DigitalOcean with Container Linux.
+In this tutorial, we'll create a Kubernetes v1.17.1 cluster on DigitalOcean with Container Linux.
 
 We'll declare a Kubernetes cluster using the Typhoon Terraform module. Then apply the changes to create controller droplets, worker droplets, DNS records, tags, and TLS assets.
 
@@ -10,15 +10,15 @@ Controller hosts are provisioned to run an `etcd-member` peer and a `kubelet` se
 
 * Digital Ocean Account and Token
 * Digital Ocean Domain (registered Domain Name or delegated subdomain)
-* Terraform v0.12.x and [terraform-provider-ct](https://github.com/poseidon/terraform-provider-ct) installed locally
+* Terraform v0.12.6+ and [terraform-provider-ct](https://github.com/poseidon/terraform-provider-ct) installed locally
 
 ## Terraform Setup
 
-Install [Terraform](https://www.terraform.io/downloads.html) v0.12.x on your system.
+Install [Terraform](https://www.terraform.io/downloads.html) v0.12.6+ on your system.
 
 ```sh
 $ terraform version
-Terraform v0.12.9
+Terraform v0.12.16
 ```
 
 Add the [terraform-provider-ct](https://github.com/poseidon/terraform-provider-ct) plugin binary for your system to `~/.terraform.d/plugins/`, noting the final name.
@@ -50,7 +50,7 @@ Configure the DigitalOcean provider to use your token in a `providers.tf` file.
 
 ```tf
 provider "digitalocean" {
-  version = "1.8.0"
+  version = "1.11.0"
   token = "${chomp(file("~/.config/digital-ocean/token"))}"
 }
 
@@ -64,8 +64,8 @@ provider "ct" {
 Define a Kubernetes cluster using the module `digital-ocean/container-linux/kubernetes`.
 
 ```tf
-module "digital-ocean-nemo" {
-  source = "git::https://github.com/poseidon/typhoon//digital-ocean/container-linux/kubernetes?ref=v1.16.2"
+module "nemo" {
+  source = "git::https://github.com/poseidon/typhoon//digital-ocean/container-linux/kubernetes?ref=v1.17.1"
 
   # Digital Ocean
   cluster_name = "nemo"
@@ -74,7 +74,6 @@ module "digital-ocean-nemo" {
 
   # configuration
   ssh_fingerprints = ["d7:9d:79:ae:56:32:73:79:95:88:e3:a2:ab:5d:45:e7"]
-  asset_dir        = "/home/user/.secrets/clusters/nemo"
   
   # optional
   worker_count = 2
@@ -111,28 +110,37 @@ Apply the changes to create the cluster.
 
 ```sh
 $ terraform apply
-module.digital-ocean-nemo.null_resource.bootstrap: Still creating... (30s elapsed)
-module.digital-ocean-nemo.null_resource.bootstrap: Provisioning with 'remote-exec'...
+module.nemo.null_resource.bootstrap: Still creating... (30s elapsed)
+module.nemo.null_resource.bootstrap: Provisioning with 'remote-exec'...
 ...
-module.digital-ocean-nemo.null_resource.bootstrap: Still creating... (6m20s elapsed)
-module.digital-ocean-nemo.null_resource.bootstrap: Creation complete (ID: 7599298447329218468)
+module.nemo.null_resource.bootstrap: Still creating... (6m20s elapsed)
+module.nemo.null_resource.bootstrap: Creation complete (ID: 7599298447329218468)
 
-Apply complete! Resources: 54 added, 0 changed, 0 destroyed.
+Apply complete! Resources: 42 added, 0 changed, 0 destroyed.
 ```
 
 In 3-6 minutes, the Kubernetes cluster will be ready.
 
 ## Verify
 
-[Install kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) on your system. Use the generated `kubeconfig` credentials to access the Kubernetes cluster and list nodes.
+[Install kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) on your system. Obtain the generated cluster `kubeconfig` from module outputs (e.g. write to a local file).
 
 ```
-$ export KUBECONFIG=/home/user/.secrets/clusters/nemo/auth/kubeconfig
+resource "local_file" "kubeconfig-nemo" {
+  content  = module.nemo.kubeconfig-admin
+  filename = "/home/user/.kube/configs/nemo-config"
+}
+```
+
+List nodes in the cluster.
+
+```
+$ export KUBECONFIG=/home/user/.kube/configs/nemo-config
 $ kubectl get nodes
 NAME               STATUS  ROLES   AGE  VERSION
-10.132.110.130     Ready   <none>  10m  v1.16.2
-10.132.115.81      Ready   <none>  10m  v1.16.2
-10.132.124.107     Ready   <none>  10m  v1.16.2
+10.132.110.130     Ready   <none>  10m  v1.17.1
+10.132.115.81      Ready   <none>  10m  v1.17.1
+10.132.124.107     Ready   <none>  10m  v1.17.1
 ```
 
 List the pods.
@@ -171,7 +179,6 @@ Check the [variables.tf](https://github.com/poseidon/typhoon/blob/master/digital
 | region | Digital Ocean region | "nyc1", "sfo2", "fra1", tor1" |
 | dns_zone | Digital Ocean domain (i.e. DNS zone) | "do.example.com" |
 | ssh_fingerprints | SSH public key fingerprints | ["d7:9d..."] |
-| asset_dir | Absolute path to a directory where generated assets should be placed (contains secrets) | "/home/user/.secrets/nemo" |
 
 #### DNS Zone
 
@@ -212,6 +219,7 @@ Digital Ocean requires the SSH public key be uploaded to your account, so you ma
 
 | Name | Description | Default | Example |
 |:-----|:------------|:--------|:--------|
+| asset_dir | Absolute path to a directory where generated assets should be placed (contains secrets) | "" (disabled) | "/home/user/.secrets/nemo" |
 | controller_count | Number of controllers (i.e. masters) | 1 | 1 |
 | worker_count | Number of workers | 1 | 3 |
 | controller_type | Droplet type for controllers | "s-2vcpu-2gb" | s-2vcpu-2gb, s-2vcpu-4gb, s-4vcpu-8gb, ... |

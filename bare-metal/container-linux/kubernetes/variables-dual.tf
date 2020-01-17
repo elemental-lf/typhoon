@@ -29,15 +29,15 @@ variable "container_images" {
   type = map(string)
 
   default = {
-    calico = "quay.io/calico/node:v3.9.3"
-    calico_cni = "quay.io/calico/cni:v3.9.3"
-    flannel = "quay.io/coreos/flannel:v0.11.0-amd64"
+    calico      = "quay.io/calico/node:v3.11.1"
+    calico_cni  = "quay.io/calico/cni:v3.11.1"
+    flannel     = "quay.io/coreos/flannel:v0.11.0-amd64"
     flannel_cni = "quay.io/coreos/flannel-cni:v0.3.0"
-    kube_router = "cloudnativelabs/kube-router:v0.3.1"
-    hyperkube = "k8s.gcr.io/hyperkube:v1.16.3"
-    coredns = "k8s.gcr.io/coredns:1.6.2"
-    keepalived_vip   = "osixia/keepalived:2.0.17"
-    tiller           = "gcr.io/kubernetes-helm/tiller:v2.16.1"
+    kube_router = "cloudnativelabs/kube-router:v0.3.2"
+    hyperkube   = "k8s.gcr.io/hyperkube:v1.17.1"
+    coredns     = "k8s.gcr.io/coredns:1.6.6"
+    keepalived_vip = "osixia/keepalived:2.0.17"
+    tiller         = "gcr.io/kubernetes-helm/tiller:v2.16.1"
   }
 }
 
@@ -45,4 +45,10 @@ variable "enable_rbd_nbd" {
   description = "Enable rbd-nbd by blacklisting the KRBD driver inside the kubelet container"
   type        = string
   default     = "false"
+}
+
+variable "asset_overrides" {
+  description = "User supplied asset overrides and additions"
+  type        = map(string)
+  default     = {}
 }

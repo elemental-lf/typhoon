@@ -16,9 +16,17 @@ resource "digitalocean_firewall" "rules" {
     source_tags = [digitalocean_tag.controllers.name, digitalocean_tag.workers.name]
   }
 
+  # Allow Prometheus to scrape node-exporter
   inbound_rule {
     protocol    = "tcp"
     port_range  = "9100"
+    source_tags = [digitalocean_tag.workers.name]
+  }
+
+  # Allow Prometheus to scrape kube-proxy
+  inbound_rule {
+    protocol    = "tcp"
+    port_range  = "10249"
     source_tags = [digitalocean_tag.workers.name]
   }
 
@@ -73,7 +81,7 @@ resource "digitalocean_firewall" "controllers" {
     port_range       = "6443"
     source_addresses = ["0.0.0.0/0", "::/0"]
   }
-  
+
   # kube-scheduler metrics, kube-controller-manager metrics
   inbound_rule {
     protocol    = "tcp"

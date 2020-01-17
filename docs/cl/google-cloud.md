@@ -1,6 +1,6 @@
 # Google Cloud
 
-In this tutorial, we'll create a Kubernetes v1.16.2 cluster on Google Compute Engine with Container Linux.
+In this tutorial, we'll create a Kubernetes v1.17.1 cluster on Google Compute Engine with Container Linux.
 
 We'll declare a Kubernetes cluster using the Typhoon Terraform module. Then apply the changes to create a network, firewall rules, health checks, controller instances, worker managed instance group, load balancers, and TLS assets.
 
@@ -10,15 +10,15 @@ Controller hosts are provisioned to run an `etcd-member` peer and a `kubelet` se
 
 * Google Cloud Account and Service Account
 * Google Cloud DNS Zone (registered Domain Name or delegated subdomain)
-* Terraform v0.12.x and [terraform-provider-ct](https://github.com/poseidon/terraform-provider-ct) installed locally
+* Terraform v0.12.6+ and [terraform-provider-ct](https://github.com/poseidon/terraform-provider-ct) installed locally
 
 ## Terraform Setup
 
-Install [Terraform](https://www.terraform.io/downloads.html) v0.12.x on your system.
+Install [Terraform](https://www.terraform.io/downloads.html) v0.12.6+ on your system.
 
 ```sh
 $ terraform version
-Terraform v0.12.9
+Terraform v0.12.16
 ```
 
 Add the [terraform-provider-ct](https://github.com/poseidon/terraform-provider-ct) plugin binary for your system to `~/.terraform.d/plugins/`, noting the final name.
@@ -49,7 +49,7 @@ Configure the Google Cloud provider to use your service account key, project-id,
 
 ```tf
 provider "google" {
-  version     = "2.16.0"
+  version     = "3.4.0"
   project     = "project-id"
   region      = "us-central1"
   credentials = file("~/.config/google-cloud/terraform.json")
@@ -70,8 +70,8 @@ Additional configuration options are described in the `google` provider [docs](h
 Define a Kubernetes cluster using the module `google-cloud/container-linux/kubernetes`.
 
 ```tf
-module "google-cloud-yavin" {
-  source = "git::https://github.com/poseidon/typhoon//google-cloud/container-linux/kubernetes?ref=v1.16.2"
+module "yavin" {
+  source = "git::https://github.com/poseidon/typhoon//google-cloud/container-linux/kubernetes?ref=v1.17.1"
 
   # Google Cloud
   cluster_name  = "yavin"
@@ -81,7 +81,6 @@ module "google-cloud-yavin" {
 
   # configuration
   ssh_authorized_key = "ssh-rsa AAAAB3Nz..."
-  asset_dir          = "/home/user/.secrets/clusters/yavin"
   
   # optional
   worker_count = 2
@@ -118,28 +117,37 @@ Apply the changes to create the cluster.
 
 ```sh
 $ terraform apply
-module.google-cloud-yavin.null_resource.bootstrap: Still creating... (10s elapsed)
+module.yavin.null_resource.bootstrap: Still creating... (10s elapsed)
 ...
-module.google-cloud-yavin.null_resource.bootstrap: Still creating... (5m30s elapsed)
-module.google-cloud-yavin.null_resource.bootstrap: Still creating... (5m40s elapsed)
-module.google-cloud-yavin.null_resource.bootstrap: Creation complete (ID: 5768638456220583358)
+module.yavin.null_resource.bootstrap: Still creating... (5m30s elapsed)
+module.yavin.null_resource.bootstrap: Still creating... (5m40s elapsed)
+module.yavin.null_resource.bootstrap: Creation complete (ID: 5768638456220583358)
 
-Apply complete! Resources: 64 added, 0 changed, 0 destroyed.
+Apply complete! Resources: 62 added, 0 changed, 0 destroyed.
 ```
 
 In 4-8 minutes, the Kubernetes cluster will be ready.
 
 ## Verify
 
-[Install kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) on your system. Use the generated `kubeconfig` credentials to access the Kubernetes cluster and list nodes.
+[Install kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) on your system. Obtain the generated cluster `kubeconfig` from module outputs (e.g. write to a local file).
 
 ```
-$ export KUBECONFIG=/home/user/.secrets/clusters/yavin/auth/kubeconfig
+resource "local_file" "kubeconfig-yavin" {
+  content  = module.yavin.kubeconfig-admin
+  filename = "/home/user/.kube/configs/yavin-config"
+}
+```
+
+List nodes in the cluster.
+
+```
+$ export KUBECONFIG=/home/user/.kube/configs/yavin-config
 $ kubectl get nodes
 NAME                                       ROLES    STATUS  AGE  VERSION
-yavin-controller-0.c.example-com.internal  <none>   Ready   6m   v1.16.2
-yavin-worker-jrbf.c.example-com.internal   <none>   Ready   5m   v1.16.2
-yavin-worker-mzdm.c.example-com.internal   <none>   Ready   5m   v1.16.2
+yavin-controller-0.c.example-com.internal  <none>   Ready   6m   v1.17.1
+yavin-worker-jrbf.c.example-com.internal   <none>   Ready   5m   v1.17.1
+yavin-worker-mzdm.c.example-com.internal   <none>   Ready   5m   v1.17.1
 ```
 
 List the pods.
@@ -180,7 +188,6 @@ Check the [variables.tf](https://github.com/poseidon/typhoon/blob/master/google-
 | dns_zone | Google Cloud DNS zone | "google-cloud.example.com" |
 | dns_zone_name | Google Cloud DNS zone name | "example-zone" |
 | ssh_authorized_key | SSH public key for user 'core' | "ssh-rsa AAAAB3NZ..." |
-| asset_dir | Absolute path to a directory where generated assets should be placed (contains secrets) | "/home/user/.secrets/clusters/yavin" |
 
 Check the list of valid [regions](https://cloud.google.com/compute/docs/regions-zones/regions-zones) and list Container Linux [images](https://cloud.google.com/compute/docs/images) with `gcloud compute images list | grep coreos`.
 
@@ -205,6 +212,7 @@ resource "google_dns_managed_zone" "zone-for-clusters" {
 
 | Name | Description | Default | Example |
 |:-----|:------------|:--------|:--------|
+| asset_dir | Absolute path to a directory where generated assets should be placed (contains secrets) | "" (disabled) | "/home/user/.secrets/clusters/yavin" |
 | controller_count | Number of controllers (i.e. masters) | 1 | 3 |
 | worker_count | Number of workers | 1 | 3 |
 | controller_type | Machine type for controllers | "n1-standard-1" | See below |

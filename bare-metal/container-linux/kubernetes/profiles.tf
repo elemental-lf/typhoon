@@ -1,7 +1,7 @@
 locals {
   # coreos-stable -> coreos flavor, stable channel
   # flatcar-stable -> flatcar flavor, stable channel
-  flavor = split("-", var.os_channel)[0]
+  flavor  = split("-", var.os_channel)[0]
   channel = split("-", var.os_channel)[1]
 }
 
@@ -31,15 +31,15 @@ resource "matchbox_profile" "container-linux-install" {
 data "template_file" "container-linux-install-configs" {
   count = length(var.controllers) + length(var.workers)
 
-  template = file("${path.module}/cl/install.yaml.tmpl")
+  template = file("${path.module}/cl/install.yaml")
 
   vars = {
-    os_flavor           = local.flavor
-    os_channel          = local.channel
-    os_version          = var.os_version
-    ignition_endpoint   = format("%s/ignition", var.matchbox_http_endpoint)
-    install_disk        = concat(var.controllers, var.workers)[count.index]["install_disk"]
-    ssh_authorized_key  = var.ssh_authorized_key
+    os_flavor          = local.flavor
+    os_channel         = local.channel
+    os_version         = var.os_version
+    ignition_endpoint  = format("%s/ignition", var.matchbox_http_endpoint)
+    install_disk       = concat(var.controllers, var.workers)[count.index]["install_disk"]
+    ssh_authorized_key = var.ssh_authorized_key
     # only cached-container-linux profile adds -b baseurl
     baseurl_flag = ""
   }
@@ -72,15 +72,15 @@ resource "matchbox_profile" "cached-container-linux-install" {
 data "template_file" "cached-container-linux-install-configs" {
   count = length(var.controllers) + length(var.workers)
 
-  template = file("${path.module}/cl/install.yaml.tmpl")
+  template = file("${path.module}/cl/install.yaml")
 
   vars = {
-    os_flavor           = local.flavor
-    os_channel          = local.channel
-    os_version          = var.os_version
-    ignition_endpoint   = format("%s/ignition", var.matchbox_http_endpoint)
-    install_disk        = concat(var.controllers, var.workers)[count.index]["install_disk"]
-    ssh_authorized_key  = var.ssh_authorized_key
+    os_flavor          = local.flavor
+    os_channel         = local.channel
+    os_version         = var.os_version
+    ignition_endpoint  = format("%s/ignition", var.matchbox_http_endpoint)
+    install_disk       = concat(var.controllers, var.workers)[count.index]["install_disk"]
+    ssh_authorized_key = var.ssh_authorized_key
     # profile uses -b baseurl to install from matchbox cache
     baseurl_flag = "-b ${var.matchbox_http_endpoint}/assets/${local.flavor}"
   }
@@ -150,13 +150,13 @@ data "ct_config" "controller-ignitions" {
 data "template_file" "controller-configs" {
   count = length(var.controllers)
 
-  template = file("${path.module}/cl/controller.yaml.tmpl")
+  template = file("${path.module}/cl/controller.yaml")
 
   vars = {
     domain_name            = var.controllers.*.domain[count.index]
     etcd_name              = var.controllers.*.name[count.index]
     etcd_initial_cluster   = join(",", formatlist("%s=https://%s:2380", var.controllers.*.name, var.controllers.*.domain))
-    cgroup_driver = var.os_channel == "flatcar-edge" ? "systemd" : "cgroupfs"
+    cgroup_driver          = var.os_channel == "flatcar-edge" ? "systemd" : "cgroupfs"
     cluster_dns_service_ip = module.bootstrap.cluster_dns_service_ip
     cluster_domain_suffix  = var.cluster_domain_suffix
     ssh_authorized_key     = var.ssh_authorized_key
@@ -185,11 +185,11 @@ data "ct_config" "worker-ignitions" {
 data "template_file" "worker-configs" {
   count = length(var.workers)
 
-  template = file("${path.module}/cl/worker.yaml.tmpl")
+  template = file("${path.module}/cl/worker.yaml")
 
   vars = {
     domain_name            = var.workers.*.domain[count.index]
-    cgroup_driver = var.os_channel == "flatcar-edge" ? "systemd" : "cgroupfs"
+    cgroup_driver          = var.os_channel == "flatcar-edge" ? "systemd" : "cgroupfs"
     cluster_dns_service_ip = module.bootstrap.cluster_dns_service_ip
     cluster_domain_suffix  = var.cluster_domain_suffix
     ssh_authorized_key     = var.ssh_authorized_key
