@@ -21,6 +21,11 @@ resource "null_resource" "copy-controller-secrets" {
     null_resource.external_dependencies,
   ]
 
+  triggers = {
+    trigger_1 = module.bootstrap.kubeconfig-kubelet
+    trigger_2 = join("\n", local.assets_bundle)
+  }
+
   connection {
     type    = "ssh"
     host    = var.controllers.*.domain[count.index]
@@ -58,6 +63,10 @@ resource "null_resource" "copy-worker-secrets" {
     matchbox_group.worker,
     null_resource.external_dependencies,
   ]
+
+  triggers = {
+    trigger_1 = module.bootstrap.kubeconfig-kubelet
+  }
 
   connection {
     type    = "ssh"
