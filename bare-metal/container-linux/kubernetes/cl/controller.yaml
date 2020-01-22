@@ -178,7 +178,11 @@ systemd:
             --volume script,kind=host,source=/opt/bootstrap/apply \
             --mount volume=script,target=/apply \
             --insecure-options=image \
+<<<<<<< HEAD
             $${KUBELET_IMAGE_URL}:$${KUBELET_IMAGE_TAG} \
+=======
+            docker://k8s.gcr.io/hyperkube:v1.17.2 \
+>>>>>>> Update Kubernetes from v1.17.1 to v1.17.2
             --net=host \
             --dns=host \
             --exec=/apply
