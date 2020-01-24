@@ -113,6 +113,10 @@ resource "null_resource" "bootstrap" {
     null_resource.copy-worker-secrets,
   ]
 
+  triggers = {
+    trigger_1 = join("\n", local.assets_bundle)
+  }
+
   connection {
     type    = "ssh"
     host    = var.controllers[0].domain
