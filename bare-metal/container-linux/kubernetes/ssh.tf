@@ -21,10 +21,12 @@ resource "null_resource" "copy-controller-secrets" {
     null_resource.external_dependencies,
   ]
 
-  triggers = {
-    trigger_1 = module.bootstrap.kubeconfig-kubelet
-    trigger_2 = join("\n", local.assets_bundle)
-  }
+  # Disabled until all nodes are on 1.17.
+  # triggers = {
+  #  trigger_1 = local.kubelet_env
+  #  trigger_2 = module.bootstrap.kubeconfig-kubelet
+  #  trigger_3 = join("\n", local.assets_bundle)
+  # }
 
   connection {
     type    = "ssh"
@@ -70,9 +72,11 @@ resource "null_resource" "copy-worker-secrets" {
     null_resource.external_dependencies,
   ]
 
-  triggers = {
-    trigger_1 = module.bootstrap.kubeconfig-kubelet
-  }
+  # Disabled until all nodes are on 1.17.
+  # triggers = {
+  #   trigger_1 = local.kubelet_env
+  #   trigger_2 = module.bootstrap.kubeconfig-kubelet
+  # }
 
   connection {
     type    = "ssh"
