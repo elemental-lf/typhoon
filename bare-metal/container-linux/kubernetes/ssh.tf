@@ -34,6 +34,11 @@ resource "null_resource" "copy-controller-secrets" {
   }
 
   provisioner "file" {
+    content     = local.kubelet_env
+    destination = "$HOME/kubelet.env"
+  }
+
+  provisioner "file" {
     content     = module.bootstrap.kubeconfig-kubelet
     destination = "$HOME/kubeconfig"
   }
@@ -45,7 +50,8 @@ resource "null_resource" "copy-controller-secrets" {
 
   provisioner "remote-exec" {
     inline = [
-      "sudo mv $HOME/kubeconfig /etc/kubernetes/kubeconfig",
+      "sudo rsync -a $HOME/kubeconfig /etc/kubernetes/kubeconfig",
+      "sudo rsync -a $HOME/kubelet.env /etc/kubernetes/kubelet.env",
       "sudo /opt/bootstrap/layout",
     ]
   }
@@ -76,13 +82,19 @@ resource "null_resource" "copy-worker-secrets" {
   }
 
   provisioner "file" {
+    content     = local.kubelet_env
+    destination = "$HOME/kubelet.env"
+  }
+
+  provisioner "file" {
     content     = module.bootstrap.kubeconfig-kubelet
     destination = "$HOME/kubeconfig"
   }
 
   provisioner "remote-exec" {
     inline = [
-      "sudo mv $HOME/kubeconfig /etc/kubernetes/kubeconfig",
+      "sudo rsync -a $HOME/kubeconfig /etc/kubernetes/kubeconfig",
+      "sudo rsync -a $HOME/kubelet.env /etc/kubernetes/kubelet.env",
     ]
   }
 }

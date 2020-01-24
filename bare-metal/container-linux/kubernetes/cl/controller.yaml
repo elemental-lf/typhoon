@@ -39,6 +39,25 @@ systemd:
         PathExists=/etc/kubernetes/kubeconfig
         [Install]
         WantedBy=multi-user.target
+    - name: kubelet-env-watcher.service
+      enable: true
+      contents: |
+        [Unit]
+        Description=Restart kubelet
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/bin/systemctl restart kubelet.service
+        [Install]
+        WantedBy=multi-user.target
+    - name: kubelet-env-watcher.path
+      enable: true
+      contents: |
+        [Unit]
+        Description=Watch for modified kubelet.env
+        [Path]
+        PathChanged=/etc/kubernetes/kubelet.env
+        [Install]
+        WantedBy=multi-user.target
     - name: wait-for-dns.service
       enable: true
       contents: |
@@ -59,6 +78,7 @@ systemd:
         Description=Kubelet via Hyperkube
         Wants=rpc-statd.service
         [Service]
+        EnvironmentFile=/etc/kubernetes/kubelet.env
         Environment=KUBELET_CGROUP_DRIVER=${cgroup_driver}
         ExecStartPre=/bin/mkdir -p /etc/kubernetes/cni/net.d
         ExecStartPre=/bin/mkdir -p /etc/kubernetes/manifests
@@ -106,7 +126,7 @@ systemd:
           --volume rbdnbd,kind=host,source=/etc/modprobe.d/rbd-nbd.conf \
           --mount volume=rbdnbd,target=/etc/modprobe.d/rbd-nbd.conf \
 %{ endif ~}
-          docker://${hyperkube_image}:${hyperkube_tag} \
+          $${KUBELET_IMAGE_URL}:$${KUBELET_IMAGE_TAG} \
           --exec=/usr/local/bin/kubelet -- \
           --anonymous-auth=false \
           --authentication-token-webhook \
@@ -144,6 +164,7 @@ systemd:
         Type=oneshot
         RemainAfterExit=true
         WorkingDirectory=/opt/bootstrap
+        EnvironmentFile=/etc/kubernetes/kubelet.env
         ExecStartPre=-/usr/bin/bash -c 'set -x && [ -n "$(ls /opt/bootstrap/assets/manifests-*/* 2>/dev/null)" ] && mv /opt/bootstrap/assets/manifests-*/* /opt/bootstrap/assets/manifests && rm -rf /opt/bootstrap/assets/manifests-*'
         ExecStart=/usr/bin/rkt run \
             --trust-keys-from-https \
@@ -154,7 +175,7 @@ systemd:
             --volume script,kind=host,source=/opt/bootstrap/apply \
             --mount volume=script,target=/apply \
             --insecure-options=image \
-            docker://${hyperkube_image}:${hyperkube_tag} \
+            $${KUBELET_IMAGE_URL}:$${KUBELET_IMAGE_TAG} \
             --net=host \
             --dns=host \
             --exec=/apply
@@ -166,6 +187,13 @@ storage:
     - path: /etc/kubernetes
       filesystem: root
   files:
+    - path: /etc/kubernetes/kubelet.env
+      filesystem: root
+      mode: 0644
+      contents:
+        inline: |
+          KUBELET_IMAGE_URL=docker://${kubelet_image}
+          KUBELET_IMAGE_TAG=${kubelet_tag}
     - path: /etc/hostname
       filesystem: root
       mode: 0644
