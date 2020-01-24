@@ -34,7 +34,7 @@ variable "container_images" {
     flannel     = "quay.io/coreos/flannel:v0.11.0-amd64"
     flannel_cni = "quay.io/coreos/flannel-cni:v0.3.0"
     kube_router = "cloudnativelabs/kube-router:v0.3.2"
-    hyperkube   = "k8s.gcr.io/hyperkube:v1.17.1"
+    hyperkube   = "k8s.gcr.io/hyperkube:v1.17.2"
     coredns     = "k8s.gcr.io/coredns:1.6.6"
     keepalived_vip = "osixia/keepalived:2.0.17"
     tiller         = "gcr.io/kubernetes-helm/tiller:v2.16.1"
