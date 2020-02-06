@@ -1,3 +1,12 @@
+locals {
+  # format assets for distribution
+  assets_bundle = [
+    # header with the unpack location
+    for key, value in merge(module.bootstrap.assets_dist, var.asset_overrides) :
+    format("##### %s\n%s", key, value)
+  ]
+}
+
 # Secure copy assets to controllers. Activates kubelet.service
 resource "null_resource" "copy-controller-secrets" {
   count = length(var.controllers)
@@ -12,6 +21,13 @@ resource "null_resource" "copy-controller-secrets" {
     null_resource.external_dependencies,
   ]
 
+  # Disabled until all nodes are on 1.17.
+  # triggers = {
+  #  trigger_1 = local.kubelet_env
+  #  trigger_2 = module.bootstrap.kubeconfig-kubelet
+  #  trigger_3 = join("\n", local.assets_bundle)
+  # }
+
   connection {
     type    = "ssh"
     host    = var.controllers.*.domain[count.index]
@@ -20,70 +36,25 @@ resource "null_resource" "copy-controller-secrets" {
   }
 
   provisioner "file" {
+    content     = local.kubelet_env
+    destination = "$HOME/kubelet.env"
+  }
+
+  provisioner "file" {
     content     = module.bootstrap.kubeconfig-kubelet
     destination = "$HOME/kubeconfig"
   }
 
   provisioner "file" {
-    content     = module.bootstrap.etcd_ca_cert
-    destination = "$HOME/etcd-client-ca.crt"
-  }
-
-  provisioner "file" {
-    content     = module.bootstrap.etcd_client_cert
-    destination = "$HOME/etcd-client.crt"
-  }
-
-  provisioner "file" {
-    content     = module.bootstrap.etcd_client_key
-    destination = "$HOME/etcd-client.key"
-  }
-
-  provisioner "file" {
-    content     = module.bootstrap.etcd_server_cert
-    destination = "$HOME/etcd-server.crt"
-  }
-
-  provisioner "file" {
-    content     = module.bootstrap.etcd_server_key
-    destination = "$HOME/etcd-server.key"
-  }
-
-  provisioner "file" {
-    content     = module.bootstrap.etcd_peer_cert
-    destination = "$HOME/etcd-peer.crt"
-  }
-
-  provisioner "file" {
-    content     = module.bootstrap.etcd_peer_key
-    destination = "$HOME/etcd-peer.key"
-  }
-  
-  provisioner "file" {
-    source      = var.asset_dir
+    content     = join("\n", local.assets_bundle)
     destination = "$HOME/assets"
   }
 
   provisioner "remote-exec" {
     inline = [
-      "sudo mkdir -p /etc/ssl/etcd/etcd",
-      "sudo mv etcd-client* /etc/ssl/etcd/",
-      "sudo cp /etc/ssl/etcd/etcd-client-ca.crt /etc/ssl/etcd/etcd/server-ca.crt",
-      "sudo mv etcd-server.crt /etc/ssl/etcd/etcd/server.crt",
-      "sudo mv etcd-server.key /etc/ssl/etcd/etcd/server.key",
-      "sudo cp /etc/ssl/etcd/etcd-client-ca.crt /etc/ssl/etcd/etcd/peer-ca.crt",
-      "sudo mv etcd-peer.crt /etc/ssl/etcd/etcd/peer.crt",
-      "sudo mv etcd-peer.key /etc/ssl/etcd/etcd/peer.key",
-      "sudo chown -R etcd:etcd /etc/ssl/etcd",
-      "sudo chmod -R 500 /etc/ssl/etcd",
-      "sudo rsync -a --delete $HOME/assets/ /opt/bootstrap/assets/",
-      "sudo rm -rf $HOME/assets",
-      "sudo mkdir -p /etc/kubernetes/manifests",
-      "sudo mkdir -p /etc/kubernetes/bootstrap-secrets",
-      "sudo mv $HOME/kubeconfig /etc/kubernetes/kubeconfig",
-      "sudo cp -r /opt/bootstrap/assets/tls/* /etc/kubernetes/bootstrap-secrets/",
-      "sudo cp /opt/bootstrap/assets/auth/kubeconfig /etc/kubernetes/bootstrap-secrets/",
-      "sudo cp -r /opt/bootstrap/assets/static-manifests/* /etc/kubernetes/manifests/",
+      "sudo rsync -a $HOME/kubeconfig /etc/kubernetes/kubeconfig",
+      "sudo rsync -a $HOME/kubelet.env /etc/kubernetes/kubelet.env",
+      "sudo /opt/bootstrap/layout",
     ]
   }
 }
@@ -101,11 +72,22 @@ resource "null_resource" "copy-worker-secrets" {
     null_resource.external_dependencies,
   ]
 
+  # Disabled until all nodes are on 1.17.
+  # triggers = {
+  #   trigger_1 = local.kubelet_env
+  #   trigger_2 = module.bootstrap.kubeconfig-kubelet
+  # }
+
   connection {
     type    = "ssh"
     host    = var.workers.*.domain[count.index]
     user    = "core"
     timeout = "60m"
+  }
+
+  provisioner "file" {
+    content     = local.kubelet_env
+    destination = "$HOME/kubelet.env"
   }
 
   provisioner "file" {
@@ -115,7 +97,8 @@ resource "null_resource" "copy-worker-secrets" {
 
   provisioner "remote-exec" {
     inline = [
-      "sudo mv $HOME/kubeconfig /etc/kubernetes/kubeconfig",
+      "sudo rsync -a $HOME/kubeconfig /etc/kubernetes/kubeconfig",
+      "sudo rsync -a $HOME/kubelet.env /etc/kubernetes/kubelet.env",
     ]
   }
 }
@@ -128,8 +111,11 @@ resource "null_resource" "bootstrap" {
   depends_on = [
     null_resource.copy-controller-secrets,
     null_resource.copy-worker-secrets,
-    null_resource.copy-extra-assets,
   ]
+
+  triggers = {
+    trigger_1 = join("\n", local.assets_bundle)
+  }
 
   connection {
     type    = "ssh"

@@ -28,7 +28,7 @@ systemd:
           --network host \
           --volume /var/lib/etcd:/var/lib/etcd:rw,Z \
           --volume /etc/ssl/etcd:/etc/ssl/certs:ro,Z \
-          quay.io/coreos/etcd:v3.4.2
+          quay.io/coreos/etcd:v3.4.3
         ExecStop=/usr/bin/podman stop etcd
         [Install]
         WantedBy=multi-user.target
@@ -76,12 +76,11 @@ systemd:
           --volume /var/lib/docker:/var/lib/docker \
           --volume /var/lib/kubelet:/var/lib/kubelet:rshared,z \
           --volume /var/log:/var/log \
-          --volume /var/run:/var/run \
           --volume /var/run/lock:/var/run/lock:z \
           --volume /opt/cni/bin:/opt/cni/bin:z \
           --volume /etc/iscsi:/etc/iscsi \
           --volume /sbin/iscsiadm:/sbin/iscsiadm \
-          k8s.gcr.io/hyperkube:v1.16.2 /hyperkube kubelet \
+          k8s.gcr.io/hyperkube:v1.17.1 kubelet \
           --anonymous-auth=false \
           --authentication-token-webhook \
           --authorization-mode=Webhook \
@@ -93,6 +92,7 @@ systemd:
           --cluster_domain=${cluster_domain_suffix} \
           --cni-conf-dir=/etc/kubernetes/cni/net.d \
           --exit-on-lock-contention \
+          --healthz-port=0 \
           --hostname-override=${domain_name} \
           --kubeconfig=/etc/kubernetes/kubeconfig \
           --lock-file=/var/run/lock/kubelet.lock \
@@ -130,10 +130,11 @@ systemd:
         ExecStartPre=-/usr/bin/bash -c 'set -x && [ -n "$(ls /opt/bootstrap/assets/manifests-*/* 2>/dev/null)" ] && mv /opt/bootstrap/assets/manifests-*/* /opt/bootstrap/assets/manifests && rm -rf /opt/bootstrap/assets/manifests-*'
         ExecStart=/usr/bin/podman run --name bootstrap \
             --network host \
+            --volume /etc/kubernetes/bootstrap-secrets:/etc/kubernetes/secrets:ro,Z \
             --volume /opt/bootstrap/assets:/assets:ro,Z \
             --volume /opt/bootstrap/apply:/apply:ro,Z \
-            k8s.gcr.io/hyperkube:v1.16.2 \
-            /apply
+            --entrypoint=/apply \
+            k8s.gcr.io/hyperkube:v1.17.1
         ExecStartPost=/bin/touch /opt/bootstrap/bootstrap.done
         ExecStartPost=-/usr/bin/podman stop bootstrap
 storage:
@@ -146,12 +147,33 @@ storage:
       contents:
         inline:
           ${domain_name}
+    - path: /opt/bootstrap/layout
+      mode: 0544
+      contents:
+        inline: |
+          #!/bin/bash -e
+          mkdir -p -- auth tls/etcd tls/k8s static-manifests manifests/coredns manifests-networking
+          awk '/#####/ {filename=$2; next} {print > filename}' assets
+          mkdir -p /etc/ssl/etcd/etcd
+          mkdir -p /etc/kubernetes/bootstrap-secrets
+          mv tls/etcd/{peer*,server*} /etc/ssl/etcd/etcd/
+          mv tls/etcd/etcd-client* /etc/kubernetes/bootstrap-secrets/
+          chown -R etcd:etcd /etc/ssl/etcd
+          chmod -R 500 /etc/ssl/etcd
+          mv auth/kubeconfig /etc/kubernetes/bootstrap-secrets/
+          mv tls/k8s/* /etc/kubernetes/bootstrap-secrets/
+          sudo mkdir -p /etc/kubernetes/manifests
+          sudo mv static-manifests/* /etc/kubernetes/manifests/
+          sudo mkdir -p /opt/bootstrap/assets
+          sudo mv manifests /opt/bootstrap/assets/manifests
+          sudo mv manifests-networking /opt/bootstrap/assets/manifests-networking
+          rm -rf assets auth static-manifests tls
     - path: /opt/bootstrap/apply
       mode: 0544
       contents:
         inline: |
           #!/bin/bash -e
-          export KUBECONFIG=/assets/auth/kubeconfig
+          export KUBECONFIG=/etc/kubernetes/secrets/kubeconfig
           until kubectl version; do
             echo "Waiting for static pod control plane"
             sleep 5

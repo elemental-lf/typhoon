@@ -4,6 +4,74 @@ Notable changes between versions.
 
 ## Latest
 
+* Update CoreDNS from v1.6.5 to [v1.6.6](https://coredns.io/2019/12/11/coredns-1.6.6-release/) ([#602](https://github.com/poseidon/typhoon/pull/602))
+* Update Calico from v3.10.2 to v3.11.1 ([#604](https://github.com/poseidon/typhoon/pull/604))
+* Inline Kubelet service on Container Linux nodes ([#606](https://github.com/poseidon/typhoon/pull/606))
+* Disable unused Kubelet `127.0.0.1:10248` healthz listener ([#607](https://github.com/poseidon/typhoon/pull/607))
+* Enable kube-proxy metrics and allow Prometheus scrapes
+  * Allow TCP/10249 traffic with worker node sources
+
+#### Google
+
+* Allow `terraform-provider-google` v3.0+ ([#617](https://github.com/poseidon/typhoon/pull/617))
+  * Only enforce `v2.19+` to ease migration, as no v3.x features are used
+
+#### Addons
+
+* Update Prometheus from v2.14.0 to [v2.15.2](https://github.com/prometheus/prometheus/releases/tag/v2.15.2)
+  * Add discovery for kube-proxy service endpoints
+* Update kube-state-metrics from v1.8.0 to v1.9.1
+* Reduce node-exporter DaemonSet tolerations ([#614](https://github.com/poseidon/typhoon/pull/614))
+* Update Grafana from v6.5.1 to v6.5.2
+
+## v1.17.0
+
+* Kubernetes [v1.17.0](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.17.md#v1170)
+* Manage clusters without using a local `asset_dir` ([#595](https://github.com/poseidon/typhoon/pull/595))
+  * Change `asset_dir` to be optional. Remove the variable to skip writing assets locally (**action recommended**)
+  * Allow keeping cluster assets only in Terraform state ([pluggable](https://www.terraform.io/docs/backends/types/remote.html), encryption) and allow `terraform apply` from stateless automation systems
+  * Improve asset unpacking on controllers
+  * Obtain kubeconfig from Terraform module outputs
+* Replace usage of `template_dir` with `templatefile` function ([#587](https://github.com/poseidon/typhoon/pull/587))
+  * Require Terraform version v0.12.6+ (**action required**)
+* Update CoreDNS from v1.6.2 to v1.6.5 ([#588](https://github.com/poseidon/typhoon/pull/588))
+  * Add health `lameduck` option to wait before shutdown
+* Update Calico from v3.10.1 to v3.10.2 ([#599](https://github.com/poseidon/typhoon/pull/599))
+* Reduce pod eviction timeout for deleting pods on unready nodes from 5m to 1m ([#597](https://github.com/poseidon/typhoon/pull/597))
+  * Present since [v1.13.3](#v1133), but mistakenly removed in v1.16.0
+* Add CPU requests for control plane static pods ([#589](https://github.com/poseidon/typhoon/pull/589))
+  * May provide slight edge case benefits and aligns with upstream
+
+#### Google
+
+* Use new `google_compute_region_instance_group_manager` version block format
+  * Fixes warning that `instance_template` is deprecated
+  * Require `terraform-provider-google` v2.19.0+ (**action required**)
+
+#### Addons
+
+* Update Grafana from v6.4.4 to [v6.5.1](https://grafana.com/docs/guides/whats-new-in-v6-5/)
+* Add pod networking details in dashboards ([#593](https://github.com/poseidon/typhoon/pull/593))
+* Add node alerts and Grafana dashboard from node-exporter ([#591](https://github.com/poseidon/typhoon/pull/591))
+* Reduce Prometheus high cardinality time series ([#596](https://github.com/poseidon/typhoon/pull/596))
+
+## v1.16.3
+
+* Kubernetes [v1.16.3](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.16.md#v1163)
+* Update etcd from v3.4.2 to v3.4.3 ([#582](https://github.com/poseidon/typhoon/pull/582))
+* Upgrade Calico from v3.9.2 to [v3.10.1](https://docs.projectcalico.org/v3.10/release-notes/)
+  * Allow advertising service ClusterIPs to peer routers via a [BGPConfiguration](https://docs.projectcalico.org/v3.10/networking/advertise-service-ips)
+* Switch `kube-proxy` from iptables to ipvs mode ([#574](https://github.com/poseidon/typhoon/pull/574))
+
+#### Addons
+
+* Update Prometheus from v2.13.0 to [v2.14.0](https://github.com/prometheus/prometheus/releases/tag/v2.14.0)
+  * Refresh rules, alerts, and dashboards from upstreams
+* Remove addon-resizer from kube-state-metrics ([#575](https://github.com/poseidon/typhoon/pull/575))
+* Update Grafana from v6.4.2 to v6.4.4
+
+## v1.16.2
+
 * Kubernetes [v1.16.2](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.16.md#v1162)
 * Update etcd from v3.4.1 to v3.4.2 ([#570](https://github.com/poseidon/typhoon/pull/570))
 * Update Calico from v3.9.1 to [v3.9.2](https://docs.projectcalico.org/v3.9/release-notes/)

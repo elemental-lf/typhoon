@@ -12,13 +12,13 @@
 Typhoon provides tagged releases to allow clusters to be versioned using ordinary Terraform configs.
 
 ```
-module "google-cloud-yavin" {
+module "yavin" {
   source = "git::https://github.com/poseidon/typhoon//google-cloud/container-linux/kubernetes?ref=v1.8.6"
   ...
 }
 
-module "bare-metal-mercury" {
-  source = "git::https://github.com/poseidon/typhoon//bare-metal/container-linux/kubernetes?ref=v1.16.2"
+module "mercury" {
+  source = "git::https://github.com/poseidon/typhoon//bare-metal/container-linux/kubernetes?ref=v1.17.1"
   ...
 }
 ```
@@ -65,7 +65,7 @@ ipmitool -H node1.example.com -U USER -P PASS chassis bootdev pxe
 Delete or comment the Terraform config for the cluster.
 
 ```
-- module "bare-metal-mercury" {
+- module "mercury" {
 -   source = "git::https://github.com/poseidon/typhoon//bare-metal/container-linux/kubernetes"
 -   ...
 -}
@@ -93,7 +93,7 @@ kubectl apply -f mercury -R
 Once you're confident in the new cluster, delete the Terraform config for the old cluster.
 
 ```
-- module "google-cloud-yavin" {
+- module "yavin" {
 -   source = "git::https://github.com/poseidon/typhoon//google-cloud/container-linux/kubernetes"
 -   ...
 -}
@@ -261,7 +261,7 @@ terraform apply
 
 # add kubeconfig to new workers
 terraform state list | grep null_resource
-terraform taint -module digital-ocean-nemo null_resource.copy-worker-secrets.N
+terraform taint -module digital-ocean-nemo null_resource.copy-worker-secrets[N]
 terraform apply
 ```
 
@@ -279,15 +279,15 @@ Typhoon modules have been adapted for Terraform v0.12. Provider plugins requirem
 
 | Typhoon Release   | Terraform version   |
 |-------------------|---------------------|
-| v1.16.2 - ?       | v0.12.x             |
-| v1.10.3 - v1.16.2 | v0.11.x             |
+| v1.17.1 - ?       | v0.12.x             |
+| v1.10.3 - v1.17.1 | v0.11.x             |
 | v1.9.2 - v1.10.2  | v0.10.4+ or v0.11.x |
 | v1.7.3 - v1.9.1   | v0.10.x             |
 | v1.6.4 - v1.7.2   | v0.9.x              |
 
 ### New users
 
-New users can start with Terraform v0.12.x and follow the docs for Typhoon v1.16.2+ without issue.
+New users can start with Terraform v0.12.x and follow the docs for Typhoon v1.17.1+ without issue.
 
 ### Existing users
 
@@ -307,7 +307,7 @@ sudo ln -sf ~/Downloads/terraform-0.12.0/terraform /usr/local/bin/terraform12
 For existing Typhoon v1.14.2 or v1.14.3 clusters, edit the Typhoon `ref` to first SHA that introduced Terraform v0.12 support (`3276bf587850218b8f967978a4bf2b05d5f440a2`). The aim is to minimize the diff and convert to using Terraform v0.12.x. For example:
 
 ```tf
- module "bare-metal-mercury" {
+ module "mercury" {
 -  source = "git::https://github.com/poseidon/typhoon//bare-metal/container-linux/kubernetes?ref=v1.14.3"
 +  source = "git::https://github.com/poseidon/typhoon//bare-metal/container-linux/kubernetes?ref=3276bf587850218b8f967978a4bf2b05d5f440a2"
    ...
@@ -316,7 +316,7 @@ For existing Typhoon v1.14.2 or v1.14.3 clusters, edit the Typhoon `ref` to firs
 With Terraform v0.12, Typhoon clusters no longer require the `providers` block (unless you actually need to pass an [aliased provider](https://www.terraform.io/docs/configuration/providers.html#alias-multiple-provider-instances)). A regression in Terraform v0.11 made it neccessary to explicitly pass aliased providers in order for Typhoon to continue to enforce constraints (see [terraform#16824](https://github.com/hashicorp/terraform/issues/16824)). Terraform v0.12 resolves this issue.
 
 ```tf
- module "bare-metal-mercury" {
+ module "mercury" {
    source = "git::https://github.com/poseidon/typhoon//bare-metal/container-linux/kubernetes?ref=3276bf587850218b8f967978a4bf2b05d5f440a2"
 
 -  providers = {
@@ -404,7 +404,7 @@ tree .
 └── infraB  <- new Terraform v0.12.x configs
 ```
 
-Define Typhoon clusters in the new config directory using Terraform v0.12 syntax. Follow the Typhoon v1.16.2+ docs (e.g. use `terraform12` in the `infraB` dir). See [AWS](/cl/aws), [Azure](/cl/azure), [Bare-Metal](/cl/bare-metal), [Digital Ocean](/cl/digital-ocean), or [Google-Cloud](/cl/google-cloud)) to create new clusters. Follow the usual [upgrade](/topics/maintenance/#upgrades) process to apply workloads and shift traffic. Later, switch back to the old config directory and deprovision clusters with Terraform v0.11.
+Define Typhoon clusters in the new config directory using Terraform v0.12 syntax. Follow the Typhoon v1.17.1+ docs (e.g. use `terraform12` in the `infraB` dir). See [AWS](/cl/aws), [Azure](/cl/azure), [Bare-Metal](/cl/bare-metal), [Digital Ocean](/cl/digital-ocean), or [Google-Cloud](/cl/google-cloud)) to create new clusters. Follow the usual [upgrade](/topics/maintenance/#upgrades) process to apply workloads and shift traffic. Later, switch back to the old config directory and deprovision clusters with Terraform v0.11.
 
 ```shell
 terraform12 init

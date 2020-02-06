@@ -3,7 +3,7 @@
 !!! danger
     Typhoon for Fedora CoreOS is an early preview! Fedora CoreOS itself is a preview! Expect bugs and design shifts. Please help both projects solve problems. Report Fedora CoreOS bugs to [Fedora](https://github.com/coreos/fedora-coreos-tracker/issues). Report Typhoon issues to Typhoon.
 
-In this tutorial, we'll create a Kubernetes v1.16.2 cluster on AWS with Fedora CoreOS.
+In this tutorial, we'll create a Kubernetes v1.17.1 cluster on AWS with Fedora CoreOS.
 
 We'll declare a Kubernetes cluster using the Typhoon Terraform module. Then apply the changes to create a VPC, gateway, subnets, security groups, controller instances, worker auto-scaling group, network load balancer, and TLS assets.
 
@@ -13,15 +13,15 @@ Controller hosts are provisioned to run an `etcd-member` peer and a `kubelet` se
 
 * AWS Account and IAM credentials
 * AWS Route53 DNS Zone (registered Domain Name or delegated subdomain)
-* Terraform v0.12.x and [terraform-provider-ct](https://github.com/poseidon/terraform-provider-ct) installed locally
+* Terraform v0.12.6+ and [terraform-provider-ct](https://github.com/poseidon/terraform-provider-ct) installed locally
 
 ## Terraform Setup
 
-Install [Terraform](https://www.terraform.io/downloads.html) v0.12.x on your system.
+Install [Terraform](https://www.terraform.io/downloads.html) v0.12.6+ on your system.
 
 ```sh
 $ terraform version
-Terraform v0.12.9
+Terraform v0.12.16
 ```
 
 Add the [terraform-provider-ct](https://github.com/poseidon/terraform-provider-ct) plugin binary for your system to `~/.terraform.d/plugins/`, noting the final name.
@@ -52,7 +52,7 @@ Configure the AWS provider to use your access key credentials in a `providers.tf
 
 ```tf
 provider "aws" {
-  version                 = "2.31.0"
+  version                 = "2.41.0"
   region                  = "eu-central-1"
   shared_credentials_file = "/home/user/.config/aws/credentials"
 }
@@ -72,8 +72,8 @@ Additional configuration options are described in the `aws` provider [docs](http
 Define a Kubernetes cluster using the module `aws/fedora-coreos/kubernetes`.
 
 ```tf
-module "aws-tempest" {
-  source = "git::https://github.com/poseidon/typhoon//aws/fedora-coreos/kubernetes?ref=v1.16.2"
+module "tempest" {
+  source = "git::https://github.com/poseidon/typhoon//aws/fedora-coreos/kubernetes?ref=v1.17.1"
 
   # AWS
   cluster_name = "tempest"
@@ -82,7 +82,6 @@ module "aws-tempest" {
 
   # configuration
   ssh_authorized_key = "ssh-rsa AAAAB3Nz..."
-  asset_dir          = "/home/user/.secrets/clusters/tempest"
 
   # optional
   worker_count = 2
@@ -113,7 +112,7 @@ Plan the resources to be created.
 
 ```sh
 $ terraform plan
-Plan: 98 to add, 0 to change, 0 to destroy.
+Plan: 81 to add, 0 to change, 0 to destroy.
 ```
 
 Apply the changes to create the cluster.
@@ -121,9 +120,9 @@ Apply the changes to create the cluster.
 ```sh
 $ terraform apply
 ...
-module.aws-tempest.null_resource.bootstrap: Still creating... (4m50s elapsed)
-module.aws-tempest.null_resource.bootstrap: Still creating... (5m0s elapsed)
-module.aws-tempest.null_resource.bootstrap: Creation complete after 5m8s (ID: 3961816482286168143)
+module.tempest.null_resource.bootstrap: Still creating... (4m50s elapsed)
+module.tempest.null_resource.bootstrap: Still creating... (5m0s elapsed)
+module.tempest.null_resource.bootstrap: Creation complete after 5m8s (ID: 3961816482286168143)
 
 Apply complete! Resources: 98 added, 0 changed, 0 destroyed.
 ```
@@ -132,15 +131,24 @@ In 4-8 minutes, the Kubernetes cluster will be ready.
 
 ## Verify
 
-[Install kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) on your system. Use the generated `kubeconfig` credentials to access the Kubernetes cluster and list nodes.
+[Install kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) on your system. Obtain the generated cluster `kubeconfig` from module outputs (e.g. write to a local file).
 
 ```
-$ export KUBECONFIG=/home/user/.secrets/clusters/tempest/auth/kubeconfig
+resource "local_file" "kubeconfig-tempest" {
+  content  = module.tempest.kubeconfig-admin
+  filename = "/home/user/.kube/configs/tempest-config"
+}
+```
+
+List nodes in the cluster.
+
+```
+$ export KUBECONFIG=/home/user/.kube/configs/tempest-config
 $ kubectl get nodes
 NAME           STATUS  ROLES    AGE  VERSION
-ip-10-0-3-155  Ready   <none>   10m  v1.16.2
-ip-10-0-26-65  Ready   <none>   10m  v1.16.2
-ip-10-0-41-21  Ready   <none>   10m  v1.16.2
+ip-10-0-3-155  Ready   <none>   10m  v1.17.1
+ip-10-0-26-65  Ready   <none>   10m  v1.17.1
+ip-10-0-41-21  Ready   <none>   10m  v1.17.1
 ```
 
 List the pods.
@@ -177,7 +185,6 @@ Check the [variables.tf](https://github.com/poseidon/typhoon/blob/master/aws/fed
 | dns_zone | AWS Route53 DNS zone | "aws.example.com" |
 | dns_zone_id | AWS Route53 DNS zone id | "Z3PAABBCFAKEC0" |
 | ssh_authorized_key | SSH public key for user 'core' | "ssh-rsa AAAAB3NZ..." |
-| asset_dir | Absolute path to a directory where generated assets should be placed (contains secrets) | "/home/user/.secrets/clusters/tempest" |
 
 #### DNS Zone
 
@@ -200,6 +207,7 @@ Reference the DNS zone id with `aws_route53_zone.zone-for-clusters.zone_id`.
 
 | Name | Description | Default | Example |
 |:-----|:------------|:--------|:--------|
+| asset_dir | Absolute path to a directory where generated assets should be placed (contains secrets) | "" (disabled) | "/home/user/.secrets/clusters/tempest" |
 | controller_count | Number of controllers (i.e. masters) | 1 | 1 |
 | worker_count | Number of workers | 1 | 3 |
 | controller_type | EC2 instance type for controllers | "t3.small" | See below |

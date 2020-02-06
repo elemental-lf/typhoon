@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
         - name: grafana
-          image: docker.io/grafana/grafana:6.4.2
+          image: docker.io/grafana/grafana:6.5.2
           env:
             - name: GF_PATHS_CONFIG
               value: "/etc/grafana/custom.ini"
@@ -56,14 +56,18 @@ spec:
               mountPath: /etc/grafana/provisioning/dashboards
             - name: dashboards-etcd
               mountPath: /etc/grafana/dashboards/etcd
+            - name: dashboards-node-exporter
+              mountPath: /etc/grafana/dashboards/node-exporter
             - name: dashboards-prom
               mountPath: /etc/grafana/dashboards/prom
             - name: dashboards-k8s
               mountPath: /etc/grafana/dashboards/k8s
             - name: dashboards-k8s-nodes
               mountPath: /etc/grafana/dashboards/k8s-nodes
-            - name: dashboards-k8s-resources
-              mountPath: /etc/grafana/dashboards/k8s-resources
+            - name: dashboards-k8s-resources-1
+              mountPath: /etc/grafana/dashboards/k8s-resources-1
+            - name: dashboards-k8s-resources-2
+              mountPath: /etc/grafana/dashboards/k8s-resources-2
             - name: dashboards-coredns
               mountPath: /etc/grafana/dashboards/coredns
             - name: dashboards-nginx-ingress
@@ -81,6 +85,9 @@ spec:
         - name: dashboards-etcd
           configMap:
             name: grafana-dashboards-etcd
+        - name: dashboards-node-exporter
+          configMap:
+            name: grafana-dashboards-node-exporter
         - name: dashboards-prom
           configMap:
             name: grafana-dashboards-prom
@@ -90,9 +97,12 @@ spec:
         - name: dashboards-k8s-nodes
           configMap:
             name: grafana-dashboards-k8s-nodes
-        - name: dashboards-k8s-resources
+        - name: dashboards-k8s-resources-1
           configMap:
-            name: grafana-dashboards-k8s-resources
+            name: grafana-dashboards-k8s-resources-1
+        - name: dashboards-k8s-resources-2
+          configMap:
+            name: grafana-dashboards-k8s-resources-2
         - name: dashboards-coredns
           configMap:
             name: grafana-dashboards-coredns
