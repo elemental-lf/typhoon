@@ -121,7 +121,7 @@ systemd:
           --read-only-port=0 \
           --volume-plugin-dir=/var/lib/kubelet/volumeplugins \
           --max-pods=220 \
-          --eviction-soft=memory.available<500Mi,nodefs.available<31%,nodefs.inodesFree<10%,imagefs.available<31%,imagefs.inodesFree<10% \
+          --eviction-soft=memory.available<500Mi,nodefs.available<20%,nodefs.inodesFree<10%,imagefs.available<20%,imagefs.inodesFree<10% \
           --eviction-soft-grace-period=memory.available=2m,nodefs.available=2m,nodefs.inodesFree=2m,imagefs.available=2m,imagefs.inodesFree=2m
         ExecStop=-/usr/bin/rkt stop --uuid-file=/var/cache/kubelet-pod.uuid
         Restart=always
