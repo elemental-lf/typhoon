@@ -165,6 +165,7 @@ data "template_file" "controller-configs" {
     kubelet_image          = split(":", var.container_images["kubelet"])[0]
     kubelet_tag            = split(":", var.container_images["kubelet"])[1]
     enable_rbd_nbd         = var.enable_rbd_nbd
+    taints                 = join(",",var.controllers[count.index]["taints"])
   }
 }
 
@@ -196,6 +197,7 @@ data "template_file" "worker-configs" {
     kubelet_image          = split(":", var.container_images["kubelet"])[0]
     kubelet_tag            = split(":", var.container_images["kubelet"])[1]
     enable_rbd_nbd         = var.enable_rbd_nbd
+    taints                 = join(",",var.workers[count.index]["taints"])
   }
 }
 

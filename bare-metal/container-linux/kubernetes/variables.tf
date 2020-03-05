@@ -28,6 +28,7 @@ variable "controllers" {
     mac    = string
     domain = string
     install_disk = string
+    taints = list(string)
   }))
   description = <<EOD
 List of controller machine details (unique name, identifying MAC address, FQDN, installation disk)
@@ -41,6 +42,7 @@ variable "workers" {
     mac    = string
     domain = string
     install_disk = string
+    taints = list(string)
   }))
   description = <<EOD
 List of worker machine details (unique name, identifying MAC address, FQDN, installation disk)
