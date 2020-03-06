@@ -1,9 +1,6 @@
 # Bare-Metal
 
-!!! danger
-    Typhoon for Fedora CoreOS is an early preview! Fedora CoreOS itself is a preview! Expect bugs and design shifts. Please help both projects solve problems. Report Fedora CoreOS bugs to [Fedora](https://github.com/coreos/fedora-coreos-tracker/issues). Report Typhoon issues to Typhoon.
-
-In this tutorial, we'll network boot and provision a Kubernetes v1.17.1 cluster on bare-metal with Fedora CoreOS.
+In this tutorial, we'll network boot and provision a Kubernetes v1.17.3 cluster on bare-metal with Fedora CoreOS.
 
 First, we'll deploy a [Matchbox](https://github.com/poseidon/matchbox) service and setup a network boot environment. Then, we'll declare a Kubernetes cluster using the Typhoon Terraform module and power on machines. On PXE boot, machines will install Fedora CoreOS to disk, reboot into the disk install, and provision themselves as Kubernetes controllers or workers via Ignition.
 
@@ -30,7 +27,7 @@ Configure each machine to boot from the disk through IPMI or the BIOS menu.
 ```
 ipmitool -H node1 -U USER -P PASS chassis bootdev disk options=persistent
 ```
- 
+
 During provisioning, you'll explicitly set the boot device to `pxe` for the next boot only. Machines will install (overwrite) the operating system to disk on PXE boot and reboot into the disk install.
 
 !!! tip ""
@@ -106,7 +103,7 @@ Read about the [many ways](https://coreos.com/matchbox/docs/latest/network-setup
     TFTP chainloading to modern boot firmware, like iPXE, avoids issues with old NICs and allows faster transfer protocols like HTTP to be used.
 
 !!! warning
-    Compile iPXE from [source](https://github.com/ipxe/ipxe) with support for [HTTPS downloads](https://ipxe.org/crypto). iPXE's pre-built firmware binaries do not enable this. Fedora does not provide images over HTTP.
+    Compile iPXE from [source](https://github.com/ipxe/ipxe) with support for [HTTPS downloads](https://ipxe.org/crypto). iPXE's pre-built firmware binaries do not enable this. Fedora CoreOS downloads are HTTPS-only.
 
 ## Terraform Setup
 
@@ -114,7 +111,7 @@ Install [Terraform](https://www.terraform.io/downloads.html) v0.12.6+ on your sy
 
 ```sh
 $ terraform version
-Terraform v0.12.16
+Terraform v0.12.20
 ```
 
 Add the [terraform-provider-matchbox](https://github.com/poseidon/terraform-provider-matchbox) plugin binary for your system to `~/.terraform.d/plugins/`, noting the final name.
@@ -163,14 +160,13 @@ Define a Kubernetes cluster using the module `bare-metal/fedora-coreos/kubernete
 
 ```tf
 module "mercury" {
-  source = "git::https://github.com/poseidon/typhoon//bare-metal/fedora-coreos/kubernetes?ref=v1.17.1"
-  
+  source = "git::https://github.com/poseidon/typhoon//bare-metal/fedora-coreos/kubernetes?ref=v1.17.3"
+
   # bare-metal
   cluster_name            = "mercury"
   matchbox_http_endpoint  = "http://matchbox.example.com"
-  os_stream               = "testing"
-  os_version              = "30.20191002.0"
-  cached_install          = true
+  os_stream               = "stable"
+  os_version              = "31.20200113.3.1"
 
   # configuration
   k8s_domain_name    = "node1.example.com"
@@ -293,9 +289,9 @@ List nodes in the cluster.
 $ export KUBECONFIG=/home/user/.kube/configs/mercury-config
 $ kubectl get nodes
 NAME                STATUS  ROLES   AGE  VERSION
-node1.example.com   Ready   <none>  10m  v1.17.1
-node2.example.com   Ready   <none>  10m  v1.17.1
-node3.example.com   Ready   <none>  10m  v1.17.1
+node1.example.com   Ready   <none>  10m  v1.17.3
+node2.example.com   Ready   <none>  10m  v1.17.3
+node3.example.com   Ready   <none>  10m  v1.17.3
 ```
 
 List the pods.
@@ -330,8 +326,8 @@ Check the [variables.tf](https://github.com/poseidon/typhoon/blob/master/bare-me
 |:-----|:------------|:--------|
 | cluster_name | Unique cluster name | "mercury" |
 | matchbox_http_endpoint | Matchbox HTTP read-only endpoint | "http://matchbox.example.com:port" |
-| os_stream | Fedora CoreOS release stream | "testing" |
-| os_version | Fedora CoreOS version to PXE and install | "30.20190716.1" |
+| os_stream | Fedora CoreOS release stream | "stable" |
+| os_version | Fedora CoreOS version to PXE and install | "31.20200113.3.1" |
 | k8s_domain_name | FQDN resolving to the controller(s) nodes. Workers and kubectl will communicate with this endpoint | "myk8s.example.com" |
 | ssh_authorized_key | SSH public key for user 'core' | "ssh-rsa AAAAB3Nz..." |
 | controllers | List of controller machine detail objects (unique name, identifying MAC address, FQDN) | `[{name="node1", mac="52:54:00:a1:9c:ae", domain="node1.example.com"}]` |
@@ -345,7 +341,7 @@ Check the [variables.tf](https://github.com/poseidon/typhoon/blob/master/bare-me
 | cached_install | PXE boot and install from the Matchbox `/assets` cache. Admin MUST have downloaded Fedora CoreOS images into the cache | false | true |
 | install_disk | Disk device where Fedora CoreOS should be installed | "sda" (not "/dev/sda" like Container Linux) | "sdb" |
 | networking | Choice of networking provider | "calico" | "calico" or "flannel" |
-| network_mtu | CNI interface MTU (calico-only) | 1480 | - | 
+| network_mtu | CNI interface MTU (calico-only) | 1480 | - |
 | snippets | Map from machine names to lists of Fedora CoreOS Config snippets | {} | UNSUPPORTED |
 | network_ip_autodetection_method | Method to detect host IPv4 address (calico-only) | "first-found" | "can-reach=10.0.0.1" |
 | pod_cidr | CIDR IPv4 range to assign to Kubernetes pods | "10.2.0.0/16" | "10.22.0.0/16" |

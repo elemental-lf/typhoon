@@ -4,12 +4,98 @@ Notable changes between versions.
 
 ## Latest
 
+* Update etcd from v3.4.3 to [v3.4.4](https://github.com/etcd-io/etcd/releases/tag/v3.4.4)
+  * On Container Linux, fetch using the docker transport format ([#659](https://github.com/poseidon/typhoon/pull/659))
+* Update CoreDNS from v1.6.6 to v1.6.7 ([#648](https://github.com/poseidon/typhoon/pull/648))
+
+#### AWS
+
+* Allow VPC route table extension via reference ([#654](https://github.com/poseidon/typhoon/pull/654))
+* Fix `worker_node_labels` on Fedora CoreOS ([#651](https://github.com/poseidon/typhoon/pull/651))
+* Fix automatic worker node delete on shutdown on Fedora CoreOS ([#657](https://github.com/poseidon/typhoon/pull/657))
+
+#### Google Cloud
+
+* Fix `worker_node_labels` on Fedora CoreOS ([#651](https://github.com/poseidon/typhoon/pull/651))
+* Fix automatic worker node delete on shutdown on Fedora CoreOS ([#657](https://github.com/poseidon/typhoon/pull/657))
+
+#### DigitalOcean
+
+* Add support for Flatcar Container Linux ([#644](https://github.com/poseidon/typhoon/pull/644))
+
+#### Addons
+
+* Update nginx-ingress from v0.28.0 to [v0.30.0](https://github.com/kubernetes/ingress-nginx/releases/tag/nginx-0.30.0)
+* Update Prometheus from v2.15.2 to [v2.16.0](https://github.com/prometheus/prometheus/releases/tag/v2.16.0)
+  * Refresh Prometheus rules and alerts
+  * Add a BlackboxProbeFailure alert
+  * Update kube-state-metrics from v1.9.4 to v1.9.5
+  * Update node-exporter from v0.18.1 to [v1.0.0-rc.0](https://github.com/prometheus/node_exporter/releases/tag/v1.0.0-rc.0)
+* Update Grafana from v6.6.1 to v6.6.2
+  * Refresh Grafana dashboards
+
+## v1.17.3
+
+* Kubernetes [v1.17.3](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.17.md#v1173)
+* Update Calico from v3.11.2 to v3.12.0
+* Allow Fedora CoreOS clusters to pass CNCF conformance suite
+  * Set Docker log driver to `json-file` as a workaround
+* Try Fedora CoreOS or Flatcar Linux alongside CoreOS [Container Linux](https://coreos.com/os/eol/) clusters (recommended)
+
+#### AWS
+
+* Promote Fedora CoreOS to beta ([#645](https://github.com/poseidon/typhoon/pull/645))
+
+#### Bare-Metal
+
+* Promote Fedora CoreOS to beta ([#645](https://github.com/poseidon/typhoon/pull/645))
+* Add Fedora CoreOS kernel arguments initrd and console ([#640](https://github.com/poseidon/typhoon/pull/640))
+
+#### Google Cloud
+
+* Add Terraform module for Fedora CoreOS ([#632](https://github.com/poseidon/typhoon/pull/632))
+* Add support for Flatcar Container Linux ([#639](https://github.com/poseidon/typhoon/pull/639))
+
+#### Addons
+
+* Update nginx-ingress from v0.27.1 to v0.28.0
+* Update kube-state-metrics from v1.9.3 to v1.9.4
+* Update Grafana from v6.5.3 to v6.6.1
+
+## v1.17.2
+
+* Kubernetes [v1.17.2](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.17.md#v1172)
+
+#### AWS
+
+* Promote Fedora CoreOS from preview to alpha
+
+#### Bare-Metal
+
+* Promote Fedora CoreOS from preview to alpha
+* Update Fedora CoreOS images location
+  * Use Fedora CoreOS production [download](https://getfedora.org/coreos/download/) streams
+  * Use live PXE kernel and initramfs images
+
+#### Addons
+
+* Update nginx-ingress from v0.26.1 to [v0.27.1](https://github.com/kubernetes/ingress-nginx/releases/tag/nginx-0.27.1) ([#625](https://github.com/poseidon/typhoon/pull/625))
+  * Change runAsUser from 33 to 101 for alpine-based image
+* Update kube-state-metrics from v1.9.2 to v1.9.3
+
+## v1.17.1
+
+* Kubernetes [v1.17.1](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.17.md#v1171)
 * Update CoreDNS from v1.6.5 to [v1.6.6](https://coredns.io/2019/12/11/coredns-1.6.6-release/) ([#602](https://github.com/poseidon/typhoon/pull/602))
-* Update Calico from v3.10.2 to v3.11.1 ([#604](https://github.com/poseidon/typhoon/pull/604))
+* Update Calico from v3.10.2 to v3.11.2 ([#604](https://github.com/poseidon/typhoon/pull/604))
 * Inline Kubelet service on Container Linux nodes ([#606](https://github.com/poseidon/typhoon/pull/606))
 * Disable unused Kubelet `127.0.0.1:10248` healthz listener ([#607](https://github.com/poseidon/typhoon/pull/607))
 * Enable kube-proxy metrics and allow Prometheus scrapes
   * Allow TCP/10249 traffic with worker node sources
+
+#### AWS
+
+* Update Fedora CoreOS AMI filter for fedora-coreos-31 ([#620](https://github.com/poseidon/typhoon/pull/620))
 
 #### Google
 
@@ -20,9 +106,9 @@ Notable changes between versions.
 
 * Update Prometheus from v2.14.0 to [v2.15.2](https://github.com/prometheus/prometheus/releases/tag/v2.15.2)
   * Add discovery for kube-proxy service endpoints
-* Update kube-state-metrics from v1.8.0 to v1.9.1
+* Update kube-state-metrics from v1.8.0 to v1.9.2
 * Reduce node-exporter DaemonSet tolerations ([#614](https://github.com/poseidon/typhoon/pull/614))
-* Update Grafana from v6.5.1 to v6.5.2
+* Update Grafana from v6.5.1 to v6.5.3
 
 ## v1.17.0
 
@@ -246,7 +332,7 @@ Notable changes between versions.
 * Require `terraform-provider-azurerm` v1.27+ to support Terraform v0.12 (action required)
 * Avoid unneeded rotations of Regular priority virtual machine scale sets
   * Azure only allows `eviction_policy` to be set for Low priority VMs. Supporting Low priority VMs meant when Regular VMs were used, each `terraform apply` rolled workers, to set eviction_policy to null.
-  * Terraform v0.12 nullable variables fix the issue so plan does not produce a diff. 
+  * Terraform v0.12 nullable variables fix the issue so plan does not produce a diff.
 
 #### Bare-Metal
 
@@ -301,7 +387,7 @@ Notable changes between versions.
 * Update Grafana from v6.1.6 to v6.2.1
 
 ## v1.14.2
- 
+
 * Kubernetes [v1.14.2](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.14.md#v1142)
 * Update etcd from v3.3.12 to [v3.3.13](https://github.com/etcd-io/etcd/releases/tag/v3.3.13)
 * Upgrade Calico from v3.6.1 to [v3.7.2](https://docs.projectcalico.org/v3.7/release-notes/)
@@ -372,7 +458,7 @@ Notable changes between versions.
 
 * Add ability to load balance TCP/UDP applications ([#442](https://github.com/poseidon/typhoon/pull/442))
   * Add worker instances to a target pool, output as `worker_target_pool`
-  * Health check for workers with Ingress controllers. Forward rules don't support differing internal/external ports, but some Ingress controllers support TCP/UDP proxy as a workaround 
+  * Health check for workers with Ingress controllers. Forward rules don't support differing internal/external ports, but some Ingress controllers support TCP/UDP proxy as a workaround
 * Remove Haswell minimum CPU platform requirement ([#439](https://github.com/poseidon/typhoon/pull/439))
   * Google Cloud API implements `min_cpu_platform` to mean "use exactly this CPU". Revert [#405](https://github.com/poseidon/typhoon/pull/405) added in v1.13.4.
   * Fix error creating clusters in new regions without Haswell (e.g. europe-west2) ([#438](https://github.com/poseidon/typhoon/issues/438))
@@ -557,7 +643,7 @@ Notable changes between versions.
 * Update Calico from v3.3.0 to [v3.3.1](https://docs.projectcalico.org/v3.3/releases/)
   * Disable Felix usage reporting by default ([#345](https://github.com/poseidon/typhoon/pull/345))
 * Improve flannel manifests
-  * [Rename](https://github.com/poseidon/terraform-render-bootkube/commit/d045a8e6b8eccfbb9d69bb51953b5a93d23f67f7) `kube-flannel` DaemonSet to `flannel` and `kube-flannel-cfg` ConfigMap to `flannel-config` 
+  * [Rename](https://github.com/poseidon/terraform-render-bootkube/commit/d045a8e6b8eccfbb9d69bb51953b5a93d23f67f7) `kube-flannel` DaemonSet to `flannel` and `kube-flannel-cfg` ConfigMap to `flannel-config`
   * [Drop](https://github.com/poseidon/terraform-render-bootkube/commit/39f9afb3360ec642e5b98457c8bd07eda35b6c96) unused mounts and add a CPU resource request
 * Update CoreDNS from v1.2.4 to [v1.2.6](https://coredns.io/2018/11/05/coredns-1.2.6-release/)
   * Enable CoreDNS `loop` and `loadbalance` plugins ([#340](https://github.com/poseidon/typhoon/pull/340))
@@ -719,7 +805,7 @@ Notable changes between versions.
 * Force apiserver to stop listening on `127.0.0.1:8080`
 * Replace `kube-dns` with [CoreDNS](https://coredns.io/) ([#261](https://github.com/poseidon/typhoon/pull/261))
   * Edit the `coredns` ConfigMap to [customize](https://coredns.io/plugins/)
-  * CoreDNS doesn't use a resizer. For large clusters, scaling may be required. 
+  * CoreDNS doesn't use a resizer. For large clusters, scaling may be required.
 
 #### AWS
 
@@ -764,7 +850,7 @@ Notable changes between versions.
 
 * Switch `kube-apiserver` port from 443 to 6443 ([#248](https://github.com/poseidon/typhoon/pull/248))
   * Users who exposed kube-apiserver on a WAN via their router/load-balancer will need to adjust its configuration (e.g. DNAT 6443). Most apiservers are on a LAN (internal, VPN-only, etc) so if you didn't specially configure network gear for 443, no change is needed. (possible action required)
-* Fix possible deadlock when provisioning clusters larger than 10 nodes ([#244](https://github.com/poseidon/typhoon/pull/244)) 
+* Fix possible deadlock when provisioning clusters larger than 10 nodes ([#244](https://github.com/poseidon/typhoon/pull/244))
 
 #### DigitalOcean
 
@@ -832,7 +918,7 @@ Notable changes between versions.
   * Please change values stable, beta, or alpha to coreos-stable, coreos-beta, coreos-alpha (**action required!**)
 * Replace `container_linux_version` variable with `os_version`
 * Add `network_ip_autodetection_method` variable for Calico host IPv4 address detection
-  * Use Calico's default "first-found" to support single NIC and bonded NIC nodes 
+  * Use Calico's default "first-found" to support single NIC and bonded NIC nodes
   * Allow [alternative](https://docs.projectcalico.org/v3.1/reference/node/configuration#ip-autodetection-methods) methods for multi NIC nodes, like can-reach=IP or interface=REGEX
 * Deprecate `container_linux_oem` variable
 
@@ -865,7 +951,7 @@ Notable changes between versions.
 #### Google Cloud
 
 * Add support for multi-controller clusters (i.e. multi-master) ([#54](https://github.com/poseidon/typhoon/issues/54), [#190](https://github.com/poseidon/typhoon/pull/190))
-  * Switch from Google Cloud network load balancer to a TCP proxy load balancer. Avoid a [bug](https://issuetracker.google.com/issues/67366622) in Google network load balancers that limited clusters to only bootstrapping one controller node. 
+  * Switch from Google Cloud network load balancer to a TCP proxy load balancer. Avoid a [bug](https://issuetracker.google.com/issues/67366622) in Google network load balancers that limited clusters to only bootstrapping one controller node.
   * Add TCP health check for apiserver pods on controllers. Replace kubelet check approximation.
 
 #### Addons
@@ -1096,7 +1182,7 @@ Notable changes between versions.
   * Container Linux stable, beta, and alpha now provide Docker 17.09 (instead
   of 1.12)
   * Older clusters (with CLUO addon) auto-update Container Linux version to begin using Docker 17.09
-* Fix race where `etcd-member.service` could fail to resolve peers ([#69](https://github.com/poseidon/typhoon/pull/69)) 
+* Fix race where `etcd-member.service` could fail to resolve peers ([#69](https://github.com/poseidon/typhoon/pull/69))
 * Add optional `cluster_domain_suffix` variable (#74)
 * Use kubernetes-incubator/bootkube v0.9.1
 

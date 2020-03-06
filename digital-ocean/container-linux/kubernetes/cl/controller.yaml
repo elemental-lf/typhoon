@@ -7,7 +7,9 @@ systemd:
         - name: 40-etcd-cluster.conf
           contents: |
             [Service]
-            Environment="ETCD_IMAGE_TAG=v3.4.3"
+            Environment="ETCD_IMAGE_TAG=v3.4.4"
+            Environment="ETCD_IMAGE_URL=docker://quay.io/coreos/etcd"
+            Environment="RKT_RUN_ARGS=--insecure-options=image"
             Environment="ETCD_NAME=${etcd_name}"
             Environment="ETCD_ADVERTISE_CLIENT_URLS=https://${etcd_domain}:2379"
             Environment="ETCD_INITIAL_ADVERTISE_PEER_URLS=https://${etcd_domain}:2380"
@@ -89,7 +91,7 @@ systemd:
           --mount volume=run,target=/run \
           --volume usr-share-certs,kind=host,source=/usr/share/ca-certificates,readOnly=true \
           --mount volume=usr-share-certs,target=/usr/share/ca-certificates \
-          --volume var-lib-calico,kind=host,source=/var/lib/calico \
+          --volume var-lib-calico,kind=host,source=/var/lib/calico,readOnly=true \
           --mount volume=var-lib-calico,target=/var/lib/calico \
           --volume var-lib-docker,kind=host,source=/var/lib/docker \
           --mount volume=var-lib-docker,target=/var/lib/docker \
@@ -99,7 +101,7 @@ systemd:
           --mount volume=var-log,target=/var/log \
           --volume opt-cni-bin,kind=host,source=/opt/cni/bin \
           --mount volume=opt-cni-bin,target=/opt/cni/bin \
-          docker://k8s.gcr.io/hyperkube:v1.17.1 \
+          docker://k8s.gcr.io/hyperkube:v1.17.3 \
           --exec=/usr/local/bin/kubelet -- \
           --anonymous-auth=false \
           --authentication-token-webhook \
@@ -144,7 +146,7 @@ systemd:
             --volume script,kind=host,source=/opt/bootstrap/apply \
             --mount volume=script,target=/apply \
             --insecure-options=image \
-            docker://k8s.gcr.io/hyperkube:v1.17.1 \
+            docker://k8s.gcr.io/hyperkube:v1.17.3 \
             --net=host \
             --dns=host \
             --exec=/apply

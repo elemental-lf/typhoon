@@ -53,7 +53,7 @@ systemd:
           --mount volume=run,target=/run \
           --volume usr-share-certs,kind=host,source=/usr/share/ca-certificates,readOnly=true \
           --mount volume=usr-share-certs,target=/usr/share/ca-certificates \
-          --volume var-lib-calico,kind=host,source=/var/lib/calico \
+          --volume var-lib-calico,kind=host,source=/var/lib/calico,readOnly=true \
           --mount volume=var-lib-calico,target=/var/lib/calico \
           --volume var-lib-docker,kind=host,source=/var/lib/docker \
           --mount volume=var-lib-docker,target=/var/lib/docker \
@@ -63,7 +63,7 @@ systemd:
           --mount volume=var-log,target=/var/log \
           --volume opt-cni-bin,kind=host,source=/opt/cni/bin \
           --mount volume=opt-cni-bin,target=/opt/cni/bin \
-          docker://k8s.gcr.io/hyperkube:v1.17.1 \
+          docker://k8s.gcr.io/hyperkube:v1.17.3 \
           --exec=/usr/local/bin/kubelet -- \
           --anonymous-auth=false \
           --authentication-token-webhook \
@@ -126,7 +126,7 @@ storage:
             --volume config,kind=host,source=/etc/kubernetes \
             --mount volume=config,target=/etc/kubernetes \
             --insecure-options=image \
-            docker://k8s.gcr.io/hyperkube:v1.17.1 \
+            docker://k8s.gcr.io/hyperkube:v1.17.3 \
             --net=host \
             --dns=host \
             -- \

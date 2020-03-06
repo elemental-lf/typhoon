@@ -11,7 +11,7 @@ Typhoon distributes upstream Kubernetes, architectural conventions, and cluster 
 
 ## Features <a href="https://www.cncf.io/certification/software-conformance/"><img align="right" src="https://storage.googleapis.com/poseidon/certified-kubernetes.png"></a>
 
-* Kubernetes v1.17.1 (upstream)
+* Kubernetes v1.17.3 (upstream)
 * Single or multi-master, [Calico](https://www.projectcalico.org/) or [flannel](https://github.com/coreos/flannel) networking
 * On-cluster etcd with TLS, [RBAC](https://kubernetes.io/docs/admin/authorization/rbac/)-enabled, [network policy](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
 * Advanced features like [worker pools](https://typhoon.psdn.io/advanced/worker-pools/), [preemptible](https://typhoon.psdn.io/cl/google-cloud/#preemption) workers, and [snippets](https://typhoon.psdn.io/advanced/customization/#container-linux) customization
@@ -23,18 +23,28 @@ Typhoon provides a Terraform Module for each supported operating system and plat
 
 | Platform      | Operating System | Terraform Module | Status |
 |---------------|------------------|------------------|--------|
-| AWS           | Container Linux / Flatcar Linux  | [aws/container-linux/kubernetes](aws/container-linux/kubernetes) | stable |
+| AWS           | Container Linux  | [aws/container-linux/kubernetes](aws/container-linux/kubernetes) | stable |
 | Azure         | Container Linux  | [azure/container-linux/kubernetes](azure/container-linux/kubernetes) | alpha |
-| Bare-Metal    | Container Linux / Flatcar Linux  | [bare-metal/container-linux/kubernetes](bare-metal/container-linux/kubernetes) | stable |
+| Bare-Metal    | Container Linux  | [bare-metal/container-linux/kubernetes](bare-metal/container-linux/kubernetes) | stable |
 | Digital Ocean | Container Linux  | [digital-ocean/container-linux/kubernetes](digital-ocean/container-linux/kubernetes) | beta |
 | Google Cloud  | Container Linux  | [google-cloud/container-linux/kubernetes](google-cloud/container-linux/kubernetes) | stable |
 
-A preview of Typhoon for [Fedora CoreOS](https://getfedora.org/coreos/) is available for testing.
+Typhoon is available for [Fedora CoreOS](https://getfedora.org/coreos/).
 
 | Platform      | Operating System | Terraform Module | Status |
 |---------------|------------------|------------------|--------|
-| AWS           | Fedora CoreOS | [aws/fedora-coreos/kubernetes](aws/fedora-coreos/kubernetes) | preview |
-| Bare-Metal    | Fedora CoreOS | [bare-metal/fedora-coreos/kubernetes](bare-metal/fedora-coreos/kubernetes) | preview |
+| AWS           | Fedora CoreOS | [aws/fedora-coreos/kubernetes](aws/fedora-coreos/kubernetes) | beta |
+| Bare-Metal    | Fedora CoreOS | [bare-metal/fedora-coreos/kubernetes](bare-metal/fedora-coreos/kubernetes) | beta |
+| Google Cloud  | Fedora CoreOS | [google-cloud/fedora-coreos/kubernetes](google-cloud/fedora-coreos/kubernetes) | alpha |
+
+Typhoon is available for [Flatcar Container Linux](https://www.flatcar-linux.org/releases/).
+
+| Platform      | Operating System | Terraform Module | Status |
+|---------------|------------------|------------------|--------|
+| AWS           | Flatcar Linux    | [aws/container-linux/kubernetes](aws/container-linux/kubernetes) | stable |
+| Bare-Metal    | Flatcar Linux    | [bare-metal/container-linux/kubernetes](bare-metal/container-linux/kubernetes) | stable |
+| Google Cloud  | Flatcar Linux  | [google-cloud/container-linux/kubernetes](google-cloud/container-linux/kubernetes) | alpha |
+| Digital Ocean | Flatcar Linux  | [digital-ocean/container-linux/kubernetes](digital-ocean/container-linux/kubernetes) | alpha |
 
 ## Documentation
 
@@ -48,7 +58,7 @@ Define a Kubernetes cluster by using the Terraform module for your chosen platfo
 
 ```tf
 module "yavin" {
-  source = "git::https://github.com/poseidon/typhoon//google-cloud/container-linux/kubernetes?ref=v1.17.1"
+  source = "git::https://github.com/poseidon/typhoon//google-cloud/container-linux/kubernetes?ref=v1.17.3"
 
   # Google Cloud
   cluster_name  = "yavin"
@@ -58,7 +68,7 @@ module "yavin" {
 
   # configuration
   ssh_authorized_key = "ssh-rsa AAAAB3Nz..."
-  
+
   # optional
   worker_count = 2
   worker_preemptible = true
@@ -87,9 +97,9 @@ In 4-8 minutes (varies by platform), the cluster will be ready. This Google Clou
 $ export KUBECONFIG=/home/user/.kube/configs/yavin-config
 $ kubectl get nodes
 NAME                                       ROLES    STATUS  AGE  VERSION
-yavin-controller-0.c.example-com.internal  <none>   Ready   6m   v1.17.1
-yavin-worker-jrbf.c.example-com.internal   <none>   Ready   5m   v1.17.1
-yavin-worker-mzdm.c.example-com.internal   <none>   Ready   5m   v1.17.1
+yavin-controller-0.c.example-com.internal  <none>   Ready   6m   v1.17.3
+yavin-worker-jrbf.c.example-com.internal   <none>   Ready   5m   v1.17.3
+yavin-worker-mzdm.c.example-com.internal   <none>   Ready   5m   v1.17.3
 ```
 
 List the pods.

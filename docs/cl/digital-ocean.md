@@ -1,6 +1,6 @@
 # Digital Ocean
 
-In this tutorial, we'll create a Kubernetes v1.17.1 cluster on DigitalOcean with Container Linux.
+In this tutorial, we'll create a Kubernetes v1.17.3 cluster on DigitalOcean with CoreOS Container Linux or Flatcar Linux.
 
 We'll declare a Kubernetes cluster using the Typhoon Terraform module. Then apply the changes to create controller droplets, worker droplets, DNS records, tags, and TLS assets.
 
@@ -18,7 +18,7 @@ Install [Terraform](https://www.terraform.io/downloads.html) v0.12.6+ on your sy
 
 ```sh
 $ terraform version
-Terraform v0.12.16
+Terraform v0.12.20
 ```
 
 Add the [terraform-provider-ct](https://github.com/poseidon/terraform-provider-ct) plugin binary for your system to `~/.terraform.d/plugins/`, noting the final name.
@@ -50,7 +50,7 @@ Configure the DigitalOcean provider to use your token in a `providers.tf` file.
 
 ```tf
 provider "digitalocean" {
-  version = "1.11.0"
+  version = "1.14.0"
   token = "${chomp(file("~/.config/digital-ocean/token"))}"
 }
 
@@ -65,22 +65,45 @@ Define a Kubernetes cluster using the module `digital-ocean/container-linux/kube
 
 ```tf
 module "nemo" {
-  source = "git::https://github.com/poseidon/typhoon//digital-ocean/container-linux/kubernetes?ref=v1.17.1"
+  source = "git::https://github.com/poseidon/typhoon//digital-ocean/container-linux/kubernetes?ref=v1.17.3"
 
   # Digital Ocean
   cluster_name = "nemo"
   region       = "nyc3"
   dns_zone     = "digital-ocean.example.com"
+  image        = "coreos-stable"
 
   # configuration
   ssh_fingerprints = ["d7:9d:79:ae:56:32:73:79:95:88:e3:a2:ab:5d:45:e7"]
-  
+
   # optional
   worker_count = 2
 }
 ```
 
 Reference the [variables docs](#variables) or the [variables.tf](https://github.com/poseidon/typhoon/blob/master/digital-ocean/container-linux/kubernetes/variables.tf) source.
+
+### Flatcar Linux Only
+
+!!! warning
+    Typhoon for Flatcar Linux on DigitalOcean is alpha. Also IPv6 is unsupported with DigitalOcean custom images.
+
+Flatcar Linux publishes DigitalOcean images, but does not upload them. DigitalOcean allows [custom boot images](https://blog.digitalocean.com/custom-images/) by file or URL.
+
+[Download](https://www.flatcar-linux.org/releases/) the Flatcar Linux DigitalOcean bin image (or copy the URL) and [upload](https://cloud.digitalocean.com/images/custom_images) it as a custom image. Rename the image with the channel and version to refer to these images over time.
+
+```tf
+module "nemo" {
+  ...
+  image = data.digitalocean_image.flatcar-stable.id
+}
+
+data "digitalocean_image" "flatcar-stable" {
+  name = "flatcar-stable-2303.4.0.bin.bz2"
+}
+```
+
+Set the [image](#variables) to the custom image id.
 
 ## ssh-agent
 
@@ -138,9 +161,9 @@ List nodes in the cluster.
 $ export KUBECONFIG=/home/user/.kube/configs/nemo-config
 $ kubectl get nodes
 NAME               STATUS  ROLES   AGE  VERSION
-10.132.110.130     Ready   <none>  10m  v1.17.1
-10.132.115.81      Ready   <none>  10m  v1.17.1
-10.132.124.107     Ready   <none>  10m  v1.17.1
+10.132.110.130     Ready   <none>  10m  v1.17.3
+10.132.115.81      Ready   <none>  10m  v1.17.3
+10.132.124.107     Ready   <none>  10m  v1.17.3
 ```
 
 List the pods.
@@ -149,9 +172,9 @@ List the pods.
 NAMESPACE     NAME                                       READY     STATUS    RESTARTS   AGE
 kube-system   coredns-1187388186-ld1j7                   1/1       Running   0          11m
 kube-system   coredns-1187388186-rdhf7                   1/1       Running   0          11m
-kube-system   calico-node-1m5bf                          2/2       Running   0          11m              
-kube-system   calico-node-7jmr1                          2/2       Running   0          11m              
-kube-system   calico-node-bknc8                          2/2       Running   0          11m              
+kube-system   calico-node-1m5bf                          2/2       Running   0          11m
+kube-system   calico-node-7jmr1                          2/2       Running   0          11m
+kube-system   calico-node-bknc8                          2/2       Running   0          11m
 kube-system   kube-apiserver-ip-10.132.115.81            1/1       Running   0          11m
 kube-system   kube-controller-manager-ip-10.132.115.81   1/1       Running   0          11m
 kube-system   kube-proxy-6kxjf                           1/1       Running   0          11m
@@ -224,7 +247,7 @@ Digital Ocean requires the SSH public key be uploaded to your account, so you ma
 | worker_count | Number of workers | 1 | 3 |
 | controller_type | Droplet type for controllers | "s-2vcpu-2gb" | s-2vcpu-2gb, s-2vcpu-4gb, s-4vcpu-8gb, ... |
 | worker_type | Droplet type for workers | "s-1vcpu-2gb" | s-1vcpu-2gb, s-2vcpu-2gb, ... |
-| image | Container Linux image for instances | "coreos-stable" | coreos-stable, coreos-beta, coreos-alpha |
+| image | Container Linux image for instances | "coreos-stable" | coreos-stable, coreos-beta, coreos-alpha, "custom-image-id" |
 | controller_clc_snippets | Controller Container Linux Config snippets | [] | [example](/advanced/customization/) |
 | worker_clc_snippets | Worker Container Linux Config snippets | [] | [example](/advanced/customization/) |
 | networking | Choice of networking provider | "calico" | "flannel" or "calico" |
