@@ -1,10 +1,33 @@
 ---
 variant: fcos
 version: 1.0.0
+ignition:
+  config:
+    merge:
+${snippets}
 systemd:
   units:
     - name: docker.service
       enabled: true
+    - name: kubelet-env-watcher.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Restart kubelet
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/bin/systemctl restart kubelet.service
+        [Install]
+        WantedBy=multi-user.target
+    - name: kubelet-env-watcher.path
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Watch for modified kubelet.env
+        [Path]
+        PathChanged=/etc/kubernetes/kubelet.env
+        [Install]
+        WantedBy=multi-user.target
     - name: wait-for-dns.service
       enabled: true
       contents: |
@@ -23,6 +46,7 @@ systemd:
         Description=Kubelet via Hyperkube (System Container)
         Wants=rpc-statd.service
         [Service]
+        EnvironmentFile=/etc/kubernetes/kubelet.env
         ExecStartPre=/bin/mkdir -p /etc/kubernetes/cni/net.d
         ExecStartPre=/bin/mkdir -p /etc/kubernetes/manifests
         ExecStartPre=/bin/mkdir -p /opt/cni/bin
@@ -50,7 +74,11 @@ systemd:
           --volume /opt/cni/bin:/opt/cni/bin:z \
           --volume /etc/iscsi:/etc/iscsi \
           --volume /sbin/iscsiadm:/sbin/iscsiadm \
-          k8s.gcr.io/hyperkube:v1.17.3 kubelet \
+%{ if enable_rbd_nbd == "true" ~}
+          --volume /etc/modprobe.d/rbd-nbd.conf:/etc/modprobe.d/rbd-nbd.conf \
+%{ endif ~}
+          $${KUBELET_IMAGE_URL}:$${KUBELET_IMAGE_TAG} \
+          kubelet \
           --anonymous-auth=false \
           --authentication-token-webhook \
           --authorization-mode=Webhook \
@@ -70,7 +98,13 @@ systemd:
           --node-labels=node.kubernetes.io/node \
           --pod-manifest-path=/etc/kubernetes/manifests \
           --read-only-port=0 \
-          --volume-plugin-dir=/var/lib/kubelet/volumeplugins
+%{ if length(taints) > 0 ~}
+          --register-with-taints=${taints} \
+%{ endif ~}
+          --volume-plugin-dir=/var/lib/kubelet/volumeplugins \
+          --max-pods=220 \
+          --eviction-soft=memory.available<500Mi,nodefs.available<20%,nodefs.inodesFree<10%,imagefs.available<20%,imagefs.inodesFree<10% \
+          --eviction-soft-grace-period=memory.available=2m,nodefs.available=2m,nodefs.inodesFree=2m,imagefs.available=2m,imagefs.inodesFree=2m
         ExecStop=-/usr/bin/podman stop kubelet
         Delegate=yes
         Restart=always
@@ -90,6 +124,12 @@ storage:
   directories:
     - path: /etc/kubernetes
   files:
+    - path: /etc/kubernetes/kubelet.env
+      mode: 0644
+      contents:
+        inline: |
+          KUBELET_IMAGE_URL=${kubelet_image}
+          KUBELET_IMAGE_TAG=${kubelet_tag}
     - path: /etc/hostname
       mode: 0644
       contents:
@@ -98,7 +138,15 @@ storage:
     - path: /etc/sysctl.d/max-user-watches.conf
       contents:
         inline: |
-          fs.inotify.max_user_watches=16184
+          fs.inotify.max_user_watches=524288
+          fs.inotify.max_user_instances=1024
+%{ if enable_rbd_nbd == "true" ~}
+    - path: /etc/modprobe.d/rbd-nbd.conf
+      contents:
+        inline: |
+          install rbd /bin/true
+          options nbd nbds_max=256
+%{ endif ~}
     - path: /etc/systemd/system.conf.d/accounting.conf
       contents:
         inline: |

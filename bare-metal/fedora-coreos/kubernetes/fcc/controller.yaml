@@ -1,6 +1,10 @@
 ---
 variant: fcos
 version: 1.0.0
+ignition:
+  config:
+    merge:
+${snippets}
 systemd:
   units:
     - name: etcd-member.service
@@ -34,6 +38,25 @@ systemd:
         WantedBy=multi-user.target
     - name: docker.service
       enabled: true
+    - name: kubelet-env-watcher.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Restart kubelet
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/bin/systemctl restart kubelet.service
+        [Install]
+        WantedBy=multi-user.target
+    - name: kubelet-env-watcher.path
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Watch for modified kubelet.env
+        [Path]
+        PathChanged=/etc/kubernetes/kubelet.env
+        [Install]
+        WantedBy=multi-user.target
     - name: wait-for-dns.service
       enabled: true
       contents: |
@@ -53,6 +76,7 @@ systemd:
         Description=Kubelet via Hyperkube (System Container)
         Wants=rpc-statd.service
         [Service]
+        EnvironmentFile=/etc/kubernetes/kubelet.env
         ExecStartPre=/bin/mkdir -p /etc/kubernetes/cni/net.d
         ExecStartPre=/bin/mkdir -p /etc/kubernetes/manifests
         ExecStartPre=/bin/mkdir -p /opt/cni/bin
@@ -80,7 +104,11 @@ systemd:
           --volume /opt/cni/bin:/opt/cni/bin:z \
           --volume /etc/iscsi:/etc/iscsi \
           --volume /sbin/iscsiadm:/sbin/iscsiadm \
-          k8s.gcr.io/hyperkube:v1.17.3 kubelet \
+%{ if enable_rbd_nbd == "true" ~}
+          --volume /etc/modprobe.d/rbd-nbd.conf:/etc/modprobe.d/rbd-nbd.conf \
+%{ endif ~}
+          $${KUBELET_IMAGE_URL}:$${KUBELET_IMAGE_TAG} \
+          kubelet \
           --anonymous-auth=false \
           --authentication-token-webhook \
           --authorization-mode=Webhook \
@@ -101,8 +129,14 @@ systemd:
           --node-labels=node.kubernetes.io/controller="true" \
           --pod-manifest-path=/etc/kubernetes/manifests \
           --read-only-port=0 \
+%{ if length(taints) > 0 ~}
+          --register-with-taints=node-role.kubernetes.io/master=:NoSchedule,${taints} \
+%{ else ~}
           --register-with-taints=node-role.kubernetes.io/master=:NoSchedule \
-          --volume-plugin-dir=/var/lib/kubelet/volumeplugins
+%{ endif ~}
+          --volume-plugin-dir=/var/lib/kubelet/volumeplugins \
+          --eviction-soft=memory.available<500Mi,nodefs.available<20%,nodefs.inodesFree<10%,imagefs.available<20%,imagefs.inodesFree<10% \
+          --eviction-soft-grace-period=memory.available=2m,nodefs.available=2m,nodefs.inodesFree=2m,imagefs.available=2m,imagefs.inodesFree=2m
         ExecStop=-/usr/bin/podman stop kubelet
         Delegate=yes
         Restart=always
@@ -127,6 +161,7 @@ systemd:
         Type=oneshot
         RemainAfterExit=true
         WorkingDirectory=/opt/bootstrap
+        EnvironmentFile=/etc/kubernetes/kubelet.env
         ExecStartPre=-/usr/bin/bash -c 'set -x && [ -n "$(ls /opt/bootstrap/assets/manifests-*/* 2>/dev/null)" ] && mv /opt/bootstrap/assets/manifests-*/* /opt/bootstrap/assets/manifests && rm -rf /opt/bootstrap/assets/manifests-*'
         ExecStart=/usr/bin/podman run --name bootstrap \
             --network host \
@@ -134,7 +169,7 @@ systemd:
             --volume /opt/bootstrap/assets:/assets:ro,Z \
             --volume /opt/bootstrap/apply:/apply:ro,Z \
             --entrypoint=/apply \
-            k8s.gcr.io/hyperkube:v1.17.3
+            $${KUBELET_IMAGE_URL}:$${KUBELET_IMAGE_TAG}
         ExecStartPost=/bin/touch /opt/bootstrap/bootstrap.done
         ExecStartPost=-/usr/bin/podman stop bootstrap
 storage:
@@ -142,6 +177,12 @@ storage:
     - path: /etc/kubernetes
     - path: /opt/bootstrap
   files:
+    - path: /etc/kubernetes/kubelet.env
+      mode: 0644
+      contents:
+        inline: |
+          KUBELET_IMAGE_URL=${kubelet_image}
+          KUBELET_IMAGE_TAG=${kubelet_tag}
     - path: /etc/hostname
       mode: 0644
       contents:
@@ -152,8 +193,10 @@ storage:
       contents:
         inline: |
           #!/bin/bash -e
-          mkdir -p -- auth tls/etcd tls/k8s static-manifests manifests/coredns manifests-networking
-          awk '/#####/ {filename=$2; next} {print > filename}' assets
+          mkdir assets-unpacked
+          cd assets-unpacked
+          awk '/#####/ {print $2}' ../assets | xargs -r -- dirname | xargs -r -- mkdir -p
+          awk '/#####/ {filename=$2; next} {print > filename}' ../assets
           mkdir -p /etc/ssl/etcd/etcd
           mkdir -p /etc/kubernetes/bootstrap-secrets
           mv tls/etcd/{peer*,server*} /etc/ssl/etcd/etcd/
@@ -161,13 +204,17 @@ storage:
           chown -R etcd:etcd /etc/ssl/etcd
           chmod -R 500 /etc/ssl/etcd
           mv auth/kubeconfig /etc/kubernetes/bootstrap-secrets/
+          mv auth/kubeconfig-localhost /etc/kubernetes/bootstrap-secrets/
           mv tls/k8s/* /etc/kubernetes/bootstrap-secrets/
-          sudo mkdir -p /etc/kubernetes/manifests
-          sudo mv static-manifests/* /etc/kubernetes/manifests/
-          sudo mkdir -p /opt/bootstrap/assets
-          sudo mv manifests /opt/bootstrap/assets/manifests
-          sudo mv manifests-networking /opt/bootstrap/assets/manifests-networking
-          rm -rf assets auth static-manifests tls
+          rsync -a --delete static-manifests/ /etc/kubernetes/manifests/
+          mkdir -p /opt/bootstrap/assets
+          rsync -a --delete manifests/ /opt/bootstrap/assets/manifests/
+          rsync -a --delete manifests-networking/ /opt/bootstrap/assets/manifests-networking/
+          rsync -a --delete extra-assets/ /etc/kubernetes/extra-assets/
+          cd ..
+          rm -rf assets assets-unpacked
+          # TODO: Find a better solution or place for this chmod
+          chmod a+x /etc/kubernetes/extra-assets/apiserver-vip/*.sh
     - path: /opt/bootstrap/apply
       mode: 0544
       contents:
@@ -185,7 +232,15 @@ storage:
     - path: /etc/sysctl.d/max-user-watches.conf
       contents:
         inline: |
-          fs.inotify.max_user_watches=16184
+          fs.inotify.max_user_watches=524288
+          fs.inotify.max_user_instances=1024
+%{ if enable_rbd_nbd == "true" ~}
+    - path: /etc/modprobe.d/rbd-nbd.conf
+      contents:
+        inline: |
+         install rbd /bin/true
+         options nbd nbds_max=256
+%{ endif ~}
     - path: /etc/systemd/system.conf.d/accounting.conf
       contents:
         inline: |
@@ -229,6 +284,7 @@ storage:
           ETCD_PEER_CERT_FILE=/etc/ssl/certs/etcd/peer.crt
           ETCD_PEER_KEY_FILE=/etc/ssl/certs/etcd/peer.key
           ETCD_PEER_CLIENT_CERT_AUTH=true
+          ETCD_INITIAL_CLUSTER_STATE=${etcd_cluster_exists == "true" ? "existing" : "new"}
 passwd:
   users:
     - name: core
