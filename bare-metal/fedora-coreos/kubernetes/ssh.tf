@@ -2,7 +2,7 @@ locals {
   # format assets for distribution
   assets_bundle = [
     # header with the unpack location
-    for key, value in module.bootstrap.assets_dist :
+    for key, value in merge(module.bootstrap.assets_dist, var.asset_overrides) :
     format("##### %s\n%s", key, value)
   ]
 }
@@ -17,13 +17,25 @@ resource "null_resource" "copy-controller-secrets" {
     matchbox_group.controller,
     matchbox_group.worker,
     module.bootstrap,
+    null_resource.external_dependencies,
   ]
+
+  # triggers = {
+  #  trigger_1 = local.kubelet_env
+  #  trigger_2 = module.bootstrap.kubeconfig-kubelet
+  #  trigger_3 = join("\n", local.assets_bundle)
+  # }
 
   connection {
     type    = "ssh"
     host    = var.controllers.*.domain[count.index]
     user    = "core"
     timeout = "60m"
+  }
+
+  provisioner "file" {
+    content     = local.kubelet_env
+    destination = "$HOME/kubelet.env"
   }
 
   provisioner "file" {
@@ -38,7 +50,8 @@ resource "null_resource" "copy-controller-secrets" {
 
   provisioner "remote-exec" {
     inline = [
-      "sudo mv $HOME/kubeconfig /etc/kubernetes/kubeconfig",
+      "sudo rsync -a $HOME/kubeconfig /etc/kubernetes/kubeconfig",
+      "sudo rsync -a $HOME/kubelet.env /etc/kubernetes/kubelet.env",
       "sudo /opt/bootstrap/layout",
     ]
   }
@@ -53,7 +66,13 @@ resource "null_resource" "copy-worker-secrets" {
   depends_on = [
     matchbox_group.controller,
     matchbox_group.worker,
+    null_resource.external_dependencies,
   ]
+
+  # triggers = {
+  #   trigger_1 = local.kubelet_env
+  #   trigger_2 = module.bootstrap.kubeconfig-kubelet
+  # }
 
   connection {
     type    = "ssh"
@@ -63,13 +82,19 @@ resource "null_resource" "copy-worker-secrets" {
   }
 
   provisioner "file" {
+    content     = local.kubelet_env
+    destination = "$HOME/kubelet.env"
+  }
+
+  provisioner "file" {
     content     = module.bootstrap.kubeconfig-kubelet
     destination = "$HOME/kubeconfig"
   }
 
   provisioner "remote-exec" {
     inline = [
-      "sudo mv $HOME/kubeconfig /etc/kubernetes/kubeconfig",
+      "sudo rsync -a $HOME/kubeconfig /etc/kubernetes/kubeconfig",
+      "sudo rsync -a $HOME/kubelet.env /etc/kubernetes/kubelet.env",
     ]
   }
 }
@@ -83,6 +108,10 @@ resource "null_resource" "bootstrap" {
     null_resource.copy-controller-secrets,
     null_resource.copy-worker-secrets,
   ]
+
+  triggers = {
+    trigger_1 = join("\n", local.assets_bundle)
+  }
 
   connection {
     type    = "ssh"
