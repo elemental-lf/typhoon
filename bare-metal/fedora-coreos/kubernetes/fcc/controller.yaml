@@ -75,6 +75,7 @@ systemd:
         [Unit]
         Description=Kubelet via Hyperkube (System Container)
         Wants=rpc-statd.service
+        StartLimitIntervalSec=0
         [Service]
         EnvironmentFile=/etc/kubernetes/kubelet.env
         ExecStartPre=/bin/mkdir -p /etc/kubernetes/cni/net.d
