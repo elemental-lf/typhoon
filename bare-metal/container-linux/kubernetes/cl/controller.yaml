@@ -163,7 +163,6 @@ systemd:
       contents: |
         [Unit]
         Description=Kubernetes control plane
-        ConditionPathExists=!/opt/bootstrap/bootstrap.done
         [Service]
         Type=oneshot
         RemainAfterExit=true
@@ -183,7 +182,6 @@ systemd:
             --net=host \
             --dns=host \
             --exec=/apply
-        ExecStartPost=/bin/touch /opt/bootstrap/bootstrap.done
         [Install]
         WantedBy=multi-user.target
 storage:

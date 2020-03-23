@@ -126,7 +126,7 @@ resource "null_resource" "bootstrap" {
 
   provisioner "remote-exec" {
     inline = [
-      "sudo systemctl start bootstrap",
+      "sudo systemctl restart bootstrap",
     ]
   }
 }
