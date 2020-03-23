@@ -10,7 +10,6 @@ systemd:
     - name: docker.service
       enabled: true
     - name: kubelet-env-watcher.service
-      enabled: true
       contents: |
         [Unit]
         Description=Restart kubelet
