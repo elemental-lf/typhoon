@@ -24,6 +24,7 @@ systemd:
       contents: |
         [Unit]
         Description=Watch for modified kubelet.env
+        After=kubelet.service
         [Path]
         PathChanged=/etc/kubernetes/kubelet.env
         [Install]
