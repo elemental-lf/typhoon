@@ -13,9 +13,10 @@ systemd:
       contents: |
         [Unit]
         Description=Restart kubelet
+        StartLimitIntervalSec=0
         [Service]
         Type=oneshot
-        ExecStart=/usr/bin/systemctl restart kubelet.service
+        ExecStart=-/usr/bin/systemctl --job-mode=fail try-restart kubelet.service
         [Install]
         WantedBy=multi-user.target
     - name: kubelet-env-watcher.path
