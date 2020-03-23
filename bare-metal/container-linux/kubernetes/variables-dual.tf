@@ -39,7 +39,7 @@ variable "container_images" {
     kube_scheduler            = "k8s.gcr.io/hyperkube:v1.17.4"
     kube_proxy                = "k8s.gcr.io/hyperkube:v1.17.4"
     kubelet                   = "k8s.gcr.io/hyperkube:v1.17.4"
-    coredns     = "k8s.gcr.io/coredns:1.6.6"
+    coredns     = "k8s.gcr.io/coredns:1.6.7"
     keepalived_vip = "osixia/keepalived:2.0.17"
     tiller         = "gcr.io/kubernetes-helm/tiller:v2.16.1"
   }
