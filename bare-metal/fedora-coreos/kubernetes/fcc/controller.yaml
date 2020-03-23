@@ -48,7 +48,7 @@ systemd:
         [Install]
         WantedBy=multi-user.target
     - name: kubelet-env-watcher.path
-      enabled: true
+      #enabled: true
       contents: |
         [Unit]
         Description=Watch for modified kubelet.env
