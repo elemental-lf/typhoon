@@ -12,6 +12,16 @@ variable "apiserver_vip" {
   default     = ""
 }
 
+variable "apiserver_vip_interface" {
+  description = "Interface to use for apiserver HA via keepalived"
+  type        = string
+}
+
+variable "apiserver_vip_vrrp_id" {
+  description = "VRRP id to use for apiserver HA via keepalived"
+  type        = number
+}
+
 variable "etcd_cluster_exists" {
   type        = string
   description = "Wheter it should be assumed that the etcd cluster already exists or not"
