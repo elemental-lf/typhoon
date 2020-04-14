@@ -1,9 +1,6 @@
 # Google Cloud
 
-!!! danger
-    Typhoon for Fedora CoreOS is an alpha. Please report Fedora CoreOS bugs to [Fedora](https://github.com/coreos/fedora-coreos-tracker/issues) and Typhoon issues to Typhoon.
-
-In this tutorial, we'll create a Kubernetes v1.17.3 cluster on Google Compute Engine with Fedora CoreOS.
+In this tutorial, we'll create a Kubernetes v1.18.1 cluster on Google Compute Engine with Fedora CoreOS.
 
 We'll declare a Kubernetes cluster using the Typhoon Terraform module. Then apply the changes to create a network, firewall rules, health checks, controller instances, worker managed instance group, load balancers, and TLS assets.
 
@@ -21,15 +18,15 @@ Install [Terraform](https://www.terraform.io/downloads.html) v0.12.6+ on your sy
 
 ```sh
 $ terraform version
-Terraform v0.12.20
+Terraform v0.12.21
 ```
 
 Add the [terraform-provider-ct](https://github.com/poseidon/terraform-provider-ct) plugin binary for your system to `~/.terraform.d/plugins/`, noting the final name.
 
 ```sh
-wget https://github.com/poseidon/terraform-provider-ct/releases/download/v0.4.0/terraform-provider-ct-v0.4.0-linux-amd64.tar.gz
-tar xzf terraform-provider-ct-v0.4.0-linux-amd64.tar.gz
-mv terraform-provider-ct-v0.4.0-linux-amd64/terraform-provider-ct ~/.terraform.d/plugins/terraform-provider-ct_v0.4.0
+wget https://github.com/poseidon/terraform-provider-ct/releases/download/v0.5.0/terraform-provider-ct-v0.5.0-linux-amd64.tar.gz
+tar xzf terraform-provider-ct-v0.5.0-linux-amd64.tar.gz
+mv terraform-provider-ct-v0.5.0-linux-amd64/terraform-provider-ct ~/.terraform.d/plugins/terraform-provider-ct_v0.5.0
 ```
 
 Read [concepts](/architecture/concepts/) to learn about Terraform, modules, and organizing resources. Change to your infrastructure repository (e.g. `infra`).
@@ -52,14 +49,14 @@ Configure the Google Cloud provider to use your service account key, project-id,
 
 ```tf
 provider "google" {
-  version     = "3.7.0"
+  version     = "3.12.0"
   project     = "project-id"
   region      = "us-central1"
   credentials = file("~/.config/google-cloud/terraform.json")
 }
 
 provider "ct" {
-  version = "0.4.0"
+  version = "0.5.0"
 }
 ```
 
@@ -76,13 +73,13 @@ Fedora CoreOS publishes images for Google Cloud, but does not yet upload them. G
 
 ```
 gsutil list
-gsutil cp fedora-coreos-31.20200113.3.1-gcp.x86_64.tar.gz gs://BUCKET
+gsutil cp fedora-coreos-31.20200323.3.2-gcp.x86_64.tar.gz gs://BUCKET
 ```
 
 Create a Compute Engine image from the file.
 
 ```
-gcloud compute images create fedora-coreos-31-20200113-3-1 --source-uri gs://BUCKET/fedora-coreos-31.20200113.3.1-gcp.x86_64.tar.gz
+gcloud compute images create fedora-coreos-31-20200323-3-2 --source-uri gs://BUCKET/fedora-coreos-31.20200323.3.2-gcp.x86_64.tar.gz
 ```
 
 ## Cluster
@@ -100,7 +97,7 @@ module "yavin" {
   dns_zone_name = "example-zone"
 
   # custom image name from above
-  os_image = "fedora-coreos-31-20200113-3-1"
+  os_image = "fedora-coreos-31-20200323-3-2"
 
   # configuration
   ssh_authorized_key = "ssh-rsa AAAAB3Nz..."
@@ -110,7 +107,7 @@ module "yavin" {
 }
 ```
 
-Reference the [variables docs](#variables) or the [variables.tf](https://github.com/poseidon/typhoon/blob/master/google-cloud/container-linux/kubernetes/variables.tf) source.
+Reference the [variables docs](#variables) or the [variables.tf](https://github.com/poseidon/typhoon/blob/master/google-cloud/fedora-coreos/kubernetes/variables.tf) source.
 
 ## ssh-agent
 
@@ -168,9 +165,9 @@ List nodes in the cluster.
 $ export KUBECONFIG=/home/user/.kube/configs/yavin-config
 $ kubectl get nodes
 NAME                                       ROLES    STATUS  AGE  VERSION
-yavin-controller-0.c.example-com.internal  <none>   Ready   6m   v1.17.3
-yavin-worker-jrbf.c.example-com.internal   <none>   Ready   5m   v1.17.3
-yavin-worker-mzdm.c.example-com.internal   <none>   Ready   5m   v1.17.3
+yavin-controller-0.c.example-com.internal  <none>   Ready   6m   v1.18.1
+yavin-worker-jrbf.c.example-com.internal   <none>   Ready   5m   v1.18.1
+yavin-worker-mzdm.c.example-com.internal   <none>   Ready   5m   v1.18.1
 ```
 
 List the pods.
@@ -197,7 +194,7 @@ Learn about [maintenance](/topics/maintenance/) and [addons](/addons/overview/).
 
 ## Variables
 
-Check the [variables.tf](https://github.com/poseidon/typhoon/blob/master/google-cloud/container-linux/kubernetes/variables.tf) source.
+Check the [variables.tf](https://github.com/poseidon/typhoon/blob/master/google-cloud/fedora-coreos/kubernetes/variables.tf) source.
 
 ### Required
 
@@ -207,6 +204,7 @@ Check the [variables.tf](https://github.com/poseidon/typhoon/blob/master/google-
 | region | Google Cloud region | "us-central1" |
 | dns_zone | Google Cloud DNS zone | "google-cloud.example.com" |
 | dns_zone_name | Google Cloud DNS zone name | "example-zone" |
+| os_image | Fedora CoreOS image for compute instances | "fedora-coreos-31-20200323-3-2" |
 | ssh_authorized_key | SSH public key for user 'core' | "ssh-rsa AAAAB3NZ..." |
 
 Check the list of valid [regions](https://cloud.google.com/compute/docs/regions-zones/regions-zones) and list Fedora CoreOS [images](https://cloud.google.com/compute/docs/images) with `gcloud compute images list | grep fedora-coreos`.
@@ -232,16 +230,14 @@ resource "google_dns_managed_zone" "zone-for-clusters" {
 
 | Name | Description | Default | Example |
 |:-----|:------------|:--------|:--------|
-| asset_dir | Absolute path to a directory where generated assets should be placed (contains secrets) | "" (disabled) | "/home/user/.secrets/clusters/yavin" |
 | controller_count | Number of controllers (i.e. masters) | 1 | 3 |
 | worker_count | Number of workers | 1 | 3 |
 | controller_type | Machine type for controllers | "n1-standard-1" | See below |
 | worker_type | Machine type for workers | "n1-standard-1" | See below |
-| os_image | Fedora CoreOS image for compute instances | "" | "fedora-coreos-31-20200113-3-1" |
 | disk_size | Size of the disk in GB | 40 | 100 |
 | worker_preemptible | If enabled, Compute Engine will terminate workers randomly within 24 hours | false | true |
-| controller_snippets | Controller Fedora CoreOS Config snippets | [] | UNSUPPORTED |
-| worker_snippets | Worker Fedora CoreOS Config snippets | [] | UNSUPPORTED |
+| controller_snippets | Controller Fedora CoreOS Config snippets | [] | [examples](/advanced/customization/) |
+| worker_snippets | Worker Fedora CoreOS Config snippets | [] | [examples](/advanced/customization/) |
 | networking | Choice of networking provider | "calico" | "calico" or "flannel" |
 | pod_cidr | CIDR IPv4 range to assign to Kubernetes pods | "10.2.0.0/16" | "10.22.0.0/16" |
 | service_cidr | CIDR IPv4 range to assign to Kubernetes services | "10.3.0.0/16" | "10.3.0.0/24" |

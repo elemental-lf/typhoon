@@ -28,7 +28,7 @@ systemd:
           --network host \
           --volume /var/lib/etcd:/var/lib/etcd:rw,Z \
           --volume /etc/ssl/etcd:/etc/ssl/certs:ro,Z \
-          quay.io/coreos/etcd:v3.4.4
+          quay.io/coreos/etcd:v3.4.7
         ExecStop=/usr/bin/podman stop etcd
         [Install]
         WantedBy=multi-user.target
@@ -79,7 +79,7 @@ systemd:
           --volume /var/log:/var/log \
           --volume /var/run/lock:/var/run/lock:z \
           --volume /opt/cni/bin:/opt/cni/bin:z \
-          k8s.gcr.io/hyperkube:v1.17.3 kubelet \
+          quay.io/poseidon/kubelet:v1.18.1 \
           --anonymous-auth=false \
           --authentication-token-webhook \
           --authorization-mode=Webhook \
@@ -116,14 +116,14 @@ systemd:
         Type=oneshot
         RemainAfterExit=true
         WorkingDirectory=/opt/bootstrap
-        ExecStartPre=-/usr/bin/bash -c 'set -x && [ -n "$(ls /opt/bootstrap/assets/manifests-*/* 2>/dev/null)" ] && mv /opt/bootstrap/assets/manifests-*/* /opt/bootstrap/assets/manifests && rm -rf /opt/bootstrap/assets/manifests-*'
+        ExecStartPre=-/usr/bin/podman rm bootstrap
         ExecStart=/usr/bin/podman run --name bootstrap \
             --network host \
             --volume /etc/kubernetes/bootstrap-secrets:/etc/kubernetes/secrets:ro,Z \
             --volume /opt/bootstrap/assets:/assets:ro,Z \
             --volume /opt/bootstrap/apply:/apply:ro,Z \
             --entrypoint=/apply \
-            k8s.gcr.io/hyperkube:v1.17.3
+            quay.io/poseidon/kubelet:v1.18.1
         ExecStartPost=/bin/touch /opt/bootstrap/bootstrap.done
         ExecStartPost=-/usr/bin/podman stop bootstrap
 storage:
@@ -155,8 +155,10 @@ storage:
           sudo mv static-manifests/* /etc/kubernetes/manifests/
           sudo mkdir -p /opt/bootstrap/assets
           sudo mv manifests /opt/bootstrap/assets/manifests
-          sudo mv manifests-networking /opt/bootstrap/assets/manifests-networking
-          rm -rf assets auth static-manifests tls
+          sudo mkdir -p /opt/bootstrap/assets/manifests/crds
+          sudo mv manifests-networking/{crd,cluster}*.yaml /opt/bootstrap/assets/manifests/crds 2>/dev/null || true
+          sudo mv manifests-networking/* /opt/bootstrap/assets/manifests/
+          rm -rf assets auth static-manifests tls manifests-networking
     - path: /opt/bootstrap/apply
       mode: 0544
       contents:
@@ -166,6 +168,10 @@ storage:
           until kubectl version; do
             echo "Waiting for static pod control plane"
             sleep 5
+          done
+          until kubectl apply -f /assets/manifests/crds -R; do
+             echo "Retry Custom Resource Definition manifests"
+             sleep 5
           done
           until kubectl apply -f /assets/manifests -R; do
              echo "Retry applying manifests"
@@ -182,19 +188,6 @@ storage:
           DefaultCPUAccounting=yes
           DefaultMemoryAccounting=yes
           DefaultBlockIOAccounting=yes
-    - path: /etc/sysconfig/docker
-      mode: 0644
-      overwrite: true
-      contents:
-        inline: |
-          # Modify these options if you want to change the way the docker daemon runs
-          OPTIONS="--selinux-enabled \
-            --log-driver=json-file \
-            --live-restore \
-            --default-ulimit nofile=1024:1024 \
-            --init-path /usr/libexec/docker/docker-init \
-            --userland-proxy-path /usr/libexec/docker/docker-proxy \
-          "
     - path: /etc/etcd/etcd.env
       mode: 0644
       contents:

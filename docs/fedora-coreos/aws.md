@@ -1,6 +1,6 @@
 # AWS
 
-In this tutorial, we'll create a Kubernetes v1.17.3 cluster on AWS with Fedora CoreOS.
+In this tutorial, we'll create a Kubernetes v1.18.1 cluster on AWS with Fedora CoreOS.
 
 We'll declare a Kubernetes cluster using the Typhoon Terraform module. Then apply the changes to create a VPC, gateway, subnets, security groups, controller instances, worker auto-scaling group, network load balancer, and TLS assets.
 
@@ -18,15 +18,15 @@ Install [Terraform](https://www.terraform.io/downloads.html) v0.12.6+ on your sy
 
 ```sh
 $ terraform version
-Terraform v0.12.20
+Terraform v0.12.21
 ```
 
 Add the [terraform-provider-ct](https://github.com/poseidon/terraform-provider-ct) plugin binary for your system to `~/.terraform.d/plugins/`, noting the final name.
 
 ```sh
-wget https://github.com/poseidon/terraform-provider-ct/releases/download/v0.4.0/terraform-provider-ct-v0.4.0-linux-amd64.tar.gz
-tar xzf terraform-provider-ct-v0.4.0-linux-amd64.tar.gz
-mv terraform-provider-ct-v0.4.0-linux-amd64/terraform-provider-ct ~/.terraform.d/plugins/terraform-provider-ct_v0.4.0
+wget https://github.com/poseidon/terraform-provider-ct/releases/download/v0.5.0/terraform-provider-ct-v0.5.0-linux-amd64.tar.gz
+tar xzf terraform-provider-ct-v0.5.0-linux-amd64.tar.gz
+mv terraform-provider-ct-v0.5.0-linux-amd64/terraform-provider-ct ~/.terraform.d/plugins/terraform-provider-ct_v0.5.0
 ```
 
 Read [concepts](/architecture/concepts/) to learn about Terraform, modules, and organizing resources. Change to your infrastructure repository (e.g. `infra`).
@@ -49,13 +49,13 @@ Configure the AWS provider to use your access key credentials in a `providers.tf
 
 ```tf
 provider "aws" {
-  version                 = "2.48.0"
+  version                 = "2.53.0"
   region                  = "eu-central-1"
   shared_credentials_file = "/home/user/.config/aws/credentials"
 }
 
 provider "ct" {
-  version = "0.4.0"
+  version = "0.5.0"
 }
 ```
 
@@ -70,7 +70,7 @@ Define a Kubernetes cluster using the module `aws/fedora-coreos/kubernetes`.
 
 ```tf
 module "tempest" {
-  source = "git::https://github.com/poseidon/typhoon//aws/fedora-coreos/kubernetes?ref=v1.17.3"
+  source = "git::https://github.com/poseidon/typhoon//aws/fedora-coreos/kubernetes?ref=v1.18.1"
 
   # AWS
   cluster_name = "tempest"
@@ -143,9 +143,9 @@ List nodes in the cluster.
 $ export KUBECONFIG=/home/user/.kube/configs/tempest-config
 $ kubectl get nodes
 NAME           STATUS  ROLES    AGE  VERSION
-ip-10-0-3-155  Ready   <none>   10m  v1.17.3
-ip-10-0-26-65  Ready   <none>   10m  v1.17.3
-ip-10-0-41-21  Ready   <none>   10m  v1.17.3
+ip-10-0-3-155  Ready   <none>   10m  v1.18.1
+ip-10-0-26-65  Ready   <none>   10m  v1.18.1
+ip-10-0-41-21  Ready   <none>   10m  v1.18.1
 ```
 
 List the pods.
@@ -204,7 +204,6 @@ Reference the DNS zone id with `aws_route53_zone.zone-for-clusters.zone_id`.
 
 | Name | Description | Default | Example |
 |:-----|:------------|:--------|:--------|
-| asset_dir | Absolute path to a directory where generated assets should be placed (contains secrets) | "" (disabled) | "/home/user/.secrets/clusters/tempest" |
 | controller_count | Number of controllers (i.e. masters) | 1 | 1 |
 | worker_count | Number of workers | 1 | 3 |
 | controller_type | EC2 instance type for controllers | "t3.small" | See below |
@@ -215,8 +214,8 @@ Reference the DNS zone id with `aws_route53_zone.zone-for-clusters.zone_id`.
 | disk_iops | IOPS of the EBS volume | 0 (i.e. auto) | 400 |
 | worker_target_groups | Target group ARNs to which worker instances should be added | [] | [aws_lb_target_group.app.id] |
 | worker_price | Spot price in USD for worker instances or 0 to use on-demand instances | 0 | 0.10 |
-| controller_snippets | Controller Fedora CoreOS Config snippets | [] | UNSUPPORTED |
-| worker_clc_snippets | Worker Fedora CoreOS Config snippets | [] | UNSUPPORTED |
+| controller_snippets | Controller Fedora CoreOS Config snippets | [] | [examples](/advanced/customization/) |
+| worker_snippets | Worker Fedora CoreOS Config snippets | [] | [examples](/advanced/customization/) |
 | networking | Choice of networking provider | "calico" | "calico" or "flannel" |
 | network_mtu | CNI interface MTU (calico only) | 1480 | 8981 |
 | host_cidr | CIDR IPv4 range to assign to EC2 instances | "10.0.0.0/16" | "10.1.0.0/16" |

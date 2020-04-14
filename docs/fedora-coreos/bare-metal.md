@@ -1,6 +1,6 @@
 # Bare-Metal
 
-In this tutorial, we'll network boot and provision a Kubernetes v1.17.3 cluster on bare-metal with Fedora CoreOS.
+In this tutorial, we'll network boot and provision a Kubernetes v1.18.1 cluster on bare-metal with Fedora CoreOS.
 
 First, we'll deploy a [Matchbox](https://github.com/poseidon/matchbox) service and setup a network boot environment. Then, we'll declare a Kubernetes cluster using the Typhoon Terraform module and power on machines. On PXE boot, machines will install Fedora CoreOS to disk, reboot into the disk install, and provision themselves as Kubernetes controllers or workers via Ignition.
 
@@ -111,7 +111,7 @@ Install [Terraform](https://www.terraform.io/downloads.html) v0.12.6+ on your sy
 
 ```sh
 $ terraform version
-Terraform v0.12.20
+Terraform v0.12.21
 ```
 
 Add the [terraform-provider-matchbox](https://github.com/poseidon/terraform-provider-matchbox) plugin binary for your system to `~/.terraform.d/plugins/`, noting the final name.
@@ -125,9 +125,9 @@ mv terraform-provider-matchbox-v0.3.0-linux-amd64/terraform-provider-matchbox ~/
 Add the [terraform-provider-ct](https://github.com/poseidon/terraform-provider-ct) plugin binary for your system to `~/.terraform.d/plugins/`, noting the final name.
 
 ```sh
-wget https://github.com/poseidon/terraform-provider-ct/releases/download/v0.4.0/terraform-provider-ct-v0.4.0-linux-amd64.tar.gz
-tar xzf terraform-provider-ct-v0.4.0-linux-amd64.tar.gz
-mv terraform-provider-ct-v0.4.0-linux-amd64/terraform-provider-ct ~/.terraform.d/plugins/terraform-provider-ct_v0.4.0
+wget https://github.com/poseidon/terraform-provider-ct/releases/download/v0.5.0/terraform-provider-ct-v0.5.0-linux-amd64.tar.gz
+tar xzf terraform-provider-ct-v0.5.0-linux-amd64.tar.gz
+mv terraform-provider-ct-v0.5.0-linux-amd64/terraform-provider-ct ~/.terraform.d/plugins/terraform-provider-ct_v0.5.0
 ```
 
 Read [concepts](/architecture/concepts/) to learn about Terraform, modules, and organizing resources. Change to your infrastructure repository (e.g. `infra`).
@@ -150,7 +150,7 @@ provider "matchbox" {
 }
 
 provider "ct" {
-  version = "0.4.0"
+  version = "0.5.0"
 }
 ```
 
@@ -160,7 +160,7 @@ Define a Kubernetes cluster using the module `bare-metal/fedora-coreos/kubernete
 
 ```tf
 module "mercury" {
-  source = "git::https://github.com/poseidon/typhoon//bare-metal/fedora-coreos/kubernetes?ref=v1.17.3"
+  source = "git::https://github.com/poseidon/typhoon//bare-metal/fedora-coreos/kubernetes?ref=v1.18.1"
 
   # bare-metal
   cluster_name            = "mercury"
@@ -289,9 +289,9 @@ List nodes in the cluster.
 $ export KUBECONFIG=/home/user/.kube/configs/mercury-config
 $ kubectl get nodes
 NAME                STATUS  ROLES   AGE  VERSION
-node1.example.com   Ready   <none>  10m  v1.17.3
-node2.example.com   Ready   <none>  10m  v1.17.3
-node3.example.com   Ready   <none>  10m  v1.17.3
+node1.example.com   Ready   <none>  10m  v1.18.1
+node2.example.com   Ready   <none>  10m  v1.18.1
+node3.example.com   Ready   <none>  10m  v1.18.1
 ```
 
 List the pods.
@@ -337,14 +337,15 @@ Check the [variables.tf](https://github.com/poseidon/typhoon/blob/master/bare-me
 
 | Name | Description | Default | Example |
 |:-----|:------------|:--------|:--------|
-| asset_dir | Absolute path to a directory where generated assets should be placed (contains secrets) | "" (disabled) | "/home/user/.secrets/clusters/mercury" |
 | cached_install | PXE boot and install from the Matchbox `/assets` cache. Admin MUST have downloaded Fedora CoreOS images into the cache | false | true |
 | install_disk | Disk device where Fedora CoreOS should be installed | "sda" (not "/dev/sda" like Container Linux) | "sdb" |
 | networking | Choice of networking provider | "calico" | "calico" or "flannel" |
 | network_mtu | CNI interface MTU (calico-only) | 1480 | - |
-| snippets | Map from machine names to lists of Fedora CoreOS Config snippets | {} | UNSUPPORTED |
+| snippets | Map from machine names to lists of Fedora CoreOS Config snippets | {} | [examples](/advanced/customization/) |
 | network_ip_autodetection_method | Method to detect host IPv4 address (calico-only) | "first-found" | "can-reach=10.0.0.1" |
 | pod_cidr | CIDR IPv4 range to assign to Kubernetes pods | "10.2.0.0/16" | "10.22.0.0/16" |
 | service_cidr | CIDR IPv4 range to assign to Kubernetes services | "10.3.0.0/16" | "10.3.0.0/24" |
 | kernel_args | Additional kernel args to provide at PXE boot | [] | ["kvm-intel.nested=1"] |
+| worker_node_labels | Map from worker name to list of initial node labels | {} | {"node2" = ["role=special"]} |
+| worker_node_taints | Map from worker name to list of initial node taints | {} | {"node2" = ["role=special:NoSchedule"]} |
 

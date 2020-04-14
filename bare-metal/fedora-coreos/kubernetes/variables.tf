@@ -13,12 +13,12 @@ variable "matchbox_http_endpoint" {
 variable "os_stream" {
   type        = string
   description = "Fedora CoreOS release stream (e.g. testing, stable)"
-  default     = "testing"
+  default     = "stable"
 }
 
 variable "os_version" {
   type        = string
-  description = "Fedora CoreOS version to PXE and install (e.g. 30.20190712.0)"
+  description = "Fedora CoreOS version to PXE and install (e.g. 31.20200310.3.0)"
 }
 
 # machines
@@ -29,7 +29,6 @@ variable "controllers" {
     mac    = string
     domain = string
     install_disk = string
-    taints = list(string)
   }))
   description = <<EOD
 List of controller machine details (unique name, identifying MAC address, FQDN, installation disk)
@@ -43,7 +42,6 @@ variable "workers" {
     mac    = string
     domain = string
     install_disk = string
-    taints = list(string)
   }))
   description = <<EOD
 List of worker machine details (unique name, identifying MAC address, FQDN, installation disk)
@@ -57,6 +55,30 @@ EOD
 variable "snippets" {
   type        = map(list(string))
   description = "Map from machine names to lists of Fedora CoreOS Config snippets"
+  default     = {}
+}
+
+variable "controller_node_labels" {
+  type        = map(list(string))
+  description = "Map from controller names to lists of initial node labels"
+  default     = {}
+}
+
+variable "controller_node_taints" {
+  type        = map(list(string))
+  description = "Map from controller names to lists of initial node taints"
+  default     = {}
+}
+
+variable "worker_node_labels" {
+  type        = map(list(string))
+  description = "Map from worker names to lists of initial node labels"
+  default     = {}
+}
+
+variable "worker_node_taints" {
+  type        = map(list(string))
+  description = "Map from worker names to lists of initial node taints"
   default     = {}
 }
 

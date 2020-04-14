@@ -1,10 +1,6 @@
 ---
 variant: fcos
 version: 1.0.0
-ignition:
-  config:
-    merge:
-${snippets}
 systemd:
   units:
     - name: docker.service
@@ -80,7 +76,6 @@ systemd:
           --volume /etc/modprobe.d/rbd-nbd.conf:/etc/modprobe.d/rbd-nbd.conf \
 %{ endif ~}
           $${KUBELET_IMAGE_URL}:$${KUBELET_IMAGE_TAG} \
-          kubelet \
           --anonymous-auth=false \
           --authentication-token-webhook \
           --authorization-mode=Webhook \
@@ -98,11 +93,14 @@ systemd:
           --lock-file=/var/run/lock/kubelet.lock \
           --network-plugin=cni \
           --node-labels=node.kubernetes.io/node \
+          %{~ for label in compact(split(",", node_labels)) ~}
+          --node-labels=${label} \
+          %{~ endfor ~}
+          %{~ for taint in compact(split(",", node_taints)) ~}
+          --register-with-taints=${taint} \
+          %{~ endfor ~}
           --pod-manifest-path=/etc/kubernetes/manifests \
           --read-only-port=0 \
-%{ if length(taints) > 0 ~}
-          --register-with-taints=${taints} \
-%{ endif ~}
           --volume-plugin-dir=/var/lib/kubelet/volumeplugins \
           --max-pods=220 \
           --eviction-soft=memory.available<500Mi,nodefs.available<20%,nodefs.inodesFree<10%,imagefs.available<20%,imagefs.inodesFree<10% \

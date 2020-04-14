@@ -144,7 +144,7 @@ data "ct_config" "controller-ignitions" {
   count        = length(var.controllers)
   content      = data.template_file.controller-configs.*.rendered[count.index]
   pretty_print = false
-  snippets     = local.clc_map[var.controllers.*.name[count.index]]
+  snippets     = lookup(var.snippets, var.controllers.*.name[count.index], [])
 }
 
 data "template_file" "controller-configs" {
@@ -165,7 +165,8 @@ data "template_file" "controller-configs" {
     kubelet_image          = split(":", var.container_images["kubelet"])[0]
     kubelet_tag            = split(":", var.container_images["kubelet"])[1]
     enable_rbd_nbd         = var.enable_rbd_nbd
-    taints                 = join(",",var.controllers[count.index]["taints"])
+    node_labels            = join(",", lookup(var.controller_node_labels, var.controllers.*.name[count.index], []))
+    node_taints            = join(",", lookup(var.controller_node_taints, var.controllers.*.name[count.index], []))
   }
 }
 
@@ -180,7 +181,7 @@ data "ct_config" "worker-ignitions" {
   count        = length(var.workers)
   content      = data.template_file.worker-configs.*.rendered[count.index]
   pretty_print = false
-  snippets     = local.clc_map[var.workers.*.name[count.index]]
+  snippets     = lookup(var.snippets, var.workers.*.name[count.index], [])
 }
 
 data "template_file" "worker-configs" {
@@ -197,27 +198,7 @@ data "template_file" "worker-configs" {
     kubelet_image          = split(":", var.container_images["kubelet"])[0]
     kubelet_tag            = split(":", var.container_images["kubelet"])[1]
     enable_rbd_nbd         = var.enable_rbd_nbd
-    taints                 = join(",",var.workers[count.index]["taints"])
+    node_labels            = join(",", lookup(var.worker_node_labels, var.workers.*.name[count.index], []))
+    node_taints            = join(",", lookup(var.worker_node_taints, var.workers.*.name[count.index], []))
   }
 }
-
-locals {
-  # Hack to workaround https://github.com/hashicorp/terraform/issues/17251
-  # Still an issue in Terraform v0.12 https://github.com/hashicorp/terraform/issues/20572
-  # Default Container Linux config snippets map every node names to list("\n") so
-  # all lookups succeed
-  clc_defaults = zipmap(
-    concat(var.controllers.*.name, var.workers.*.name),
-    chunklist(data.template_file.clc-default-snippets.*.rendered, 1),
-  )
-
-  # Union of the default and user specific snippets, later overrides prior.
-  clc_map = merge(local.clc_defaults, var.clc_snippets)
-}
-
-// Horrible hack to generate a Terraform list of node count length
-data "template_file" "clc-default-snippets" {
-  count    = length(var.controllers) + length(var.workers)
-  template = "\n"
-}
-

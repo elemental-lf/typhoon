@@ -1,6 +1,6 @@
 # Digital Ocean
 
-In this tutorial, we'll create a Kubernetes v1.17.3 cluster on DigitalOcean with CoreOS Container Linux or Flatcar Linux.
+In this tutorial, we'll create a Kubernetes v1.18.1 cluster on DigitalOcean with CoreOS Container Linux or Flatcar Linux.
 
 We'll declare a Kubernetes cluster using the Typhoon Terraform module. Then apply the changes to create controller droplets, worker droplets, DNS records, tags, and TLS assets.
 
@@ -18,15 +18,15 @@ Install [Terraform](https://www.terraform.io/downloads.html) v0.12.6+ on your sy
 
 ```sh
 $ terraform version
-Terraform v0.12.20
+Terraform v0.12.21
 ```
 
 Add the [terraform-provider-ct](https://github.com/poseidon/terraform-provider-ct) plugin binary for your system to `~/.terraform.d/plugins/`, noting the final name.
 
 ```sh
-wget https://github.com/poseidon/terraform-provider-ct/releases/download/v0.4.0/terraform-provider-ct-v0.4.0-linux-amd64.tar.gz
-tar xzf terraform-provider-ct-v0.4.0-linux-amd64.tar.gz
-mv terraform-provider-ct-v0.4.0-linux-amd64/terraform-provider-ct ~/.terraform.d/plugins/terraform-provider-ct_v0.4.0
+wget https://github.com/poseidon/terraform-provider-ct/releases/download/v0.5.0/terraform-provider-ct-v0.5.0-linux-amd64.tar.gz
+tar xzf terraform-provider-ct-v0.5.0-linux-amd64.tar.gz
+mv terraform-provider-ct-v0.5.0-linux-amd64/terraform-provider-ct ~/.terraform.d/plugins/terraform-provider-ct_v0.5.0
 ```
 
 Read [concepts](/architecture/concepts/) to learn about Terraform, modules, and organizing resources. Change to your infrastructure repository (e.g. `infra`).
@@ -50,12 +50,12 @@ Configure the DigitalOcean provider to use your token in a `providers.tf` file.
 
 ```tf
 provider "digitalocean" {
-  version = "1.14.0"
+  version = "1.15.1"
   token = "${chomp(file("~/.config/digital-ocean/token"))}"
 }
 
 provider "ct" {
-  version = "0.4.0"
+  version = "0.5.0"
 }
 ```
 
@@ -65,13 +65,13 @@ Define a Kubernetes cluster using the module `digital-ocean/container-linux/kube
 
 ```tf
 module "nemo" {
-  source = "git::https://github.com/poseidon/typhoon//digital-ocean/container-linux/kubernetes?ref=v1.17.3"
+  source = "git::https://github.com/poseidon/typhoon//digital-ocean/container-linux/kubernetes?ref=v1.18.1"
 
   # Digital Ocean
   cluster_name = "nemo"
   region       = "nyc3"
   dns_zone     = "digital-ocean.example.com"
-  image        = "coreos-stable"
+  os_image     = "coreos-stable"
 
   # configuration
   ssh_fingerprints = ["d7:9d:79:ae:56:32:73:79:95:88:e3:a2:ab:5d:45:e7"]
@@ -95,7 +95,7 @@ Flatcar Linux publishes DigitalOcean images, but does not upload them. DigitalOc
 ```tf
 module "nemo" {
   ...
-  image = data.digitalocean_image.flatcar-stable.id
+  os_image = data.digitalocean_image.flatcar-stable.id
 }
 
 data "digitalocean_image" "flatcar-stable" {
@@ -103,7 +103,7 @@ data "digitalocean_image" "flatcar-stable" {
 }
 ```
 
-Set the [image](#variables) to the custom image id.
+Set the [os_image](#variables) to the custom image id.
 
 ## ssh-agent
 
@@ -161,9 +161,9 @@ List nodes in the cluster.
 $ export KUBECONFIG=/home/user/.kube/configs/nemo-config
 $ kubectl get nodes
 NAME               STATUS  ROLES   AGE  VERSION
-10.132.110.130     Ready   <none>  10m  v1.17.3
-10.132.115.81      Ready   <none>  10m  v1.17.3
-10.132.124.107     Ready   <none>  10m  v1.17.3
+10.132.110.130     Ready   <none>  10m  v1.18.1
+10.132.115.81      Ready   <none>  10m  v1.18.1
+10.132.124.107     Ready   <none>  10m  v1.18.1
 ```
 
 List the pods.
@@ -187,9 +187,6 @@ kube-system   kube-scheduler-ip-10.132.115.81            1/1       Running   0  
 
 Learn about [maintenance](/topics/maintenance/) and [addons](/addons/overview/).
 
-!!! note
-    On Container Linux clusters, install the `CLUO` addon to coordinate reboots and drains when nodes auto-update. Otherwise, updates may not be applied until the next reboot.
-
 ## Variables
 
 Check the [variables.tf](https://github.com/poseidon/typhoon/blob/master/digital-ocean/container-linux/kubernetes/variables.tf) source.
@@ -207,7 +204,7 @@ Check the [variables.tf](https://github.com/poseidon/typhoon/blob/master/digital
 
 Clusters create DNS A records `${cluster_name}.${dns_zone}` to resolve to controller droplets (round robin). This FQDN is used by workers and `kubectl` to access the apiserver(s). In this example, the cluster's apiserver would be accessible at `nemo.do.example.com`.
 
-You'll need a registered domain name or delegated subdomain in Digital Ocean Domains (i.e. DNS zones). You can set this up once and create many clusters with unique names.
+You'll need a registered domain name or delegated subdomain in DigitalOcean Domains (i.e. DNS zones). You can set this up once and create many clusters with unique names.
 
 ```tf
 # Declare a DigitalOcean record to also create a zone file
@@ -242,14 +239,13 @@ Digital Ocean requires the SSH public key be uploaded to your account, so you ma
 
 | Name | Description | Default | Example |
 |:-----|:------------|:--------|:--------|
-| asset_dir | Absolute path to a directory where generated assets should be placed (contains secrets) | "" (disabled) | "/home/user/.secrets/nemo" |
 | controller_count | Number of controllers (i.e. masters) | 1 | 1 |
 | worker_count | Number of workers | 1 | 3 |
 | controller_type | Droplet type for controllers | "s-2vcpu-2gb" | s-2vcpu-2gb, s-2vcpu-4gb, s-4vcpu-8gb, ... |
 | worker_type | Droplet type for workers | "s-1vcpu-2gb" | s-1vcpu-2gb, s-2vcpu-2gb, ... |
-| image | Container Linux image for instances | "coreos-stable" | coreos-stable, coreos-beta, coreos-alpha, "custom-image-id" |
-| controller_clc_snippets | Controller Container Linux Config snippets | [] | [example](/advanced/customization/) |
-| worker_clc_snippets | Worker Container Linux Config snippets | [] | [example](/advanced/customization/) |
+| os_image | Container Linux image for instances | "coreos-stable" | coreos-stable, coreos-beta, coreos-alpha, "custom-image-id" |
+| controller_snippets | Controller Container Linux Config snippets | [] | [example](/advanced/customization/) |
+| worker_snippets | Worker Container Linux Config snippets | [] | [example](/advanced/customization/) |
 | networking | Choice of networking provider | "calico" | "flannel" or "calico" |
 | pod_cidr | CIDR IPv4 range to assign to Kubernetes pods | "10.2.0.0/16" | "10.22.0.0/16" |
 | service_cidr | CIDR IPv4 range to assign to Kubernetes services | "10.3.0.0/16" | "10.3.0.0/24" |

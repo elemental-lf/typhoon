@@ -28,7 +28,6 @@ variable "controllers" {
     mac    = string
     domain = string
     install_disk = string
-    taints = list(string)
   }))
   description = <<EOD
 List of controller machine details (unique name, identifying MAC address, FQDN, installation disk)
@@ -42,7 +41,6 @@ variable "workers" {
     mac    = string
     domain = string
     install_disk = string
-    taints = list(string)
   }))
   description = <<EOD
 List of worker machine details (unique name, identifying MAC address, FQDN, installation disk)
@@ -53,9 +51,33 @@ List of worker machine details (unique name, identifying MAC address, FQDN, inst
 EOD
 }
 
-variable "clc_snippets" {
+variable "snippets" {
   type        = map(list(string))
   description = "Map from machine names to lists of Container Linux Config snippets"
+  default     = {}
+}
+
+variable "controller_node_labels" {
+  type        = map(list(string))
+  description = "Map from controller names to lists of initial node labels"
+  default     = {}
+}
+
+variable "controller_node_taints" {
+  type        = map(list(string))
+  description = "Map from controller names to lists of initial node taints"
+  default     = {}
+}
+
+variable "worker_node_labels" {
+  type        = map(list(string))
+  description = "Map from worker names to lists of initial node labels"
+  default     = {}
+}
+
+variable "worker_node_taints" {
+  type        = map(list(string))
+  description = "Map from worker names to lists of initial node taints"
   default     = {}
 }
 

@@ -100,8 +100,7 @@ systemd:
           --volume rbdnbd,kind=host,source=/etc/modprobe.d/rbd-nbd.conf \
           --mount volume=rbdnbd,target=/etc/modprobe.d/rbd-nbd.conf \
 %{ endif ~}
-          $${KUBELET_IMAGE_URL}:$${KUBELET_IMAGE_TAG} \
-          --exec=/usr/local/bin/kubelet -- \
+          docker://$${KUBELET_IMAGE_URL}:$${KUBELET_IMAGE_TAG} \
           --anonymous-auth=false \
           --authentication-token-webhook \
           --authorization-mode=Webhook \
@@ -117,11 +116,14 @@ systemd:
           --lock-file=/var/run/lock/kubelet.lock \
           --network-plugin=cni \
           --node-labels=node.kubernetes.io/node \
+          %{~ for label in compact(split(",", node_labels)) ~}
+          --node-labels=${label} \
+          %{~ endfor ~}
+          %{~ for taint in compact(split(",", node_taints)) ~}
+          --register-with-taints=${taint} \
+          %{~ endfor ~}
           --pod-manifest-path=/etc/kubernetes/manifests \
           --read-only-port=0 \
-%{ if length(taints) > 0 ~}
-          --register-with-taints=${taints} \
-%{ endif ~}
           --volume-plugin-dir=/var/lib/kubelet/volumeplugins \
           --max-pods=220 \
           --eviction-soft=memory.available<500Mi,nodefs.available<20%,nodefs.inodesFree<10%,imagefs.available<20%,imagefs.inodesFree<10% \
@@ -142,7 +144,7 @@ storage:
       mode: 0644
       contents:
         inline: |
-          KUBELET_IMAGE_URL=docker://${kubelet_image}
+          KUBELET_IMAGE_URL=${kubelet_image}
           KUBELET_IMAGE_TAG=${kubelet_tag}
     - path: /etc/hostname
       filesystem: root

@@ -7,7 +7,7 @@ systemd:
         - name: 40-etcd-cluster.conf
           contents: |
             [Service]
-            Environment="ETCD_IMAGE_TAG=v3.4.4"
+            Environment="ETCD_IMAGE_TAG=v3.4.7"
             Environment="ETCD_IMAGE_URL=docker://quay.io/coreos/etcd"
             Environment="RKT_RUN_ARGS=--insecure-options=image"
             Environment="ETCD_NAME=${etcd_name}"
@@ -128,8 +128,7 @@ systemd:
           --volume rbdnbd,kind=host,source=/etc/modprobe.d/rbd-nbd.conf \
           --mount volume=rbdnbd,target=/etc/modprobe.d/rbd-nbd.conf \
 %{ endif ~}
-          $${KUBELET_IMAGE_URL}:$${KUBELET_IMAGE_TAG} \
-          --exec=/usr/local/bin/kubelet -- \
+          docker://$${KUBELET_IMAGE_URL}:$${KUBELET_IMAGE_TAG} \
           --anonymous-auth=false \
           --authentication-token-webhook \
           --authorization-mode=Webhook \
@@ -146,13 +145,14 @@ systemd:
           --network-plugin=cni \
           --node-labels=node.kubernetes.io/master \
           --node-labels=node.kubernetes.io/controller="true" \
+          %{~ for label in compact(split(",", node_labels)) ~}
+          --node-labels=${label} \
+          %{~ endfor ~}
+          %{~ for taint in compact(split(",", node_taints)) ~}
+          --register-with-taints=${taint} \
+          %{~ endfor ~}
           --pod-manifest-path=/etc/kubernetes/manifests \
           --read-only-port=0 \
-%{ if length(taints) > 0 ~}
-          --register-with-taints=node-role.kubernetes.io/master=:NoSchedule,${taints} \
-%{ else ~}
-          --register-with-taints=node-role.kubernetes.io/master=:NoSchedule \
-%{ endif ~}
           --volume-plugin-dir=/var/lib/kubelet/volumeplugins \
           --eviction-soft=memory.available<500Mi,nodefs.available<20%,nodefs.inodesFree<10%,imagefs.available<20%,imagefs.inodesFree<10% \
           --eviction-soft-grace-period=memory.available=2m,nodefs.available=2m,nodefs.inodesFree=2m,imagefs.available=2m,imagefs.inodesFree=2m
@@ -170,7 +170,6 @@ systemd:
         RemainAfterExit=true
         WorkingDirectory=/opt/bootstrap
         EnvironmentFile=/etc/kubernetes/kubelet.env
-        ExecStartPre=-/usr/bin/bash -c 'set -x && [ -n "$(ls /opt/bootstrap/assets/manifests-*/* 2>/dev/null)" ] && mv /opt/bootstrap/assets/manifests-*/* /opt/bootstrap/assets/manifests && rm -rf /opt/bootstrap/assets/manifests-*'
         ExecStart=/usr/bin/rkt run \
             --trust-keys-from-https \
             --volume config,kind=host,source=/etc/kubernetes/bootstrap-secrets \
@@ -180,7 +179,7 @@ systemd:
             --volume script,kind=host,source=/opt/bootstrap/apply \
             --mount volume=script,target=/apply \
             --insecure-options=image \
-            $${KUBELET_IMAGE_URL}:$${KUBELET_IMAGE_TAG} \
+            docker://$${KUBELET_IMAGE_URL}:$${KUBELET_IMAGE_TAG} \
             --net=host \
             --dns=host \
             --exec=/apply
@@ -196,7 +195,7 @@ storage:
       mode: 0644
       contents:
         inline: |
-          KUBELET_IMAGE_URL=docker://${kubelet_image}
+          KUBELET_IMAGE_URL=${kubelet_image}
           KUBELET_IMAGE_TAG=${kubelet_tag}
     - path: /etc/hostname
       filesystem: root
@@ -226,7 +225,9 @@ storage:
           rsync -a --delete static-manifests/ /etc/kubernetes/manifests/
           mkdir -p /opt/bootstrap/assets
           rsync -a --delete manifests/ /opt/bootstrap/assets/manifests/
-          rsync -a --delete manifests-networking/ /opt/bootstrap/assets/manifests-networking/
+          mkdir -p /opt/bootstrap/assets/manifests/crds
+          mv manifests-networking/{crd,cluster}*.yaml /opt/bootstrap/assets/manifests/crds 2>/dev/null || true
+          mv manifests-networking/* /opt/bootstrap/assets/manifests/
           rsync -a --delete extra-assets/ /etc/kubernetes/extra-assets/
           cd ..
           rm -rf assets assets-unpacked
@@ -242,6 +243,10 @@ storage:
           until kubectl version; do
             echo "Waiting for static pod control plane"
             sleep 5
+          done
+          until kubectl apply -f /assets/manifests/crds -R; do
+             echo "Retry Custom Resource Definition manifests"
+             sleep 5
           done
           until kubectl apply -f /assets/manifests -R; do
              echo "Retry applying manifests"

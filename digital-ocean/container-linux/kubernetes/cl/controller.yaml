@@ -7,7 +7,7 @@ systemd:
         - name: 40-etcd-cluster.conf
           contents: |
             [Service]
-            Environment="ETCD_IMAGE_TAG=v3.4.4"
+            Environment="ETCD_IMAGE_TAG=v3.4.7"
             Environment="ETCD_IMAGE_URL=docker://quay.io/coreos/etcd"
             Environment="RKT_RUN_ARGS=--insecure-options=image"
             Environment="ETCD_NAME=${etcd_name}"
@@ -101,8 +101,7 @@ systemd:
           --mount volume=var-log,target=/var/log \
           --volume opt-cni-bin,kind=host,source=/opt/cni/bin \
           --mount volume=opt-cni-bin,target=/opt/cni/bin \
-          docker://k8s.gcr.io/hyperkube:v1.17.3 \
-          --exec=/usr/local/bin/kubelet -- \
+          docker://quay.io/poseidon/kubelet:v1.18.1 -- \
           --anonymous-auth=false \
           --authentication-token-webhook \
           --authorization-mode=Webhook \
@@ -136,7 +135,6 @@ systemd:
         Type=oneshot
         RemainAfterExit=true
         WorkingDirectory=/opt/bootstrap
-        ExecStartPre=-/usr/bin/bash -c 'set -x && [ -n "$(ls /opt/bootstrap/assets/manifests-*/* 2>/dev/null)" ] && mv /opt/bootstrap/assets/manifests-*/* /opt/bootstrap/assets/manifests && rm -rf /opt/bootstrap/assets/manifests-*'
         ExecStart=/usr/bin/rkt run \
             --trust-keys-from-https \
             --volume config,kind=host,source=/etc/kubernetes/bootstrap-secrets \
@@ -146,7 +144,7 @@ systemd:
             --volume script,kind=host,source=/opt/bootstrap/apply \
             --mount volume=script,target=/apply \
             --insecure-options=image \
-            docker://k8s.gcr.io/hyperkube:v1.17.3 \
+            docker://quay.io/poseidon/kubelet:v1.18.1 \
             --net=host \
             --dns=host \
             --exec=/apply
@@ -178,8 +176,10 @@ storage:
           sudo mv static-manifests/* /etc/kubernetes/manifests/
           sudo mkdir -p /opt/bootstrap/assets
           sudo mv manifests /opt/bootstrap/assets/manifests
-          sudo mv manifests-networking /opt/bootstrap/assets/manifests-networking
-          rm -rf assets auth static-manifests tls
+          sudo mkdir -p /opt/bootstrap/assets/manifests/crds
+          sudo mv manifests-networking/{crd,cluster}*.yaml /opt/bootstrap/assets/manifests/crds 2>/dev/null || true
+          sudo mv manifests-networking/* /opt/bootstrap/assets/manifests/
+          rm -rf assets auth static-manifests tls manifests-networking
     - path: /opt/bootstrap/apply
       filesystem: root
       mode: 0544
@@ -190,6 +190,10 @@ storage:
           until kubectl version; do
             echo "Waiting for static pod control plane"
             sleep 5
+          done
+          until kubectl apply -f /assets/manifests/crds -R; do
+             echo "Retry Custom Resource Definition manifests"
+             sleep 5
           done
           until kubectl apply -f /assets/manifests -R; do
              echo "Retry applying manifests"

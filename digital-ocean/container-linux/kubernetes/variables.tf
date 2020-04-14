@@ -41,19 +41,19 @@ variable "worker_type" {
   default     = "s-1vcpu-2gb"
 }
 
-variable "image" {
+variable "os_image" {
   type        = string
   description = "Container Linux image for instances (e.g. coreos-stable)"
   default     = "coreos-stable"
 }
 
-variable "controller_clc_snippets" {
+variable "controller_snippets" {
   type        = list(string)
   description = "Controller Container Linux Config snippets"
   default     = []
 }
 
-variable "worker_clc_snippets" {
+variable "worker_snippets" {
   type        = list(string)
   description = "Worker Container Linux Config snippets"
   default     = []

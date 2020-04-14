@@ -46,8 +46,9 @@ resource "matchbox_profile" "controllers" {
 data "ct_config" "controller-ignitions" {
   count = length(var.controllers)
 
-  content = data.template_file.controller-configs.*.rendered[count.index]
-  strict  = true
+  content  = data.template_file.controller-configs.*.rendered[count.index]
+  strict   = true
+  snippets = lookup(var.snippets, var.controllers.*.name[count.index], [])
 }
 
 data "template_file" "controller-configs" {
@@ -66,12 +67,8 @@ data "template_file" "controller-configs" {
     kubelet_image          = split(":", var.container_images["kubelet"])[0]
     kubelet_tag            = split(":", var.container_images["kubelet"])[1]
     enable_rbd_nbd         = var.enable_rbd_nbd
-    taints                 = join(",",var.controllers[count.index]["taints"])
-    snippets               = <<-EOT
-    %{ for snippet in matchkeys(data.ct_config.rendered_flattened_snippets[*].rendered, local.flattend_snippets_hosts, [var.controllers[count.index].name])  ~}
-          - source: "data:;base64,${base64encode(snippet)}"
-    %{ endfor ~}
-    EOT
+    node_labels            = join(",", lookup(var.controller_node_labels, var.controllers.*.name[count.index], []))
+    node_taints            = join(",", lookup(var.controller_node_taints, var.controllers.*.name[count.index], []))
   }
 }
 
@@ -92,8 +89,9 @@ resource "matchbox_profile" "workers" {
 data "ct_config" "worker-ignitions" {
   count = length(var.workers)
 
-  content = data.template_file.worker-configs.*.rendered[count.index]
-  strict  = true
+  content  = data.template_file.worker-configs.*.rendered[count.index]
+  strict   = true
+  snippets = lookup(var.snippets, var.workers.*.name[count.index], [])
 }
 
 data "template_file" "worker-configs" {
@@ -108,61 +106,7 @@ data "template_file" "worker-configs" {
     kubelet_image          = split(":", var.container_images["kubelet"])[0]
     kubelet_tag            = split(":", var.container_images["kubelet"])[1]
     enable_rbd_nbd         = var.enable_rbd_nbd
-    taints                 = join(",",var.workers[count.index]["taints"])
-    snippets               = <<-EOT
-    %{ for snippet in matchkeys(data.ct_config.rendered_flattened_snippets[*].rendered, local.flattend_snippets_hosts, [var.workers[count.index].name])  ~}
-          - source: "data:;base64,${base64encode(snippet)}"
-    %{ endfor ~}
-    EOT
+    node_labels            = join(",", lookup(var.worker_node_labels, var.workers.*.name[count.index], []))
+    node_taints            = join(",", lookup(var.worker_node_taints, var.workers.*.name[count.index], []))
   }
 }
-
-locals {
-  flattend_snippets_hosts = flatten(
-          [ for host, snippets in var.snippets:
-              [ for snippet in snippets:
-                      host
-              ]
-          ]
-  )
-
-  flattened_snippets = flatten(
-          [ for host, snippets in var.snippets:
-              [ for snippet in snippets:
-                      <<-EOT
-                      variant: fcos
-                      version: 1.0.0
-                      ${snippet}
-                      EOT
-              ]
-          ]
-  )
-}
-
-data "ct_config" "rendered_flattened_snippets" {
-  count = length(local.flattened_snippets)
-
-  content = local.flattened_snippets[count.index]
-  strict  = true
-}
-
-#data "external" "merged-controller-configs" {
-#  count = length(var.controllers)
-#
-#  program = ["bash", "-c", "jq -n --arg document \"$(jq -r .documents | ${path.module}/scripts/yaml-merge)\" '{\"document\": $document}'"]
-#
-#  query = {
-#    documents = join("\n---\n", concat([data.template_file.controller-configs.*.rendered[count.index]],  local.clc_map[var.controllers.*.name[count.index]]))
-#  }
-#}
-
-#data "external" "merged-worker-configs" {
-#  count = length(var.workers)
-#
-#  program = ["bash", "-c",  "jq -n --arg document \"$(jq -r .documents | ${path.module}/scripts/yaml-merge)\" '{\"document\": $document}'"]
-#
-#  query = {
-#    documents = join("\n---\n", concat([data.template_file.worker-configs.*.rendered[count.index]],  local.clc_map[var.workers.*.name[count.index]]))
-#  }
-#}
-

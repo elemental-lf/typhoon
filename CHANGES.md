@@ -4,24 +4,118 @@ Notable changes between versions.
 
 ## Latest
 
-* Update etcd from v3.4.3 to [v3.4.4](https://github.com/etcd-io/etcd/releases/tag/v3.4.4)
-  * On Container Linux, fetch using the docker transport format ([#659](https://github.com/poseidon/typhoon/pull/659))
-* Update CoreDNS from v1.6.6 to v1.6.7 ([#648](https://github.com/poseidon/typhoon/pull/648))
+## v1.18.1
+
+* Kubernetes [v1.18.1](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.18.md#v1181)
+* Choose Fedora CoreOS or Flatcar Linux (**action recommended**)
+  * Use a `fedora-coreos` module for Fedora CoreOS
+  * Use a `container-linux` module with OS set to Flatcar Linux
+* Update etcd from v3.4.5 to [v3.4.7](https://github.com/etcd-io/etcd/releases/tag/v3.4.7)
+* Change `kube-proxy` and `calico` or `flannel` to tolerate specific taints ([#682](https://github.com/poseidon/typhoon/pull/682))
+  * Tolerate master and not-ready taints, rather than tolerating all taints
+* Update flannel from v0.11.0 to v0.12.0 ([#690](https://github.com/poseidon/typhoon/pull/690))
+* Fix bootstrap when `networking` mode `flannel` (non-default) is chosen ([#689](https://github.com/poseidon/typhoon/pull/689))
+  * Regressed in v1.18.0 changes for Calico ([#675](https://github.com/poseidon/typhoon/pull/675))
+* Rename Container Linux `controller_clc_snippets` to `controller_snippets` for consistency ([#688](https://github.com/poseidon/typhoon/pull/688))
+* Rename Container Linux `worker_clc_snippets` to `worker_snippets` for consistency
+* Rename Container Linux `clc_snippets` (bare-metal) to `snippets` for consistency
+* Drop support for [gitRepo](https://kubernetes.io/docs/concepts/storage/volumes/#gitrepo) volumes
+
+#### Azure
+
+* Fix Azure worker UDP outbound connections ([#691](https://github.com/poseidon/typhoon/pull/691))
+  * Fix Azure worker clock sync timeouts
+
+#### DigitalOcean
+
+* Add support for Fedora CoreOS ([#699](https://github.com/poseidon/typhoon/pull/699))
+
+#### Addons
+
+* Refresh Prometheus rules/alerts and Grafana dashboards ([#692](https://github.com/poseidon/typhoon/pull/692))
+* Update Grafana from v6.7.1 to v6.7.2
+
+## v1.18.0
+
+* Kubernetes [v1.18.0](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.18.md#v1180)
+* Update etcd from v3.4.4 to [v3.4.5](https://github.com/etcd-io/etcd/releases/tag/v3.4.5)
+* Switch from upstream hyperkube image to individual images ([#669](https://github.com/poseidon/typhoon/pull/669))
+  * Use upstream k8s.gcr.io `kube-apiserver`, `kube-controller-manager`, `kube-scheduler`, and `kube-proxy` container images
+  * Use [poseidon/kubelet](https://github.com/poseidon/kubelet) to package the upstream Kubelet binary and dependencies as a container image (checksummed, automated build)
+  * Add [quay.io/poseidon/kubelet](https://quay.io/repository/poseidon/kubelet) as a Typhoon distributed artifact in the security policy
+  * Update base images from debian 9 to debian 10
+  * Background: Kubernetes will [stop releasing](https://github.com/kubernetes/kubernetes/pull/88676) the hyperkube container image and provide the Kubelet as a binary for packaging
+* Choose Fedora CoreOS or Flatcar Linux (**action recommended**)
+  * Use a `fedora-coreos` module for Fedora CoreOS
+  * Use a `container-linux` module with OS set for Flatcar Linux (varies, see docs)
+  * CoreOS Container Linux [won't receive updates](https://coreos.com/os/eol/) after May 2020
+* Add support for Fedora CoreOS snippets (`terraform-provider-ct` v0.5+) ([#686](https://github.com/poseidon/typhoon/pull/686))
+* Recommend updating `terraform-provider-ct` plugin from v0.4.0 to [v0.5.0](https://github.com/poseidon/terraform-provider-ct/releases/tag/v0.5.0)
+* Set Fedora CoreOS log driver back to the default `journald` ([#681](https://github.com/poseidon/typhoon/pull/681))
+* Deprecate `asset_dir` variable and remove docs ([#678](https://github.com/poseidon/typhoon/pull/678))
+* Deprecate support for [gitRepo](https://kubernetes.io/docs/concepts/storage/volumes/#gitrepo) volumes. A future release will drop support.
 
 #### AWS
 
+* Fix Fedora CoreOS AMI to filter for stable images ([#685](https://github.com/poseidon/typhoon/pull/685))
+  * Latest Fedora CoreOS `testing` or `bodhi-update` images could be chosen depending on the region
+
+#### Bare-Metal
+
+* Update Fedora CoreOS default `os_stream` from testing to stable
+
+#### Google Cloud
+
+* Known: Use of stale Fedora CoreOS image may require terraform re-apply during bootstrap ([#687](https://github.com/poseidon/typhoon/pull/687))
+
+#### DigitalOcean
+
+* Rename `image` variable to `os_image` for consistency ([#677](https://github.com/poseidon/typhoon/pull/677)) (action required)
+
+#### Addons
+
+* Update Prometheus from v2.16.0 to [v2.17.1](https://github.com/prometheus/prometheus/releases/tag/v2.17.1)
+* Update Grafana from v6.6.2 to [v6.7.1](https://github.com/grafana/grafana/releases/tag/v6.7.1)
+
+## v1.17.4
+
+* Kubernetes [v1.17.4](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.17.md#v1174)
+* Update etcd from v3.4.3 to [v3.4.4](https://github.com/etcd-io/etcd/releases/tag/v3.4.4)
+  * On Container Linux, fetch using the docker transport format ([#659](https://github.com/poseidon/typhoon/pull/659))
+* Update CoreDNS from v1.6.6 to v1.6.7 ([#648](https://github.com/poseidon/typhoon/pull/648))
+* Update Calico from v3.12.0 to [v3.13.1](https://docs.projectcalico.org/v3.13/release-notes/)
+
+#### AWS
+
+* Promote Fedora CoreOS to stable ([#668](https://github.com/poseidon/typhoon/pull/668))
 * Allow VPC route table extension via reference ([#654](https://github.com/poseidon/typhoon/pull/654))
 * Fix `worker_node_labels` on Fedora CoreOS ([#651](https://github.com/poseidon/typhoon/pull/651))
 * Fix automatic worker node delete on shutdown on Fedora CoreOS ([#657](https://github.com/poseidon/typhoon/pull/657))
 
-#### Google Cloud
+#### Azure
 
-* Fix `worker_node_labels` on Fedora CoreOS ([#651](https://github.com/poseidon/typhoon/pull/651))
-* Fix automatic worker node delete on shutdown on Fedora CoreOS ([#657](https://github.com/poseidon/typhoon/pull/657))
+* Upgrade to `terraform-provider-azurerm` [v2.0+](https://www.terraform.io/docs/providers/azurerm/guides/2.0-upgrade-guide.html) (action required)
+  * Change `worker_priority` from `Low` to `Spot` if used (action required)
+  * Switch to Azure's new Linux VM and Linux VM Scale Set resources
+  * Set controller's Azure disk caching to None
+  * Associate subnets (in addition to NICs) with security groups (aesthetic)
+* Add support for Flatcar Container Linux ([#664](https://github.com/poseidon/typhoon/pull/664))
+  * Requires accepting Flatcar Linux Azure Marketplace terms
+
+#### Bare-Metal
+
+* Add `worker_node_labels` map variable for per-worker node labels ([#663](https://github.com/poseidon/typhoon/pull/663))
+* Add `worker_node_taints` map variable for per-worker node taints ([#663](https://github.com/poseidon/typhoon/pull/663))
 
 #### DigitalOcean
 
 * Add support for Flatcar Container Linux ([#644](https://github.com/poseidon/typhoon/pull/644))
+
+#### Google Cloud
+
+* Promote Fedora CoreOS to beta ([#668](https://github.com/poseidon/typhoon/pull/668))
+* Fix `worker_node_labels` on Fedora CoreOS ([#651](https://github.com/poseidon/typhoon/pull/651))
+* Fix automatic worker node delete on shutdown on Fedora CoreOS ([#657](https://github.com/poseidon/typhoon/pull/657))
 
 #### Addons
 
@@ -33,6 +127,9 @@ Notable changes between versions.
   * Update node-exporter from v0.18.1 to [v1.0.0-rc.0](https://github.com/prometheus/node_exporter/releases/tag/v1.0.0-rc.0)
 * Update Grafana from v6.6.1 to v6.6.2
   * Refresh Grafana dashboards
+* Remove Container Linux Update Operator (CLUO) addon example ([#667](https://github.com/poseidon/typhoon/pull/667))
+  * CLUO hasn't been in active use in our clusters and won't be relevant
+  beyond Container Linux. Requires patches for use on Kubernetes v1.16+
 
 ## v1.17.3
 

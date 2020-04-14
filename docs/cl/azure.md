@@ -3,7 +3,7 @@
 !!! danger
     Typhoon for Azure is alpha. For production, use AWS, Google Cloud, or bare-metal. As Azure matures, check [errata](https://github.com/poseidon/typhoon/wiki/Errata) for known shortcomings.
 
-In this tutorial, we'll create a Kubernetes v1.17.3 cluster on Azure with CoreOS Container Linux or Flatcar Linux.
+In this tutorial, we'll create a Kubernetes v1.18.1 cluster on Azure with CoreOS Container Linux or Flatcar Linux.
 
 We'll declare a Kubernetes cluster using the Typhoon Terraform module. Then apply the changes to create a resource group, virtual network, subnets, security groups, controller availability set, worker scale set, load balancer, and TLS assets.
 
@@ -21,15 +21,15 @@ Install [Terraform](https://www.terraform.io/downloads.html) v0.12.6+ on your sy
 
 ```sh
 $ terraform version
-Terraform v0.12.20
+Terraform v0.12.21
 ```
 
 Add the [terraform-provider-ct](https://github.com/poseidon/terraform-provider-ct) plugin binary for your system to `~/.terraform.d/plugins/`, noting the final name.
 
 ```sh
-wget https://github.com/poseidon/terraform-provider-ct/releases/download/v0.4.0/terraform-provider-ct-v0.4.0-linux-amd64.tar.gz
-tar xzf terraform-provider-ct-v0.4.0-linux-amd64.tar.gz
-mv terraform-provider-ct-v0.4.0-linux-amd64/terraform-provider-ct ~/.terraform.d/plugins/terraform-provider-ct_v0.4.0
+wget https://github.com/poseidon/terraform-provider-ct/releases/download/v0.5.0/terraform-provider-ct-v0.5.0-linux-amd64.tar.gz
+tar xzf terraform-provider-ct-v0.5.0-linux-amd64.tar.gz
+mv terraform-provider-ct-v0.5.0-linux-amd64/terraform-provider-ct ~/.terraform.d/plugins/terraform-provider-ct_v0.5.0
 ```
 
 Read [concepts](/architecture/concepts/) to learn about Terraform, modules, and organizing resources. Change to your infrastructure repository (e.g. `infra`).
@@ -50,11 +50,11 @@ Configure the Azure provider in a `providers.tf` file.
 
 ```tf
 provider "azurerm" {
-  version = "1.43.0"
+  version = "2.1.0"
 }
 
 provider "ct" {
-  version = "0.4.0"
+  version = "0.5.0"
 }
 ```
 
@@ -66,7 +66,7 @@ Define a Kubernetes cluster using the module `azure/container-linux/kubernetes`.
 
 ```tf
 module "ramius" {
-  source = "git::https://github.com/poseidon/typhoon//azure/container-linux/kubernetes?ref=v1.17.3"
+  source = "git::https://github.com/poseidon/typhoon//azure/container-linux/kubernetes?ref=v1.18.1"
 
   # Azure
   cluster_name   = "ramius"
@@ -84,6 +84,15 @@ module "ramius" {
 ```
 
 Reference the [variables docs](#variables) or the [variables.tf](https://github.com/poseidon/typhoon/blob/master/azure/container-linux/kubernetes/variables.tf) source.
+
+### Flatcar Linux Only
+
+Flatcar Linux publishes images to the Azure Marketplace and requires accepting their legal terms.
+
+```
+az vm image terms show --publish kinvolk --offer flatcar-container-linux --plan stable
+az vm image terms accept --publish kinvolk --offer flatcar-container-linux --plan stable
+```
 
 ## ssh-agent
 
@@ -140,9 +149,9 @@ List nodes in the cluster.
 $ export KUBECONFIG=/home/user/.kube/configs/ramius-config
 $ kubectl get nodes
 NAME                  STATUS  ROLES   AGE  VERSION
-ramius-controller-0   Ready   <none>  24m  v1.17.3
-ramius-worker-000001  Ready   <none>  25m  v1.17.3
-ramius-worker-000002  Ready   <none>  24m  v1.17.3
+ramius-controller-0   Ready   <none>  24m  v1.18.1
+ramius-worker-000001  Ready   <none>  25m  v1.18.1
+ramius-worker-000002  Ready   <none>  24m  v1.18.1
 ```
 
 List the pods.
@@ -166,9 +175,6 @@ kube-system   kube-scheduler-ramius-controller-0          1/1    Running   0    
 ## Going Further
 
 Learn about [maintenance](/topics/maintenance/) and [addons](/addons/overview/).
-
-!!! note
-    On Container Linux clusters, install the `CLUO` addon to coordinate reboots and drains when nodes auto-update. Otherwise, updates may not be applied until the next reboot.
 
 ## Variables
 
@@ -218,16 +224,15 @@ Reference the DNS zone with `azurerm_dns_zone.clusters.name` and its resource gr
 
 | Name | Description | Default | Example |
 |:-----|:------------|:--------|:--------|
-| asset_dir | Absolute path to a directory where generated assets should be placed (contains secrets) | "" (disabled) | "/home/user/.secrets/clusters/ramius" |
 | controller_count | Number of controllers (i.e. masters) | 1 | 1 |
 | worker_count | Number of workers | 1 | 3 |
 | controller_type | Machine type for controllers | "Standard_B2s" | See below |
 | worker_type | Machine type for workers | "Standard_DS1_v2" | See below |
-| os_image | Channel for a Container Linux derivative | "coreos-stable" | coreos-stable, coreos-beta, coreos-alpha |
+| os_image | Channel for a Container Linux derivative | "coreos-stable" | coreos-stable, coreos-beta, coreos-alpha, flatcar-stable, flatcar-beta |
 | disk_size | Size of the disk in GB | 40 | 100 |
-| worker_priority | Set priority to Low to use reduced cost surplus capacity, with the tradeoff that instances can be deallocated at any time | Regular | Low |
-| controller_clc_snippets | Controller Container Linux Config snippets | [] | [example](/advanced/customization/#usage) |
-| worker_clc_snippets | Worker Container Linux Config snippets | [] | [example](/advanced/customization/#usage) |
+| worker_priority | Set priority to Spot to use reduced cost surplus capacity, with the tradeoff that instances can be deallocated at any time | Regular | Spot |
+| controller_snippets | Controller Container Linux Config snippets | [] | [example](/advanced/customization/#usage) |
+| worker_snippets | Worker Container Linux Config snippets | [] | [example](/advanced/customization/#usage) |
 | networking | Choice of networking provider | "calico" | "flannel" or "calico" |
 | host_cidr | CIDR IPv4 range to assign to instances | "10.0.0.0/16" | "10.0.0.0/20" |
 | pod_cidr | CIDR IPv4 range to assign to Kubernetes pods | "10.2.0.0/16" | "10.22.0.0/16" |
@@ -242,6 +247,6 @@ Check the list of valid [machine types](https://azure.microsoft.com/en-us/pricin
 !!! warning
     Do not choose a `controller_type` smaller than `Standard_B2s`. Smaller instances are not sufficient for running a controller.
 
-#### Low Priority
+#### Spot Priority
 
-Add `worker_priority=Low` to use [Low Priority](https://docs.microsoft.com/en-us/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-use-low-priority) workers that run on Azure's surplus capacity at lower cost, but with the tradeoff that they can be deallocated at random. Low priority VMs are Azure's analog to AWS spot instances or GCP premptible instances.
+Add `worker_priority=Spot` to use [Spot Priority](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/spot-vms) workers that run on Azure's surplus capacity at lower cost, but with the tradeoff that they can be deallocated at random. Spot priority VMs are Azure's analog to AWS spot instances or GCP premptible instances.

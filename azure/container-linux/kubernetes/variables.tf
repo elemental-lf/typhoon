@@ -49,7 +49,7 @@ variable "worker_type" {
 variable "os_image" {
   type        = string
   default     = "coreos-stable"
-  description = "Channel for a Container Linux derivative (coreos-stable, coreos-beta, coreos-alpha)"
+  description = "Channel for a Container Linux derivative (coreos-stable, coreos-beta, coreos-alpha, flatcar-stable, flatcar-beta)"
 }
 
 variable "disk_size" {
@@ -64,13 +64,13 @@ variable "worker_priority" {
   default     = "Regular"
 }
 
-variable "controller_clc_snippets" {
+variable "controller_snippets" {
   type        = list(string)
   description = "Controller Container Linux Config snippets"
   default     = []
 }
 
-variable "worker_clc_snippets" {
+variable "worker_snippets" {
   type        = list(string)
   description = "Worker Container Linux Config snippets"
   default     = []
