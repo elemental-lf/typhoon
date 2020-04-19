@@ -4,6 +4,45 @@ Notable changes between versions.
 
 ## Latest
 
+* Kubernetes [v1.18.2](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.18.md#v1182)
+* Choose Fedora CoreOS or Flatcar Linux (**action required**)
+  * Use a `fedora-coreos` module for Fedora CoreOS
+  * Use a `container-linux` module for Flatcar Linux
+* Change Container Linux modules' defaults from CoreOS Container Linux to [Flatcar Container Linux](https://typhoon.psdn.io/architecture/operating-systems/) ([#702](https://github.com/poseidon/typhoon/pull/702))
+  * CoreOS Container Linux [won't receive updates](https://coreos.com/os/eol/) after May 2020
+
+### Fedora CoreOS
+
+* Fix race condition during bootstrap related to SELinux shared content label ([#708](https://github.com/poseidon/typhoon/pull/708))
+
+#### Azure
+
+* Add support for Fedora CoreOS ([#704](https://github.com/poseidon/typhoon/pull/704))
+
+### Container Linux
+
+#### AWS
+
+* Change `os_image` default from `coreos-stable` to `flatcar-stable` ([#702](https://github.com/poseidon/typhoon/pull/702))
+
+#### Azure
+
+* Change `os_image` to be required. Recommend uploading a Flatcar Linux image (**action required**) ([#702](https://github.com/poseidon/typhoon/pull/702))
+* Disable Flatcar Linux Azure Marketplace image [support](https://github.com/poseidon/typhoon/pull/664) (**breaking**, [#707](https://github.com/poseidon/typhoon/pull/707))
+  * Revert to manual uploading until marketplace issue is closed ([#703](https://github.com/poseidon/typhoon/issues/703))
+
+#### Bare-Metal
+
+* Recommend changing [os_channel](https://typhoon.psdn.io/cl/bare-metal/#required) from `coreos-stable` to `flatcar-stable`
+
+#### Google
+
+* Change `os_image` to be required. Recommend uploading a Flatcar Linux image (**action required**) ([#702](https://github.com/poseidon/typhoon/pull/702))
+
+#### DigitalOcean
+
+* Change `os_image` to be required. Recommend uploading a Flatcar Linux image (**action required**) ([#702](https://github.com/poseidon/typhoon/pull/702))
+
 ## v1.18.1
 
 * Kubernetes [v1.18.1](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.18.md#v1181)
@@ -19,7 +58,7 @@ Notable changes between versions.
 * Rename Container Linux `controller_clc_snippets` to `controller_snippets` for consistency ([#688](https://github.com/poseidon/typhoon/pull/688))
 * Rename Container Linux `worker_clc_snippets` to `worker_snippets` for consistency
 * Rename Container Linux `clc_snippets` (bare-metal) to `snippets` for consistency
-* Drop support for [gitRepo](https://kubernetes.io/docs/concepts/storage/volumes/#gitrepo) volumes
+* Drop support for [gitRepo](https://kubernetes.io/docs/concepts/storage/volumes/#gitrepo) volumes ([kubelet#3](https://github.com/poseidon/kubelet/pull/3))
 
 #### Azure
 
