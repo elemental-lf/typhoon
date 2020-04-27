@@ -128,7 +128,7 @@ systemd:
           --volume rbdnbd,kind=host,source=/etc/modprobe.d/rbd-nbd.conf \
           --mount volume=rbdnbd,target=/etc/modprobe.d/rbd-nbd.conf \
 %{ endif ~}
-          docker://$${KUBELET_IMAGE_URL}:$${KUBELET_IMAGE_TAG} \
+          docker://$${KUBELET_IMAGE_URL}:$${KUBELET_IMAGE_TAG} -- \
           --anonymous-auth=false \
           --authentication-token-webhook \
           --authorization-mode=Webhook \
