@@ -128,6 +128,7 @@ systemd:
           %{~ for label in compact(split(",", node_labels)) ~}
           --node-labels=${label} \
           %{~ endfor ~}
+          --register-with-taints=node-role.kubernetes.io/master=:NoSchedule \
           %{~ for taint in compact(split(",", node_taints)) ~}
           --register-with-taints=${taint} \
           %{~ endfor ~}
