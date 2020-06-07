@@ -66,3 +66,9 @@ variable "asset_overrides" {
   type        = map(string)
   default     = {}
 }
+
+variable "accept_insecure_images" {
+  description = "Disable image signature checking"
+  type        = bool
+  default     = false
+}

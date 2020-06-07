@@ -25,7 +25,7 @@ locals {
 
   kernel = var.cached_install ? local.cached_kernel : local.remote_kernel
   initrd = var.cached_install ? local.cached_initrd : local.remote_initrd
-  args   = var.cached_install ? local.cached_args : local.remote_args
+  args   = concat(var.cached_install ? local.cached_args : local.remote_args, var.accept_insecure_images ? ["coreos.inst.insecure"] : [])
 }
 
 
