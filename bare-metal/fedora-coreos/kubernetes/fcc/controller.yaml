@@ -97,7 +97,7 @@ systemd:
           --volume /etc/pki/tls/certs:/usr/share/ca-certificates:ro \
           --volume /var/lib/calico:/var/lib/calico:ro \
           --volume /var/lib/docker:/var/lib/docker \
-          --volume /var/lib/kubelet:/var/lib/kubelet:rshared,z \
+          --volume /var/lib/kubelet:/var/lib/kubelet:rshared \
           --volume /var/log:/var/log \
           --volume /var/run/lock:/var/run/lock:z \
           --volume /opt/cni/bin:/opt/cni/bin:z \
