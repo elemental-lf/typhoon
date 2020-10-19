@@ -1,9 +1,6 @@
 # Azure
 
-!!! danger
-    Typhoon for Azure is alpha. For production, use AWS, Google Cloud, or bare-metal. As Azure matures, check [errata](https://github.com/poseidon/typhoon/wiki/Errata) for known shortcomings.
-
-In this tutorial, we'll create a Kubernetes v1.18.1 cluster on Azure with CoreOS Container Linux or Flatcar Linux.
+In this tutorial, we'll create a Kubernetes v1.19.2 cluster on Azure with Fedora CoreOS.
 
 We'll declare a Kubernetes cluster using the Typhoon Terraform module. Then apply the changes to create a resource group, virtual network, subnets, security groups, controller availability set, worker scale set, load balancer, and TLS assets.
 
@@ -13,23 +10,15 @@ Controller hosts are provisioned to run an `etcd-member` peer and a `kubelet` se
 
 * Azure account
 * Azure DNS Zone (registered Domain Name or delegated subdomain)
-* Terraform v0.12.6+ and [terraform-provider-ct](https://github.com/poseidon/terraform-provider-ct) installed locally
+* Terraform v0.13.0+
 
 ## Terraform Setup
 
-Install [Terraform](https://www.terraform.io/downloads.html) v0.12.6+ on your system.
+Install [Terraform](https://www.terraform.io/downloads.html) v0.13.0+ on your system.
 
 ```sh
 $ terraform version
-Terraform v0.12.21
-```
-
-Add the [terraform-provider-ct](https://github.com/poseidon/terraform-provider-ct) plugin binary for your system to `~/.terraform.d/plugins/`, noting the final name.
-
-```sh
-wget https://github.com/poseidon/terraform-provider-ct/releases/download/v0.5.0/terraform-provider-ct-v0.5.0-linux-amd64.tar.gz
-tar xzf terraform-provider-ct-v0.5.0-linux-amd64.tar.gz
-mv terraform-provider-ct-v0.5.0-linux-amd64/terraform-provider-ct ~/.terraform.d/plugins/terraform-provider-ct_v0.5.0
+Terraform v0.13.0
 ```
 
 Read [concepts](/architecture/concepts/) to learn about Terraform, modules, and organizing resources. Change to your infrastructure repository (e.g. `infra`).
@@ -50,23 +39,54 @@ Configure the Azure provider in a `providers.tf` file.
 
 ```tf
 provider "azurerm" {
-  version = "2.1.0"
+  features {}
 }
 
-provider "ct" {
-  version = "0.5.0"
+provider "ct" {}
+
+terraform {
+  required_providers {
+    ct = {
+      source  = "poseidon/ct"
+      version = "0.6.1"
+    }
+    azurerm = {
+      source = "hashicorp/azurerm"
+      version = "2.27.0"
+    }
+  }
 }
 ```
 
 Additional configuration options are described in the `azurerm` provider [docs](https://www.terraform.io/docs/providers/azurerm/).
 
+## Fedora CoreOS Images
+
+Fedora CoreOS publishes images for Azure, but does not yet upload them. Azure allows custom images to be uploaded to a storage account bucket and imported.
+
+[Download](https://getfedora.org/en/coreos/download?tab=cloud_operators&stream=stable) a Fedora CoreOS Azure VHD image and upload it to an Azure storage account container (i.e. bucket) via the UI (quite slow).
+
+```
+xz -d fedora-coreos-31.20200323.3.2-azure.x86_64.vhd.xz
+```
+
+Create an Azure disk (note disk ID) and create an Azure image from it (note image ID).
+
+```
+az disk create --name fedora-coreos-31.20200323.3.2 -g GROUP --source https://BUCKET.blob.core.windows.net/fedora-coreos/fedora-coreos-31.20200323.3.2-azure.x86_64.vhd
+
+az image create --name fedora-coreos-31.20200323.3.2 -g GROUP --os-type=linux --source /subscriptions/some/path/providers/Microsoft.Compute/disks/fedora-coreos-31.20200323.3.2
+```
+
+Set the [os_image](#variables) in the next step.
+
 ## Cluster
 
-Define a Kubernetes cluster using the module `azure/container-linux/kubernetes`.
+Define a Kubernetes cluster using the module `azure/fedora-coreos/kubernetes`.
 
 ```tf
 module "ramius" {
-  source = "git::https://github.com/poseidon/typhoon//azure/container-linux/kubernetes?ref=v1.18.1"
+  source = "git::https://github.com/poseidon/typhoon//azure/fedora-coreos/kubernetes?ref=v1.19.2"
 
   # Azure
   cluster_name   = "ramius"
@@ -75,6 +95,7 @@ module "ramius" {
   dns_zone_group = "example-group"
 
   # configuration
+  os_image           = "/subscriptions/some/path/Microsoft.Compute/images/fedora-coreos-31.20200323.3.2"
   ssh_authorized_key = "ssh-rsa AAAAB3Nz..."
 
   # optional
@@ -83,16 +104,7 @@ module "ramius" {
 }
 ```
 
-Reference the [variables docs](#variables) or the [variables.tf](https://github.com/poseidon/typhoon/blob/master/azure/container-linux/kubernetes/variables.tf) source.
-
-### Flatcar Linux Only
-
-Flatcar Linux publishes images to the Azure Marketplace and requires accepting their legal terms.
-
-```
-az vm image terms show --publish kinvolk --offer flatcar-container-linux --plan stable
-az vm image terms accept --publish kinvolk --offer flatcar-container-linux --plan stable
-```
+Reference the [variables docs](#variables) or the [variables.tf](https://github.com/poseidon/typhoon/blob/master/azure/fedora-coreos/kubernetes/variables.tf) source.
 
 ## ssh-agent
 
@@ -149,9 +161,9 @@ List nodes in the cluster.
 $ export KUBECONFIG=/home/user/.kube/configs/ramius-config
 $ kubectl get nodes
 NAME                  STATUS  ROLES   AGE  VERSION
-ramius-controller-0   Ready   <none>  24m  v1.18.1
-ramius-worker-000001  Ready   <none>  25m  v1.18.1
-ramius-worker-000002  Ready   <none>  24m  v1.18.1
+ramius-controller-0   Ready   <none>  24m  v1.19.2
+ramius-worker-000001  Ready   <none>  25m  v1.19.2
+ramius-worker-000002  Ready   <none>  24m  v1.19.2
 ```
 
 List the pods.
@@ -178,7 +190,7 @@ Learn about [maintenance](/topics/maintenance/) and [addons](/addons/overview/).
 
 ## Variables
 
-Check the [variables.tf](https://github.com/poseidon/typhoon/blob/master/azure/container-linux/kubernetes/variables.tf) source.
+Check the [variables.tf](https://github.com/poseidon/typhoon/blob/master/azure/fedora-coreos/kubernetes/variables.tf) source.
 
 ### Required
 
@@ -188,6 +200,7 @@ Check the [variables.tf](https://github.com/poseidon/typhoon/blob/master/azure/c
 | region | Azure region | "centralus" |
 | dns_zone | Azure DNS zone | "azure.example.com" |
 | dns_zone_group | Resource group where the Azure DNS zone resides | "global" |
+| os_image | Fedora CoreOS image for instances | "/subscriptions/..../custom-image" |
 | ssh_authorized_key | SSH public key for user 'core' | "ssh-rsa AAAAB3NZ..." |
 
 !!! tip
@@ -228,12 +241,11 @@ Reference the DNS zone with `azurerm_dns_zone.clusters.name` and its resource gr
 | worker_count | Number of workers | 1 | 3 |
 | controller_type | Machine type for controllers | "Standard_B2s" | See below |
 | worker_type | Machine type for workers | "Standard_DS1_v2" | See below |
-| os_image | Channel for a Container Linux derivative | "coreos-stable" | coreos-stable, coreos-beta, coreos-alpha, flatcar-stable, flatcar-beta |
 | disk_size | Size of the disk in GB | 40 | 100 |
 | worker_priority | Set priority to Spot to use reduced cost surplus capacity, with the tradeoff that instances can be deallocated at any time | Regular | Spot |
-| controller_snippets | Controller Container Linux Config snippets | [] | [example](/advanced/customization/#usage) |
-| worker_snippets | Worker Container Linux Config snippets | [] | [example](/advanced/customization/#usage) |
-| networking | Choice of networking provider | "calico" | "flannel" or "calico" |
+| controller_snippets | Controller Fedora CoreOS Config snippets | [] | [example](/advanced/customization/#usage) |
+| worker_snippets | Worker Fedora CoreOS Config snippets | [] | [example](/advanced/customization/#usage) |
+| networking | Choice of networking provider | "calico" | "calico" or "cilium" or "flannel" |
 | host_cidr | CIDR IPv4 range to assign to instances | "10.0.0.0/16" | "10.0.0.0/20" |
 | pod_cidr | CIDR IPv4 range to assign to Kubernetes pods | "10.2.0.0/16" | "10.22.0.0/16" |
 | service_cidr | CIDR IPv4 range to assign to Kubernetes services | "10.3.0.0/16" | "10.3.0.0/24" |

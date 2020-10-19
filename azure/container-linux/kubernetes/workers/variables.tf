@@ -46,13 +46,13 @@ variable "vm_type" {
 
 variable "os_image" {
   type        = string
-  description = "Channel for a Container Linux derivative (coreos-stable, coreos-beta, coreos-alpha)"
-  default     = "coreos-stable"
+  description = "Channel for a Container Linux derivative (flatcar-stable, flatcar-beta, flatcar-alpha, flatcar-edge, coreos-stable, coreos-beta, coreos-alpha)"
+  default     = "flatcar-stable"
 }
 
 variable "priority" {
   type        = string
-  description = "Set priority to Low to use reduced cost surplus capacity, with the tradeoff that instances can be evicted at any time."
+  description = "Set priority to Spot to use reduced cost surplus capacity, with the tradeoff that instances can be evicted at any time."
   default     = "Regular"
 }
 

@@ -48,8 +48,8 @@ variable "worker_type" {
 
 variable "os_image" {
   type        = string
-  default     = "coreos-stable"
-  description = "Channel for a Container Linux derivative (coreos-stable, coreos-beta, coreos-alpha, flatcar-stable, flatcar-beta)"
+  description = "Channel for a Container Linux derivative (flatcar-stable, flatcar-beta, flatcar-alpha, flatcar-edge, coreos-stable, coreos-beta, coreos-alpha)"
+  default     = "flatcar-stable"
 }
 
 variable "disk_size" {
@@ -60,7 +60,7 @@ variable "disk_size" {
 
 variable "worker_priority" {
   type        = string
-  description = "Set worker priority to Low to use reduced cost surplus capacity, with the tradeoff that instances can be deallocated at any time."
+  description = "Set worker priority to Spot to use reduced cost surplus capacity, with the tradeoff that instances can be deallocated at any time."
   default     = "Regular"
 }
 
@@ -81,12 +81,6 @@ variable "worker_snippets" {
 variable "ssh_authorized_key" {
   type        = string
   description = "SSH public key for user 'core'"
-}
-
-variable "asset_dir" {
-  type        = string
-  description = "Absolute path to a directory where generated assets should be placed (contains secrets)"
-  default     = ""
 }
 
 variable "networking" {
@@ -135,6 +129,12 @@ variable "worker_node_labels" {
 }
 
 # unofficial, undocumented, unsupported
+
+variable "asset_dir" {
+  type        = string
+  description = "Absolute path to a directory where generated assets should be placed (contains secrets)"
+  default     = ""
+}
 
 variable "cluster_domain_suffix" {
   type        = string

@@ -2,12 +2,12 @@
 systemd:
   units:
     - name: etcd-member.service
-      enable: true
+      enabled: true
       dropins:
         - name: 40-etcd-cluster.conf
           contents: |
             [Service]
-            Environment="ETCD_IMAGE_TAG=v3.4.7"
+            Environment="ETCD_IMAGE_TAG=v3.4.12"
             Environment="ETCD_IMAGE_URL=docker://quay.io/coreos/etcd"
             Environment="RKT_RUN_ARGS=--insecure-options=image"
             Environment="ETCD_NAME=${etcd_name}"
@@ -29,11 +29,11 @@ systemd:
             Environment="ETCD_PEER_CLIENT_CERT_AUTH=true"
             Environment="ETCD_INITIAL_CLUSTER_STATE=${etcd_cluster_exists == "true" ? "existing" : "new"}"
     - name: docker.service
-      enable: true
+      enabled: true
     - name: locksmithd.service
       mask: true
     - name: kubelet.path
-      enable: true
+      enabled: true
       contents: |
         [Unit]
         Description=Watch for kubeconfig
@@ -61,7 +61,7 @@ systemd:
         [Install]
         WantedBy=multi-user.target
     - name: wait-for-dns.service
-      enable: true
+      enabled: true
       contents: |
         [Unit]
         Description=Wait for DNS entries
@@ -77,7 +77,7 @@ systemd:
     - name: kubelet.service
       contents: |
         [Unit]
-        Description=Kubelet via Hyperkube
+        Description=Kubelet
         Wants=rpc-statd.service
         [Service]
         EnvironmentFile=/etc/kubernetes/kubelet.env
@@ -132,18 +132,16 @@ systemd:
           --anonymous-auth=false \
           --authentication-token-webhook \
           --authorization-mode=Webhook \
+          --bootstrap-kubeconfig=/etc/kubernetes/kubeconfig \
           --cgroup-driver=$${KUBELET_CGROUP_DRIVER} \
           --client-ca-file=/etc/kubernetes/ca.crt \
           --cluster_dns=${cluster_dns_service_ip} \
           --cluster_domain=${cluster_domain_suffix} \
           --cni-conf-dir=/etc/kubernetes/cni/net.d \
-          --exit-on-lock-contention \
           --healthz-port=0 \
           --hostname-override=${domain_name} \
-          --kubeconfig=/etc/kubernetes/kubeconfig \
-          --lock-file=/var/run/lock/kubelet.lock \
+          --kubeconfig=/var/lib/kubelet/kubeconfig \
           --network-plugin=cni \
-          --node-labels=node.kubernetes.io/master \
           --node-labels=node.kubernetes.io/controller="true" \
           %{~ for label in compact(split(",", node_labels)) ~}
           --node-labels=${label} \
@@ -154,6 +152,8 @@ systemd:
           %{~ endfor ~}
           --pod-manifest-path=/etc/kubernetes/manifests \
           --read-only-port=0 \
+          --register-with-taints=node-role.kubernetes.io/controller=:NoSchedule \
+          --rotate-certificates \
           --volume-plugin-dir=/var/lib/kubelet/volumeplugins \
           --eviction-soft=memory.available<500Mi,nodefs.available<20%,nodefs.inodesFree<10%,imagefs.available<20%,imagefs.inodesFree<10% \
           --eviction-soft-grace-period=memory.available=2m,nodefs.available=2m,nodefs.inodesFree=2m,imagefs.available=2m,imagefs.inodesFree=2m
@@ -188,8 +188,13 @@ systemd:
         WantedBy=multi-user.target
 storage:
   directories:
+    - path: /var/lib/etcd
+      filesystem: root
+      mode: 0700
+      overwrite: true
     - path: /etc/kubernetes
       filesystem: root
+      mode: 0755
   files:
     - path: /etc/kubernetes/kubelet.env
       filesystem: root
@@ -220,6 +225,7 @@ storage:
           mv tls/etcd/etcd-client* /etc/kubernetes/bootstrap-secrets/
           chown -R etcd:etcd /etc/ssl/etcd
           chmod -R 500 /etc/ssl/etcd
+          chmod -R 700 /var/lib/etcd
           mv auth/kubeconfig /etc/kubernetes/bootstrap-secrets/
           mv auth/kubeconfig-localhost /etc/kubernetes/bootstrap-secrets/
           mv tls/k8s/* /etc/kubernetes/bootstrap-secrets/
@@ -249,6 +255,7 @@ storage:
           done
     - path: /etc/sysctl.d/max-user-watches.conf
       filesystem: root
+      mode: 0644
       contents:
         inline: |
           fs.inotify.max_user_watches=524288

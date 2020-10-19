@@ -2,11 +2,11 @@
 systemd:
   units:
     - name: docker.service
-      enable: true
+      enabled: true
     - name: locksmithd.service
       mask: true
     - name: kubelet.path
-      enable: true
+      enabled: true
       contents: |
         [Unit]
         Description=Watch for kubeconfig
@@ -34,7 +34,7 @@ systemd:
         [Install]
         WantedBy=multi-user.target
     - name: wait-for-dns.service
-      enable: true
+      enabled: true
       contents: |
         [Unit]
         Description=Wait for DNS entries
@@ -49,7 +49,7 @@ systemd:
     - name: kubelet.service
       contents: |
         [Unit]
-        Description=Kubelet via Hyperkube
+        Description=Kubelet
         Wants=rpc-statd.service
         [Service]
         EnvironmentFile=/etc/kubernetes/kubelet.env
@@ -104,16 +104,15 @@ systemd:
           --anonymous-auth=false \
           --authentication-token-webhook \
           --authorization-mode=Webhook \
+          --bootstrap-kubeconfig=/etc/kubernetes/kubeconfig \
           --cgroup-driver=$${KUBELET_CGROUP_DRIVER} \
           --client-ca-file=/etc/kubernetes/ca.crt \
           --cluster_dns=${cluster_dns_service_ip} \
           --cluster_domain=${cluster_domain_suffix} \
           --cni-conf-dir=/etc/kubernetes/cni/net.d \
-          --exit-on-lock-contention \
           --healthz-port=0 \
           --hostname-override=${domain_name} \
-          --kubeconfig=/etc/kubernetes/kubeconfig \
-          --lock-file=/var/run/lock/kubelet.lock \
+          --kubeconfig=/var/lib/kubelet/kubeconfig \
           --network-plugin=cni \
           --node-labels=node.kubernetes.io/node \
           %{~ for label in compact(split(",", node_labels)) ~}
@@ -124,6 +123,7 @@ systemd:
           %{~ endfor ~}
           --pod-manifest-path=/etc/kubernetes/manifests \
           --read-only-port=0 \
+          --rotate-certificates \
           --volume-plugin-dir=/var/lib/kubelet/volumeplugins \
           --max-pods=220 \
           --eviction-soft=memory.available<500Mi,nodefs.available<20%,nodefs.inodesFree<10%,imagefs.available<20%,imagefs.inodesFree<10% \
@@ -138,6 +138,7 @@ storage:
   directories:
     - path: /etc/kubernetes
       filesystem: root
+      mode: 0755
   files:
     - path: /etc/kubernetes/kubelet.env
       filesystem: root
@@ -154,6 +155,7 @@ storage:
           ${domain_name}
     - path: /etc/sysctl.d/max-user-watches.conf
       filesystem: root
+      mode: 0644
       contents:
         inline: |
           fs.inotify.max_user_watches=524288
