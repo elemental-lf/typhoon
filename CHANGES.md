@@ -4,6 +4,68 @@ Notable changes between versions.
 
 ## Latest
 
+## v1.19.4
+
+* Kubernetes [v1.19.4](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.19.md#v1194)
+* Update Cilium from v1.8.4 to [v1.9.0](https://github.com/cilium/cilium/releases/tag/v1.9.0)
+* Update Calico from v3.16.3 to [v3.16.5](https://github.com/projectcalico/calico/releases/tag/v3.16.5)
+* Remove `asset_dir` variable (defaulted off in [v1.17.0](https://github.com/poseidon/typhoon/pull/595), deprecated in [v1.18.0](https://github.com/poseidon/typhoon/pull/678))
+
+### Fedora CoreOS
+
+* Improve `etcd-member.service` systemd unit ([#868](https://github.com/poseidon/typhoon/pull/868))
+  * Allow a snippet with a systemd dropin to set an alternate image (e.g. mirror)
+* Fix local node delete oneshot on node shutdown ([#856](https://github.com/poseidon/typhoon/pull/855))
+
+#### AWS
+
+* Add experimental Fedora CoreOS arm64 support ([docs](https://typhoon.psdn.io/advanced/arm64/), [#875](https://github.com/poseidon/typhoon/pull/875))
+  * Allow arm64 full-cluster or mixed/hybrid cluster with worker pools
+  * Add `arch` variable to cluster module
+  * Add `daemonset_tolerations` variable to cluster module
+  * Add `node_taints` variable to workers module
+  * Requires flannel CNI provider and use of experimental AMI (see docs)
+
+### Flatcar Linux
+
+* Rename `container-linux` modules to `flatcar-linux` ([#858](https://github.com/poseidon/typhoon/issues/858)) (**action required**)
+
+* Change on-host system containers from rkt to docker
+  * Change `etcd-member.service` container runnner from rkt to docker ([#867](https://github.com/poseidon/typhoon/pull/867))
+  * Change `kubelet.service` container runner from rkt-fly to docker ([#855](https://github.com/poseidon/typhoon/pull/855))
+  * Change `bootstrap.service` container runner from rkt to docker ([#873](https://github.com/poseidon/typhoon/pull/873))
+  * Change `delete-node.service` to use docker and an inline ExecStart ([#855](https://github.com/poseidon/typhoon/pull/855))
+* Fix local node delete oneshot on node shutdown ([#855](https://github.com/poseidon/typhoon/pull/855))
+* Remove CoreOS Container Linux Matchbox profiles ([#859](https://github.com/poseidon/typhoon/pull/858))
+
+### Addons
+
+* Update nginx-ingress from v0.40.2 to [v0.41.2](https://github.com/kubernetes/ingress-nginx/releases/tag/controller-v0.41.2)
+* Update Prometheus from v2.22.0 to [v2.22.1](https://github.com/prometheus/prometheus/releases/tag/v2.22.1)
+* Update kube-state-metrics from v2.0.0-alpha.1 to [v2.0.0-alpha.2](https://github.com/kubernetes/kube-state-metrics/releases/tag/v2.0.0-alpha.2)
+* Update Grafana from v7.2.1 to [v7.3.2](https://github.com/grafana/grafana/releases/tag/v7.3.2)
+
+## v1.19.3
+
+* Kubernetes [v1.19.3](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.19.md#v1193)
+* Update Cilium from v1.8.3 to [v1.8.4](https://github.com/cilium/cilium/releases/tag/v1.8.4)
+* Update Calico from v1.15.3 to [v1.16.3](https://github.com/projectcalico/calico/releases/tag/v3.16.3) ([#851](https://github.com/poseidon/typhoon/pull/851))
+* Update flannel from v0.13.0-rc2 to v0.13.0 ([#219](https://github.com/poseidon/terraform-render-bootstrap/pull/219))
+
+### Flatcar Linux
+
+* Remove references to CoreOS Container Linux ([#839](https://github.com/poseidon/typhoon/pull/839))
+  * Fix error querying for coreos AMI on AWS ([#838](https://github.com/poseidon/typhoon/issues/838))
+
+### Addons
+
+* Update nginx-ingress from v0.35.0 to [v0.40.2](https://github.com/kubernetes/ingress-nginx/releases/tag/controller-v0.40.2)
+* Update Grafana from v7.1.5 to [v7.2.1](https://github.com/grafana/grafana/releases/tag/v7.2.1)
+* Update Prometheus from v2.21.0 to [v2.22.0](https://github.com/prometheus/prometheus/releases/tag/v2.22.0)
+  * Update kube-state-metrics from v1.9.7 to [v2.0.0-alpha.1](https://github.com/kubernetes/kube-state-metrics/releases/tag/v2.0.0-alpha.1)
+
+## v1.19.2
+
 * Kubernetes [v1.19.2](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.19.md#v1192)
 * Update flannel from v0.12.0 to v0.13.0-rc2 ([#216](https://github.com/poseidon/terraform-render-bootstrap/pull/216))
   * Update flannel-cni from v0.4.0 to v0.4.1

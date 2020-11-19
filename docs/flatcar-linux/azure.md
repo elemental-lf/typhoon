@@ -1,6 +1,6 @@
 # Azure
 
-In this tutorial, we'll create a Kubernetes v1.19.2 cluster on Azure with CoreOS Container Linux or Flatcar Linux.
+In this tutorial, we'll create a Kubernetes v1.19.4 cluster on Azure with Flatcar Linux.
 
 We'll declare a Kubernetes cluster using the Typhoon Terraform module. Then apply the changes to create a resource group, virtual network, subnets, security groups, controller availability set, worker scale set, load balancer, and TLS assets.
 
@@ -52,7 +52,7 @@ terraform {
     }
     azurerm = {
       source = "hashicorp/azurerm"
-      version = "2.27.0"
+      version = "2.36.0"
     }
   }
 }
@@ -71,11 +71,11 @@ az vm image terms accept --publish kinvolk --offer flatcar-container-linux-free 
 
 ## Cluster
 
-Define a Kubernetes cluster using the module `azure/container-linux/kubernetes`.
+Define a Kubernetes cluster using the module `azure/flatcar-linux/kubernetes`.
 
 ```tf
 module "ramius" {
-  source = "git::https://github.com/poseidon/typhoon//azure/container-linux/kubernetes?ref=v1.19.2"
+  source = "git::https://github.com/poseidon/typhoon//azure/flatcar-linux/kubernetes?ref=v1.19.4"
 
   # Azure
   cluster_name   = "ramius"
@@ -92,7 +92,7 @@ module "ramius" {
 }
 ```
 
-Reference the [variables docs](#variables) or the [variables.tf](https://github.com/poseidon/typhoon/blob/master/azure/container-linux/kubernetes/variables.tf) source.
+Reference the [variables docs](#variables) or the [variables.tf](https://github.com/poseidon/typhoon/blob/master/azure/flatcar-linux/kubernetes/variables.tf) source.
 
 ## ssh-agent
 
@@ -149,9 +149,9 @@ List nodes in the cluster.
 $ export KUBECONFIG=/home/user/.kube/configs/ramius-config
 $ kubectl get nodes
 NAME                  STATUS  ROLES   AGE  VERSION
-ramius-controller-0   Ready   <none>  24m  v1.19.2
-ramius-worker-000001  Ready   <none>  25m  v1.19.2
-ramius-worker-000002  Ready   <none>  24m  v1.19.2
+ramius-controller-0   Ready   <none>  24m  v1.19.4
+ramius-worker-000001  Ready   <none>  25m  v1.19.4
+ramius-worker-000002  Ready   <none>  24m  v1.19.4
 ```
 
 List the pods.
@@ -178,7 +178,7 @@ Learn about [maintenance](/topics/maintenance/) and [addons](/addons/overview/).
 
 ## Variables
 
-Check the [variables.tf](https://github.com/poseidon/typhoon/blob/master/azure/container-linux/kubernetes/variables.tf) source.
+Check the [variables.tf](https://github.com/poseidon/typhoon/blob/master/azure/flatcar-linux/kubernetes/variables.tf) source.
 
 ### Required
 

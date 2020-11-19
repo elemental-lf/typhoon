@@ -8,7 +8,6 @@ module "bootstrap" {
   apiserver_vip_interface         = var.apiserver_vip_interface
   apiserver_vip_vrrp_id           = var.apiserver_vip_vrrp_id
   etcd_servers                    = var.controllers.*.domain
-  asset_dir                       = var.asset_dir
   networking                      = var.networking
   network_mtu                     = var.network_mtu
   network_ip_autodetection_method = var.network_ip_autodetection_method

@@ -4,11 +4,11 @@ Typhoon AWS, Azure, and Google Cloud allow additional groups of workers to be de
 
 Internal Terraform Modules:
 
-* `aws/container-linux/kubernetes/workers`
+* `aws/flatcar-linux/kubernetes/workers`
 * `aws/fedora-coreos/kubernetes/workers`
-* `azure/container-linux/kubernetes/workers`
+* `azure/flatcar-linux/kubernetes/workers`
 * `azure/fedora-coreos/kubernetes/workers`
-* `google-cloud/container-linux/kubernetes/workers`
+* `google-cloud/flatcar-linux/kubernetes/workers`
 * `google-cloud/fedora-coreos/kubernetes/workers`
 
 ## AWS
@@ -19,7 +19,7 @@ Create a cluster following the AWS [tutorial](../flatcar-linux/aws.md#cluster). 
 
     ```tf
     module "tempest-worker-pool" {
-      source = "git::https://github.com/poseidon/typhoon//aws/fedora-coreos/kubernetes/workers?ref=v1.19.2"
+      source = "git::https://github.com/poseidon/typhoon//aws/fedora-coreos/kubernetes/workers?ref=v1.19.4"
 
       # AWS
       vpc_id          = module.tempest.vpc_id
@@ -42,7 +42,7 @@ Create a cluster following the AWS [tutorial](../flatcar-linux/aws.md#cluster). 
 
     ```tf
     module "tempest-worker-pool" {
-      source = "git::https://github.com/poseidon/typhoon//aws/container-linux/kubernetes/workers?ref=v1.19.2"
+      source = "git::https://github.com/poseidon/typhoon//aws/flatcar-linux/kubernetes/workers?ref=v1.19.4"
 
       # AWS
       vpc_id          = module.tempest.vpc_id
@@ -71,7 +71,7 @@ Verify an auto-scaling group of workers joins the cluster within a few minutes.
 
 ### Variables
 
-The AWS internal `workers` module supports a number of [variables](https://github.com/poseidon/typhoon/blob/master/aws/container-linux/kubernetes/workers/variables.tf).
+The AWS internal `workers` module supports a number of [variables](https://github.com/poseidon/typhoon/blob/master/aws/flatcar-linux/kubernetes/workers/variables.tf).
 
 #### Required
 
@@ -110,7 +110,7 @@ Create a cluster following the Azure [tutorial](../flatcar-linux/azure.md#cluste
 
     ```tf
     module "ramius-worker-pool" {
-      source = "git::https://github.com/poseidon/typhoon//azure/fedora-coreos/kubernetes/workers?ref=v1.19.2"
+      source = "git::https://github.com/poseidon/typhoon//azure/fedora-coreos/kubernetes/workers?ref=v1.19.4"
 
       # Azure
       region                  = module.ramius.region
@@ -136,7 +136,7 @@ Create a cluster following the Azure [tutorial](../flatcar-linux/azure.md#cluste
 
     ```tf
     module "ramius-worker-pool" {
-      source = "git::https://github.com/poseidon/typhoon//azure/container-linux/kubernetes/workers?ref=v1.19.2"
+      source = "git::https://github.com/poseidon/typhoon//azure/flatcar-linux/kubernetes/workers?ref=v1.19.4"
 
       # Azure
       region                  = module.ramius.region
@@ -168,7 +168,7 @@ Verify a scale set of workers joins the cluster within a few minutes.
 
 ### Variables
 
-The Azure internal `workers` module supports a number of [variables](https://github.com/poseidon/typhoon/blob/master/azure/container-linux/kubernetes/workers/variables.tf).
+The Azure internal `workers` module supports a number of [variables](https://github.com/poseidon/typhoon/blob/master/azure/flatcar-linux/kubernetes/workers/variables.tf).
 
 #### Required
 
@@ -205,7 +205,7 @@ Create a cluster following the Google Cloud [tutorial](../flatcar-linux/google-c
 
     ```tf
     module "yavin-worker-pool" {
-      source = "git::https://github.com/poseidon/typhoon//google-cloud/fedora-coreos/kubernetes/workers?ref=v1.19.2"
+      source = "git::https://github.com/poseidon/typhoon//google-cloud/fedora-coreos/kubernetes/workers?ref=v1.19.4"
 
       # Google Cloud
       region       = "europe-west2"
@@ -229,7 +229,7 @@ Create a cluster following the Google Cloud [tutorial](../flatcar-linux/google-c
 
     ```tf
     module "yavin-worker-pool" {
-      source = "git::https://github.com/poseidon/typhoon//google-cloud/container-linux/kubernetes/workers?ref=v1.19.2"
+      source = "git::https://github.com/poseidon/typhoon//google-cloud/flatcar-linux/kubernetes/workers?ref=v1.19.4"
 
       # Google Cloud
       region       = "europe-west2"
@@ -260,16 +260,16 @@ Verify a managed instance group of workers joins the cluster within a few minute
 ```
 $ kubectl get nodes
 NAME                                             STATUS   AGE    VERSION
-yavin-controller-0.c.example-com.internal        Ready    6m     v1.19.2
-yavin-worker-jrbf.c.example-com.internal         Ready    5m     v1.19.2
-yavin-worker-mzdm.c.example-com.internal         Ready    5m     v1.19.2
-yavin-16x-worker-jrbf.c.example-com.internal     Ready    3m     v1.19.2
-yavin-16x-worker-mzdm.c.example-com.internal     Ready    3m     v1.19.2
+yavin-controller-0.c.example-com.internal        Ready    6m     v1.19.4
+yavin-worker-jrbf.c.example-com.internal         Ready    5m     v1.19.4
+yavin-worker-mzdm.c.example-com.internal         Ready    5m     v1.19.4
+yavin-16x-worker-jrbf.c.example-com.internal     Ready    3m     v1.19.4
+yavin-16x-worker-mzdm.c.example-com.internal     Ready    3m     v1.19.4
 ```
 
 ### Variables
 
-The Google Cloud internal `workers` module supports a number of [variables](https://github.com/poseidon/typhoon/blob/master/google-cloud/container-linux/kubernetes/workers/variables.tf).
+The Google Cloud internal `workers` module supports a number of [variables](https://github.com/poseidon/typhoon/blob/master/google-cloud/flatcar-linux/kubernetes/workers/variables.tf).
 
 #### Required
 
