@@ -51,7 +51,6 @@ variable "container_images" {
     kubelet                   = "quay.io/poseidon/kubelet:v1.18.2"
     coredns     = "k8s.gcr.io/coredns:1.6.7"
     keepalived_vip = "osixia/keepalived:2.0.17"
-    tiller         = "gcr.io/kubernetes-helm/tiller:v2.16.1"
   }
 }
 
