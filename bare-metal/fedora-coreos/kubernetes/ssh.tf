@@ -17,7 +17,6 @@ resource "null_resource" "copy-controller-secrets" {
     matchbox_group.controller,
     matchbox_group.worker,
     module.bootstrap,
-    null_resource.external_dependencies,
   ]
 
   # triggers = {
@@ -66,7 +65,6 @@ resource "null_resource" "copy-worker-secrets" {
   depends_on = [
     matchbox_group.controller,
     matchbox_group.worker,
-    null_resource.external_dependencies,
   ]
 
   # triggers = {
