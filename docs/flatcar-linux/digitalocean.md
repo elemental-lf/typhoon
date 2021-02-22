@@ -1,6 +1,6 @@
 # DigitalOcean
 
-In this tutorial, we'll create a Kubernetes v1.19.4 cluster on DigitalOcean with Flatcar Linux.
+In this tutorial, we'll create a Kubernetes v1.20.4 cluster on DigitalOcean with Flatcar Linux.
 
 We'll declare a Kubernetes cluster using the Typhoon Terraform module. Then apply the changes to create controller droplets, worker droplets, DNS records, tags, and TLS assets.
 
@@ -51,7 +51,7 @@ terraform {
   required_providers {
     ct = {
       source  = "poseidon/ct"
-      version = "0.6.1"
+      version = "0.7.1"
     }
     digitalocean = {
       source = "digitalocean/digitalocean"
@@ -81,7 +81,7 @@ Define a Kubernetes cluster using the module `digital-ocean/flatcar-linux/kubern
 
 ```tf
 module "nemo" {
-  source = "git::https://github.com/poseidon/typhoon//digital-ocean/flatcar-linux/kubernetes?ref=v1.19.4"
+  source = "git::https://github.com/poseidon/typhoon//digital-ocean/flatcar-linux/kubernetes?ref=v1.20.4"
 
   # Digital Ocean
   cluster_name = "nemo"
@@ -155,9 +155,9 @@ List nodes in the cluster.
 $ export KUBECONFIG=/home/user/.kube/configs/nemo-config
 $ kubectl get nodes
 NAME               STATUS  ROLES   AGE  VERSION
-10.132.110.130     Ready   <none>  10m  v1.19.4
-10.132.115.81      Ready   <none>  10m  v1.19.4
-10.132.124.107     Ready   <none>  10m  v1.19.4
+10.132.110.130     Ready   <none>  10m  v1.20.4
+10.132.115.81      Ready   <none>  10m  v1.20.4
+10.132.124.107     Ready   <none>  10m  v1.20.4
 ```
 
 List the pods.

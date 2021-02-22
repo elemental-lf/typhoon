@@ -11,7 +11,7 @@ Typhoon distributes upstream Kubernetes, architectural conventions, and cluster 
 
 ## Features <a href="https://www.cncf.io/certification/software-conformance/"><img align="right" src="https://storage.googleapis.com/poseidon/certified-kubernetes.png"></a>
 
-* Kubernetes v1.19.4 (upstream)
+* Kubernetes v1.20.4 (upstream)
 * Single or multi-master, [Calico](https://www.projectcalico.org/) or [Cilium](https://github.com/cilium/cilium) or [flannel](https://github.com/coreos/flannel) networking
 * On-cluster etcd with TLS, [RBAC](https://kubernetes.io/docs/admin/authorization/rbac/)-enabled, [network policy](https://kubernetes.io/docs/concepts/services-networking/network-policies/), SELinux enforcing
 * Advanced features like [worker pools](https://typhoon.psdn.io/advanced/worker-pools/), [preemptible](https://typhoon.psdn.io/flatcar-linux/google-cloud/#preemption) workers, and [snippets](https://typhoon.psdn.io/advanced/customization/#hosts) customization
@@ -27,7 +27,7 @@ Typhoon is available for [Fedora CoreOS](https://getfedora.org/coreos/).
 |---------------|------------------|------------------|--------|
 | AWS           | Fedora CoreOS | [aws/fedora-coreos/kubernetes](aws/fedora-coreos/kubernetes) | stable |
 | Azure         | Fedora CoreOS | [azure/fedora-coreos/kubernetes](azure/fedora-coreos/kubernetes) | alpha |
-| Bare-Metal    | Fedora CoreOS | [bare-metal/fedora-coreos/kubernetes](bare-metal/fedora-coreos/kubernetes) | beta |
+| Bare-Metal    | Fedora CoreOS | [bare-metal/fedora-coreos/kubernetes](bare-metal/fedora-coreos/kubernetes) | stable |
 | DigitalOcean  | Fedora CoreOS | [digital-ocean/fedora-coreos/kubernetes](digital-ocean/fedora-coreos/kubernetes) | beta |
 | Google Cloud  | Fedora CoreOS | [google-cloud/fedora-coreos/kubernetes](google-cloud/fedora-coreos/kubernetes) | stable |
 
@@ -54,7 +54,7 @@ Define a Kubernetes cluster by using the Terraform module for your chosen platfo
 
 ```tf
 module "yavin" {
-  source = "git::https://github.com/poseidon/typhoon//google-cloud/fedora-coreos/kubernetes?ref=v1.19.4"
+  source = "git::https://github.com/poseidon/typhoon//google-cloud/fedora-coreos/kubernetes?ref=v1.20.4"
 
   # Google Cloud
   cluster_name  = "yavin"
@@ -93,9 +93,9 @@ In 4-8 minutes (varies by platform), the cluster will be ready. This Google Clou
 $ export KUBECONFIG=/home/user/.kube/configs/yavin-config
 $ kubectl get nodes
 NAME                                       ROLES    STATUS  AGE  VERSION
-yavin-controller-0.c.example-com.internal  <none>   Ready   6m   v1.19.4
-yavin-worker-jrbf.c.example-com.internal   <none>   Ready   5m   v1.19.4
-yavin-worker-mzdm.c.example-com.internal   <none>   Ready   5m   v1.19.4
+yavin-controller-0.c.example-com.internal  <none>   Ready   6m   v1.20.4
+yavin-worker-jrbf.c.example-com.internal   <none>   Ready   5m   v1.20.4
+yavin-worker-mzdm.c.example-com.internal   <none>   Ready   5m   v1.20.4
 ```
 
 List the pods.
@@ -136,12 +136,12 @@ Typhoon addresses real world needs, which you may share. It is honest about limi
 
 ## Social Contract
 
-Typhoon is not a product, trial, or free-tier. It is not run by a company, does not offer support or services, and does not accept or make any money. It is not associated with any operating system or platform vendor.
+Typhoon is not a product, trial, or free-tier. Typhoon does not offer support, services, or charge money. And Typhoon is independent of operating system or platform vendors.
 
 Typhoon clusters will contain only [free](https://www.debian.org/intro/free) components. Cluster components will not collect data on users without their permission.
 
-## Donations
+## Sponsors
 
-Typhoon does not accept money donations. Instead, we encourage you to donate to one of [these organizations](https://github.com/poseidon/typhoon/wiki/Donations) to show your appreciation.
+Poseidon's Github [Sponsors](https://github.com/sponsors/poseidon) support the infrastructure and operational costs of providing Typhoon. If you'd like your company here, please contact dghubble at psdn.io.
 
-* [DigitalOcean](https://www.digitalocean.com/) kindly provides credits to support Typhoon test clusters.
+* [DigitalOcean](https://www.digitalocean.com/) kindly provides us cloud credits

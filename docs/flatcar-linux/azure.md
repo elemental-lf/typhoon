@@ -1,6 +1,6 @@
 # Azure
 
-In this tutorial, we'll create a Kubernetes v1.19.4 cluster on Azure with Flatcar Linux.
+In this tutorial, we'll create a Kubernetes v1.20.4 cluster on Azure with Flatcar Linux.
 
 We'll declare a Kubernetes cluster using the Typhoon Terraform module. Then apply the changes to create a resource group, virtual network, subnets, security groups, controller availability set, worker scale set, load balancer, and TLS assets.
 
@@ -48,11 +48,11 @@ terraform {
   required_providers {
     ct = {
       source  = "poseidon/ct"
-      version = "0.6.1"
+      version = "0.7.1"
     }
     azurerm = {
       source = "hashicorp/azurerm"
-      version = "2.36.0"
+      version = "2.48.0"
     }
   }
 }
@@ -75,7 +75,7 @@ Define a Kubernetes cluster using the module `azure/flatcar-linux/kubernetes`.
 
 ```tf
 module "ramius" {
-  source = "git::https://github.com/poseidon/typhoon//azure/flatcar-linux/kubernetes?ref=v1.19.4"
+  source = "git::https://github.com/poseidon/typhoon//azure/flatcar-linux/kubernetes?ref=v1.20.4"
 
   # Azure
   cluster_name   = "ramius"
@@ -149,9 +149,9 @@ List nodes in the cluster.
 $ export KUBECONFIG=/home/user/.kube/configs/ramius-config
 $ kubectl get nodes
 NAME                  STATUS  ROLES   AGE  VERSION
-ramius-controller-0   Ready   <none>  24m  v1.19.4
-ramius-worker-000001  Ready   <none>  25m  v1.19.4
-ramius-worker-000002  Ready   <none>  24m  v1.19.4
+ramius-controller-0   Ready   <none>  24m  v1.20.4
+ramius-worker-000001  Ready   <none>  25m  v1.20.4
+ramius-worker-000002  Ready   <none>  24m  v1.20.4
 ```
 
 List the pods.

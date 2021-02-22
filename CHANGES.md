@@ -4,6 +4,87 @@ Notable changes between versions.
 
 ## Latest
 
+* Kubernetes [v1.20.4](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.20.md#v1204)
+* Update Cilium from v1.9.1 to [v1.9.4](https://github.com/cilium/cilium/releases/tag/v1.9.4)
+* Update Calico from v3.17.1 to [v3.17.3](https://github.com/projectcalico/calico/releases/tag/v3.17.3)
+* Update flannel-cni from v0.4.1 to [v0.4.2](https://github.com/poseidon/flannel-cni/releases/tag/v0.4.2)
+
+### Addons
+
+* Update nginx-ingress from v0.43.0 to [v0.44.0](https://github.com/kubernetes/ingress-nginx/releases/tag/controller-v0.44.0)
+* Update Prometheus from v2.24.0 to [v2.25.0](https://github.com/prometheus/prometheus/releases/tag/v2.25.0)
+  * Update node-exporter from v1.0.1 to [v1.1.1](https://github.com/prometheus/node_exporter/releases/tag/v1.1.1)
+* Update Grafana from v7.3.7 to [v7.4.2](https://github.com/grafana/grafana/releases/tag/v7.4.2)
+
+## v1.20.2
+
+* Kubernetes [v1.20.2](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.20.md#v1202)
+* Support Terraform v0.13.x and v0.14.4+ ([#924](https://github.com/poseidon/typhoon/pull/923))
+
+### Addons
+
+* Update nginx-ingress from v0.41.2 to [v0.43.0](https://github.com/kubernetes/ingress-nginx/releases/tag/controller-v0.43.0)
+* Update Prometheus from v2.23.0 to [v2.24.0](https://github.com/prometheus/prometheus/releases/tag/v2.24.0)
+* Update Grafana from v7.3.6 to [v7.3.7](https://github.com/grafana/grafana/releases/tag/v7.3.7)
+
+## v1.20.1
+
+* Kubernetes [v1.20.1](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.20.md#v1201)
+
+### Fedora CoreOS
+
+* Fedora CoreOS 33 has stronger crypto defaults ([**notice**](https://docs.fedoraproject.org/en-US/fedora-coreos/faq/#_why_does_ssh_stop_working_after_upgrading_to_fedora_33), [#915](https://github.com/poseidon/typhoon/issues/915))
+  * Use a non-RSA SSH key or add the workaround provided in upstream [Fedora docs](https://docs.fedoraproject.org/en-US/fedora-coreos/faq/#_why_does_ssh_stop_working_after_upgrading_to_fedora_33) as a [snippet](https://typhoon.psdn.io/advanced/customization/#fedora-coreos) (**action required**)
+
+### Addons
+
+* Update Grafana from v7.3.5 to [v7.3.6](https://github.com/grafana/grafana/releases/tag/v7.3.6)
+
+## v1.20.0
+
+* Kubernetes [v1.20.0](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.20.md#v1200)
+* Add input variable validations ([#880](https://github.com/poseidon/typhoon/pull/880))
+  * Require Terraform v0.13+ ([migration guide](https://typhoon.psdn.io/topics/maintenance/#terraform-versions))
+* Set output sensitive to suppress console display for some cases ([#885](https://github.com/poseidon/typhoon/pull/885))
+* Add service account token [volume projection](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#service-account-token-volume-projection) ([#897](https://github.com/poseidon/typhoon/pull/897))
+* Scope kube-scheduler and kube-controller-manager permissions ([#898](https://github.com/poseidon/typhoon/pull/898))
+* Update etcd from v3.4.12 to [v3.4.14](https://github.com/etcd-io/etcd/releases/tag/v3.4.14)
+* Update Calico from v3.16.5 to v3.17.1 ([#890](https://github.com/poseidon/typhoon/pull/890))
+  * Enable Calico MTU auto-detection
+  * Remove [workaround](https://github.com/poseidon/typhoon/pull/724) to Calico cni-plugin [issue](https://github.com/projectcalico/cni-plugin/issues/874)
+* Update Cilium from v1.9.0 to [v1.9.1](https://github.com/cilium/cilium/releases/tag/v1.9.1)
+* Relax `terraform-provider-ct` version constraint to v0.6+ ([#893](https://github.com/poseidon/typhoon/pull/893))
+  * Allow upgrading `terraform-provider-ct` to v0.7.x ([warn](https://typhoon.psdn.io/topics/maintenance/#upgrade-terraform-provider-ct))
+
+### AWS
+
+* Enable Network Load Balancer (NLB) dualstack ([#883](https://github.com/poseidon/typhoon/pull/883))
+  * NLB subnets assigned both IPv4 and IPv6 addresses
+  * NLB DNS name has both A and AAAA records
+  * NLB to target node traffic is IPv4 (no change)
+
+### Bare-Metal
+
+* Remove iSCSI `/etc/iscsi` and `iscsadm` mounts from Kubelet ([#912](https://github.com/poseidon/typhoon/pull/912))
+
+### Fedora CoreOS
+
+#### AWS
+
+* Fix AMI query for which could fail in some regions ([#887](https://github.com/poseidon/typhoon/pull/887))
+
+#### Bare-Metal
+
+* Promote Fedora CoreOS to stable
+* Use initramfs and rootfs images as initrd's ([#889](https://github.com/poseidon/typhoon/pull/889))
+  * Requires Fedora CoreOS version with rootfs images (e.g. 32.20200923.3.0+)
+
+### Addons
+
+* Update Prometheus from v2.22.2 to [v2.23.0](https://github.com/prometheus/prometheus/releases/tag/v2.23.0)
+* Update kube-state-metrics from v2.0.0-alpha.2 to [v2.0.0-alpha.3](https://github.com/kubernetes/kube-state-metrics/releases/tag/v2.0.0-alpha.3)
+* Update Grafana from v7.3.2 to [v7.3.5](https://github.com/grafana/grafana/releases/tag/v7.3.5)
+
 ## v1.19.4
 
 * Kubernetes [v1.19.4](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.19.md#v1194)
@@ -29,7 +110,6 @@ Notable changes between versions.
 ### Flatcar Linux
 
 * Rename `container-linux` modules to `flatcar-linux` ([#858](https://github.com/poseidon/typhoon/issues/858)) (**action required**)
-
 * Change on-host system containers from rkt to docker
   * Change `etcd-member.service` container runnner from rkt to docker ([#867](https://github.com/poseidon/typhoon/pull/867))
   * Change `kubelet.service` container runner from rkt-fly to docker ([#855](https://github.com/poseidon/typhoon/pull/855))
