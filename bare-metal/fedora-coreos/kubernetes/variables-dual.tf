@@ -35,22 +35,27 @@ variable "apiserver_extra_arguments" {
 }
 
 variable "container_images" {
-  description = "Container images to use"
-  type = map(string)
+  description               = "Container images to use"
+  type                      = map(string)
 
   default = {
-    calico      = "quay.io/calico/node:v3.13.3"
-    calico_cni  = "quay.io/calico/cni:v3.13.3"
-    flannel     = "quay.io/coreos/flannel:v0.13.0-amd64"
-    flannel_cni = "quay.io/coreos/flannel-cni:v0.3.0"
-    kube_router = "cloudnativelabs/kube-router:v0.3.2"
-    kube_apiserver            = "k8s.gcr.io/kube-apiserver:v1.18.2"
-    kube_controller_manager   = "k8s.gcr.io/kube-controller-manager:v1.18.2"
-    kube_scheduler            = "k8s.gcr.io/kube-scheduler:v1.18.2"
-    kube_proxy                = "k8s.gcr.io/kube-proxy:v1.18.2"
-    kubelet                   = "quay.io/poseidon/kubelet:v1.18.2"
-    coredns     = "k8s.gcr.io/coredns:1.6.7"
-    keepalived_vip = "osixia/keepalived:2.0.17"
+    calico                  = "quay.io/calico/node:v3.17.3"
+    calico_cni              = "quay.io/calico/cni:v3.17.3"
+    cilium_agent            = "quay.io/cilium/cilium:v1.9.4"
+    cilium_operator         = "quay.io/cilium/operator-generic:v1.9.4"
+    coredns                 = "k8s.gcr.io/coredns:1.7.0"
+    flannel                 = "quay.io/coreos/flannel:v0.13.0"
+    flannel_cni             = "quay.io/poseidon/flannel-cni:v0.4.2"
+    kube_apiserver          = "k8s.gcr.io/kube-apiserver:v1.20.4"
+    kube_controller_manager = "k8s.gcr.io/kube-controller-manager:v1.20.4"
+    kube_scheduler          = "k8s.gcr.io/kube-scheduler:v1.20.4"
+    kube_proxy              = "k8s.gcr.io/kube-proxy:v1.20.4"
+    # experimental
+    cilium_agent            = "docker.io/cilium/cilium:v1.8.4"
+    cilium_operator         = "docker.io/cilium/operator-generic:v1.8.4"
+    #
+    kubelet                 = "quay.io/poseidon/kubelet:v1.20.4"
+    keepalived_vip          = "osixia/keepalived:2.0.17"
   }
 }
 
