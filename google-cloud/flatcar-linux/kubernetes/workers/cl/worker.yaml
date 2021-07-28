@@ -27,8 +27,8 @@ systemd:
         After=docker.service
         Wants=rpc-statd.service
         [Service]
-        Environment=KUBELET_IMAGE=quay.io/poseidon/kubelet:v1.20.4
-        ExecStartPre=/bin/mkdir -p /etc/kubernetes/cni/net.d
+        Environment=KUBELET_IMAGE=quay.io/poseidon/kubelet:v1.21.3
+        ExecStartPre=/bin/mkdir -p /etc/cni/net.d
         ExecStartPre=/bin/mkdir -p /etc/kubernetes/manifests
         ExecStartPre=/bin/mkdir -p /opt/cni/bin
         ExecStartPre=/bin/mkdir -p /var/lib/calico
@@ -42,6 +42,7 @@ systemd:
           --privileged \
           --pid host \
           --network host \
+          -v /etc/cni/net.d:/etc/cni/net.d:ro \
           -v /etc/kubernetes:/etc/kubernetes:ro \
           -v /etc/machine-id:/etc/machine-id:ro \
           -v /usr/lib/os-release:/etc/os-release:ro \
@@ -62,13 +63,15 @@ systemd:
           --client-ca-file=/etc/kubernetes/ca.crt \
           --cluster_dns=${cluster_dns_service_ip} \
           --cluster_domain=${cluster_domain_suffix} \
-          --cni-conf-dir=/etc/kubernetes/cni/net.d \
           --healthz-port=0 \
           --kubeconfig=/var/lib/kubelet/kubeconfig \
           --network-plugin=cni \
           --node-labels=node.kubernetes.io/node \
           %{~ for label in split(",", node_labels) ~}
           --node-labels=${label} \
+          %{~ endfor ~}
+          %{~ for taint in split(",", node_taints) ~}
+          --register-with-taints=${taint} \
           %{~ endfor ~}
           --pod-manifest-path=/etc/kubernetes/manifests \
           --read-only-port=0 \
@@ -87,7 +90,7 @@ systemd:
         [Unit]
         Description=Delete Kubernetes node on shutdown
         [Service]
-        Environment=KUBELET_IMAGE=quay.io/poseidon/kubelet:v1.20.4
+        Environment=KUBELET_IMAGE=quay.io/poseidon/kubelet:v1.21.3
         Type=oneshot
         RemainAfterExit=true
         ExecStart=/bin/true

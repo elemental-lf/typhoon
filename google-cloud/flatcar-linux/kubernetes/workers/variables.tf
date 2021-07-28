@@ -42,7 +42,7 @@ variable "os_image" {
 variable "disk_size" {
   type        = number
   description = "Size of the disk in GB"
-  default     = 40
+  default     = 30
 }
 
 variable "preemptible" {
@@ -81,6 +81,12 @@ EOD
 variable "node_labels" {
   type        = list(string)
   description = "List of initial node labels"
+  default     = []
+}
+
+variable "node_taints" {
+  type        = list(string)
+  description = "List of initial node taints"
   default     = []
 }
 

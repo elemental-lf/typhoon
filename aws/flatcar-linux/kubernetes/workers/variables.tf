@@ -36,25 +36,25 @@ variable "instance_type" {
 
 variable "os_image" {
   type        = string
-  description = "AMI channel for a Container Linux derivative (flatcar-stable, flatcar-beta, flatcar-alpha, flatcar-edge)"
+  description = "AMI channel for a Container Linux derivative (flatcar-stable, flatcar-beta, flatcar-alpha)"
   default     = "flatcar-stable"
 
   validation {
-    condition     = contains(["flatcar-stable", "flatcar-beta", "flatcar-alpha", "flatcar-edge"], var.os_image)
-    error_message = "The os_image must be flatcar-stable, flatcar-beta, flatcar-alpha, or flatcar-edge."
+    condition     = contains(["flatcar-stable", "flatcar-beta", "flatcar-alpha"], var.os_image)
+    error_message = "The os_image must be flatcar-stable, flatcar-beta, or flatcar-alpha."
   }
 }
 
 variable "disk_size" {
   type        = number
   description = "Size of the EBS volume in GB"
-  default     = 40
+  default     = 30
 }
 
 variable "disk_type" {
   type        = string
-  description = "Type of the EBS volume (e.g. standard, gp2, io1)"
-  default     = "gp2"
+  description = "Type of the EBS volume (e.g. standard, gp2, gp3, io1)"
+  default     = "gp3"
 }
 
 variable "disk_iops" {
@@ -111,5 +111,11 @@ variable "cluster_domain_suffix" {
 variable "node_labels" {
   type        = list(string)
   description = "List of initial node labels"
+  default     = []
+}
+
+variable "node_taints" {
+  type        = list(string)
+  description = "List of initial node taints"
   default     = []
 }

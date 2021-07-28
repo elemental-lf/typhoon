@@ -1,6 +1,6 @@
 ---
 variant: fcos
-version: 1.1.0
+version: 1.2.0
 systemd:
   units:
     - name: etcd-member.service
@@ -12,7 +12,7 @@ systemd:
         Wants=network-online.target network.target
         After=network-online.target
         [Service]
-        Environment=ETCD_IMAGE=quay.io/coreos/etcd:v3.4.14
+        Environment=ETCD_IMAGE=quay.io/coreos/etcd:v3.4.16
         Type=exec
         ExecStartPre=/bin/mkdir -p /var/lib/etcd
         ExecStartPre=/usr/bin/chmod 700 /var/lib/etcd
@@ -73,7 +73,7 @@ systemd:
         StartLimitIntervalSec=0
         [Service]
         EnvironmentFile=/etc/kubernetes/kubelet.env
-        ExecStartPre=/bin/mkdir -p /etc/kubernetes/cni/net.d
+        ExecStartPre=/bin/mkdir -p /etc/cni/net.d
         ExecStartPre=/bin/mkdir -p /etc/kubernetes/manifests
         ExecStartPre=/bin/mkdir -p /opt/cni/bin
         ExecStartPre=/bin/mkdir -p /var/lib/calico
@@ -84,13 +84,13 @@ systemd:
           --privileged \
           --pid host \
           --network host \
+          --volume /etc/cni/net.d:/etc/cni/net.d:ro,z \
           --volume /etc/kubernetes:/etc/kubernetes:ro,z \
           --volume /usr/lib/os-release:/etc/os-release:ro \
           --volume /lib/modules:/lib/modules:ro \
           --volume /run:/run \
           --volume /dev:/dev \
-          --volume /sys/fs/cgroup:/sys/fs/cgroup:ro \
-          --volume /sys/fs/cgroup/systemd:/sys/fs/cgroup/systemd \
+          --volume /sys/fs/cgroup:/sys/fs/cgroup \
           --volume /var/lib/calico:/var/lib/calico:ro \
           --volume /var/lib/docker:/var/lib/docker \
           --volume /var/lib/kubelet:/var/lib/kubelet:rshared \
@@ -111,7 +111,6 @@ systemd:
           --client-ca-file=/etc/kubernetes/ca.crt \
           --cluster_dns=${cluster_dns_service_ip} \
           --cluster_domain=${cluster_domain_suffix} \
-          --cni-conf-dir=/etc/kubernetes/cni/net.d \
           --healthz-port=0 \
           --hostname-override=${domain_name} \
           --kubeconfig=/var/lib/kubelet/kubeconfig \

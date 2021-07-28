@@ -11,7 +11,7 @@ Typhoon distributes upstream Kubernetes, architectural conventions, and cluster 
 
 ## Features <a href="https://www.cncf.io/certification/software-conformance/"><img align="right" src="https://storage.googleapis.com/poseidon/certified-kubernetes.png"></a>
 
-* Kubernetes v1.20.4 (upstream)
+* Kubernetes v1.21.3 (upstream)
 * Single or multi-master, [Calico](https://www.projectcalico.org/) or [Cilium](https://github.com/cilium/cilium) or [flannel](https://github.com/coreos/flannel) networking
 * On-cluster etcd with TLS, [RBAC](https://kubernetes.io/docs/admin/authorization/rbac/)-enabled, [network policy](https://kubernetes.io/docs/concepts/services-networking/network-policies/), SELinux enforcing
 * Advanced features like [worker pools](https://typhoon.psdn.io/advanced/worker-pools/), [preemptible](https://typhoon.psdn.io/flatcar-linux/google-cloud/#preemption) workers, and [snippets](https://typhoon.psdn.io/advanced/customization/#hosts) customization
@@ -30,6 +30,10 @@ Typhoon is available for [Fedora CoreOS](https://getfedora.org/coreos/).
 | Bare-Metal    | Fedora CoreOS | [bare-metal/fedora-coreos/kubernetes](bare-metal/fedora-coreos/kubernetes) | stable |
 | DigitalOcean  | Fedora CoreOS | [digital-ocean/fedora-coreos/kubernetes](digital-ocean/fedora-coreos/kubernetes) | beta |
 | Google Cloud  | Fedora CoreOS | [google-cloud/fedora-coreos/kubernetes](google-cloud/fedora-coreos/kubernetes) | stable |
+
+| Platform      | Operating System | Terraform Module | Status |
+|---------------|------------------|------------------|--------|
+| AWS           | Fedora CoreOS (ARM64) | [aws/fedora-coreos/kubernetes](aws/fedora-coreos/kubernetes) | alpha |
 
 Typhoon is available for [Flatcar Linux](https://www.flatcar-linux.org/releases/).
 
@@ -54,7 +58,7 @@ Define a Kubernetes cluster by using the Terraform module for your chosen platfo
 
 ```tf
 module "yavin" {
-  source = "git::https://github.com/poseidon/typhoon//google-cloud/fedora-coreos/kubernetes?ref=v1.20.4"
+  source = "git::https://github.com/poseidon/typhoon//google-cloud/fedora-coreos/kubernetes?ref=v1.21.3"
 
   # Google Cloud
   cluster_name  = "yavin"
@@ -93,9 +97,9 @@ In 4-8 minutes (varies by platform), the cluster will be ready. This Google Clou
 $ export KUBECONFIG=/home/user/.kube/configs/yavin-config
 $ kubectl get nodes
 NAME                                       ROLES    STATUS  AGE  VERSION
-yavin-controller-0.c.example-com.internal  <none>   Ready   6m   v1.20.4
-yavin-worker-jrbf.c.example-com.internal   <none>   Ready   5m   v1.20.4
-yavin-worker-mzdm.c.example-com.internal   <none>   Ready   5m   v1.20.4
+yavin-controller-0.c.example-com.internal  <none>   Ready   6m   v1.21.3
+yavin-worker-jrbf.c.example-com.internal   <none>   Ready   5m   v1.21.3
+yavin-worker-mzdm.c.example-com.internal   <none>   Ready   5m   v1.21.3
 ```
 
 List the pods.
@@ -126,7 +130,7 @@ Typhoon is strict about minimalism, maturity, and scope. These are not in scope:
 
 ## Help
 
-Ask questions on the IRC #typhoon channel on [freenode.net](http://freenode.net/).
+Schedule a meeting via [Github Sponsors](https://github.com/sponsors/poseidon?frequency=one-time) to discuss your use case.
 
 ## Motivation
 
@@ -142,6 +146,11 @@ Typhoon clusters will contain only [free](https://www.debian.org/intro/free) com
 
 ## Sponsors
 
-Poseidon's Github [Sponsors](https://github.com/sponsors/poseidon) support the infrastructure and operational costs of providing Typhoon. If you'd like your company here, please contact dghubble at psdn.io.
+Poseidon's Github [Sponsors](https://github.com/sponsors/poseidon) support the infrastructure and operational costs of providing Typhoon.
 
-* [DigitalOcean](https://www.digitalocean.com/) kindly provides us cloud credits
+<a href="https://www.digitalocean.com/">
+    <img src="https://opensource.nyc3.cdn.digitaloceanspaces.com/attribution/assets/SVG/DO_Logo_horizontal_blue.svg" width="201px">
+</a>
+<br>
+
+If you'd like your company here, please contact dghubble at psdn.io.

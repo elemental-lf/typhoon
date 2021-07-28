@@ -1,6 +1,6 @@
 # Google Cloud
 
-In this tutorial, we'll create a Kubernetes v1.20.4 cluster on Google Compute Engine with Flatcar Linux.
+In this tutorial, we'll create a Kubernetes v1.21.3 cluster on Google Compute Engine with Flatcar Linux.
 
 We'll declare a Kubernetes cluster using the Typhoon Terraform module. Then apply the changes to create a network, firewall rules, health checks, controller instances, worker managed instance group, load balancers, and TLS assets.
 
@@ -18,7 +18,7 @@ Install [Terraform](https://www.terraform.io/downloads.html) v0.13.0+ on your sy
 
 ```sh
 $ terraform version
-Terraform v0.13.0
+Terraform v1.0.0
 ```
 
 Read [concepts](/architecture/concepts/) to learn about Terraform, modules, and organizing resources. Change to your infrastructure repository (e.g. `infra`).
@@ -52,11 +52,11 @@ terraform {
   required_providers {
     ct = {
       source  = "poseidon/ct"
-      version = "0.7.1"
+      version = "0.9.0"
     }
     google = {
       source = "hashicorp/google"
-      version = "3.57.0"
+      version = "3.75.0"
     }
   }
 }
@@ -92,7 +92,7 @@ Define a Kubernetes cluster using the module `google-cloud/flatcar-linux/kuberne
 
 ```tf
 module "yavin" {
-  source = "git::https://github.com/poseidon/typhoon//google-cloud/flatcar-linux/kubernetes?ref=v1.20.4"
+  source = "git::https://github.com/poseidon/typhoon//google-cloud/flatcar-linux/kubernetes?ref=v1.21.3"
 
   # Google Cloud
   cluster_name  = "yavin"
@@ -167,9 +167,9 @@ List nodes in the cluster.
 $ export KUBECONFIG=/home/user/.kube/configs/yavin-config
 $ kubectl get nodes
 NAME                                       ROLES    STATUS  AGE  VERSION
-yavin-controller-0.c.example-com.internal  <none>   Ready   6m   v1.20.4
-yavin-worker-jrbf.c.example-com.internal   <none>   Ready   5m   v1.20.4
-yavin-worker-mzdm.c.example-com.internal   <none>   Ready   5m   v1.20.4
+yavin-controller-0.c.example-com.internal  <none>   Ready   6m   v1.21.3
+yavin-worker-jrbf.c.example-com.internal   <none>   Ready   5m   v1.21.3
+yavin-worker-mzdm.c.example-com.internal   <none>   Ready   5m   v1.21.3
 ```
 
 List the pods.
@@ -236,7 +236,7 @@ resource "google_dns_managed_zone" "zone-for-clusters" {
 | worker_count | Number of workers | 1 | 3 |
 | controller_type | Machine type for controllers | "n1-standard-1" | See below |
 | worker_type | Machine type for workers | "n1-standard-1" | See below |
-| disk_size | Size of the disk in GB | 40 | 100 |
+| disk_size | Size of the disk in GB | 30 | 100 |
 | worker_preemptible | If enabled, Compute Engine will terminate workers randomly within 24 hours | false | true |
 | controller_snippets | Controller Container Linux Config snippets | [] | [example](/advanced/customization/) |
 | worker_snippets | Worker Container Linux Config snippets | [] | [example](/advanced/customization/) |

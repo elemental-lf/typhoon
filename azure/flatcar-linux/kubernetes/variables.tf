@@ -48,19 +48,19 @@ variable "worker_type" {
 
 variable "os_image" {
   type        = string
-  description = "Channel for a Container Linux derivative (flatcar-stable, flatcar-beta, flatcar-alpha, flatcar-edge)"
+  description = "Channel for a Container Linux derivative (flatcar-stable, flatcar-beta, flatcar-alpha)"
   default     = "flatcar-stable"
 
   validation {
-    condition     = contains(["flatcar-stable", "flatcar-beta", "flatcar-alpha", "flatcar-edge"], var.os_image)
-    error_message = "The os_image must be flatcar-stable, flatcar-beta, flatcar-alpha, or flatcar-edge."
+    condition     = contains(["flatcar-stable", "flatcar-beta", "flatcar-alpha"], var.os_image)
+    error_message = "The os_image must be flatcar-stable, flatcar-beta, or flatcar-alpha."
   }
 }
 
 variable "disk_size" {
   type        = number
   description = "Size of the disk in GB"
-  default     = 40
+  default     = 30
 }
 
 variable "worker_priority" {
@@ -141,3 +141,8 @@ variable "cluster_domain_suffix" {
   default     = "cluster.local"
 }
 
+variable "daemonset_tolerations" {
+  type        = list(string)
+  description = "List of additional taint keys kube-system DaemonSets should tolerate (e.g. ['custom-role', 'gpu-role'])"
+  default     = []
+}

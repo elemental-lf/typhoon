@@ -51,6 +51,7 @@ resource "null_resource" "copy-controller-secrets" {
     inline = [
       "sudo rsync -a $HOME/kubeconfig /etc/kubernetes/kubeconfig",
       "sudo rsync -a $HOME/kubelet.env /etc/kubernetes/kubelet.env",
+      "sudo touch /etc/kubernetes",
       "sudo /opt/bootstrap/layout",
     ]
   }
@@ -93,6 +94,7 @@ resource "null_resource" "copy-worker-secrets" {
     inline = [
       "sudo rsync -a $HOME/kubeconfig /etc/kubernetes/kubeconfig",
       "sudo rsync -a $HOME/kubelet.env /etc/kubernetes/kubelet.env",
+      "sudo touch /etc/kubernetes",
     ]
   }
 }

@@ -1,6 +1,6 @@
 # DigitalOcean
 
-In this tutorial, we'll create a Kubernetes v1.20.4 cluster on DigitalOcean with Fedora CoreOS.
+In this tutorial, we'll create a Kubernetes v1.21.3 cluster on DigitalOcean with Fedora CoreOS.
 
 We'll declare a Kubernetes cluster using the Typhoon Terraform module. Then apply the changes to create controller droplets, worker droplets, DNS records, tags, and TLS assets.
 
@@ -18,7 +18,7 @@ Install [Terraform](https://www.terraform.io/downloads.html) v0.13.0+ on your sy
 
 ```sh
 $ terraform version
-Terraform v0.13.0
+Terraform v1.0.0
 ```
 
 Read [concepts](/architecture/concepts/) to learn about Terraform, modules, and organizing resources. Change to your infrastructure repository (e.g. `infra`).
@@ -29,7 +29,7 @@ cd infra/clusters
 
 ## Provider
 
-Login to [DigitalOcean](https://cloud.digitalocean.com) or create an [account](https://cloud.digitalocean.com/registrations/new), if you don't have one.
+Login to [DigitalOcean](https://cloud.digitalocean.com). Or if you don't have one, create an account with our [referral link](https://m.do.co/c/94a5a4e76387) to get free credits.
 
 Generate a Personal Access Token with read/write scope from the [API tab](https://cloud.digitalocean.com/settings/api/tokens). Write the token to a file that can be referenced in configs.
 
@@ -51,7 +51,7 @@ terraform {
   required_providers {
     ct = {
       source  = "poseidon/ct"
-      version = "0.7.1"
+      version = "0.9.0"
     }
     digitalocean = {
       source = "digitalocean/digitalocean"
@@ -81,7 +81,7 @@ Define a Kubernetes cluster using the module `digital-ocean/fedora-coreos/kubern
 
 ```tf
 module "nemo" {
-  source = "git::https://github.com/poseidon/typhoon//digital-ocean/fedora-coreos/kubernetes?ref=v1.20.4"
+  source = "git::https://github.com/poseidon/typhoon//digital-ocean/fedora-coreos/kubernetes?ref=v1.21.3"
 
   # Digital Ocean
   cluster_name = "nemo"
@@ -155,9 +155,9 @@ List nodes in the cluster.
 $ export KUBECONFIG=/home/user/.kube/configs/nemo-config
 $ kubectl get nodes
 NAME               STATUS  ROLES   AGE  VERSION
-10.132.110.130     Ready   <none>  10m  v1.20.4
-10.132.115.81      Ready   <none>  10m  v1.20.4
-10.132.124.107     Ready   <none>  10m  v1.20.4
+10.132.110.130     Ready   <none>  10m  v1.21.3
+10.132.115.81      Ready   <none>  10m  v1.21.3
+10.132.124.107     Ready   <none>  10m  v1.21.3
 ```
 
 List the pods.

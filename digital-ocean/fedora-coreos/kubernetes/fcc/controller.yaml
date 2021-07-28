@@ -1,6 +1,6 @@
 ---
 variant: fcos
-version: 1.1.0
+version: 1.2.0
 systemd:
   units:
     - name: etcd-member.service
@@ -12,7 +12,7 @@ systemd:
         Wants=network-online.target network.target
         After=network-online.target
         [Service]
-        Environment=ETCD_IMAGE=quay.io/coreos/etcd:v3.4.14
+        Environment=ETCD_IMAGE=quay.io/coreos/etcd:v3.4.16
         Type=exec
         ExecStartPre=/bin/mkdir -p /var/lib/etcd
         ExecStartPre=-/usr/bin/podman rm etcd
@@ -52,9 +52,9 @@ systemd:
         After=afterburn.service
         Wants=rpc-statd.service
         [Service]
-        Environment=KUBELET_IMAGE=quay.io/poseidon/kubelet:v1.20.4
+        Environment=KUBELET_IMAGE=quay.io/poseidon/kubelet:v1.21.3
         EnvironmentFile=/run/metadata/afterburn
-        ExecStartPre=/bin/mkdir -p /etc/kubernetes/cni/net.d
+        ExecStartPre=/bin/mkdir -p /etc/cni/net.d
         ExecStartPre=/bin/mkdir -p /etc/kubernetes/manifests
         ExecStartPre=/bin/mkdir -p /opt/cni/bin
         ExecStartPre=/bin/mkdir -p /var/lib/calico
@@ -65,12 +65,12 @@ systemd:
           --privileged \
           --pid host \
           --network host \
+          --volume /etc/cni/net.d:/etc/cni/net.d:ro,z \
           --volume /etc/kubernetes:/etc/kubernetes:ro,z \
           --volume /usr/lib/os-release:/etc/os-release:ro \
           --volume /lib/modules:/lib/modules:ro \
           --volume /run:/run \
-          --volume /sys/fs/cgroup:/sys/fs/cgroup:ro \
-          --volume /sys/fs/cgroup/systemd:/sys/fs/cgroup/systemd \
+          --volume /sys/fs/cgroup:/sys/fs/cgroup \
           --volume /var/lib/calico:/var/lib/calico:ro \
           --volume /var/lib/docker:/var/lib/docker \
           --volume /var/lib/kubelet:/var/lib/kubelet:rshared,z \
@@ -88,7 +88,6 @@ systemd:
           --client-ca-file=/etc/kubernetes/ca.crt \
           --cluster_dns=${cluster_dns_service_ip} \
           --cluster_domain=${cluster_domain_suffix} \
-          --cni-conf-dir=/etc/kubernetes/cni/net.d \
           --healthz-port=0 \
           --hostname-override=$${AFTERBURN_DIGITALOCEAN_IPV4_PRIVATE_0} \
           --kubeconfig=/var/lib/kubelet/kubeconfig \
@@ -130,7 +129,7 @@ systemd:
             --volume /opt/bootstrap/assets:/assets:ro,Z \
             --volume /opt/bootstrap/apply:/apply:ro,Z \
             --entrypoint=/apply \
-            quay.io/poseidon/kubelet:v1.20.4
+            quay.io/poseidon/kubelet:v1.21.3
         ExecStartPost=/bin/touch /opt/bootstrap/bootstrap.done
         ExecStartPost=-/usr/bin/podman stop bootstrap
 storage:

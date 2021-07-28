@@ -4,6 +4,164 @@ Notable changes between versions.
 
 ## Latest
 
+## v1.21.3
+
+* Kubernetes [v1.21.3](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.21.md#v1213)
+* Update Cilium from v1.10.1 to [v1.10.3](https://github.com/cilium/cilium/releases/tag/v1.10.3)
+* Require [poseidon/ct](https://github.com/poseidon/terraform-provider-ct) Terraform provider v0.9+ ([notes](https://typhoon.psdn.io/topics/maintenance/#upgrade-terraform-provider-ct))
+
+### AWS
+
+* Change default disk type from `gp2` to `gp3` ([#1012](https://github.com/poseidon/typhoon/pull/1012))
+
+### Addons
+
+* Update Prometheus from v2.28.0 to [v2.28.1](https://github.com/prometheus/prometheus/releases/tag/v2.28.1)
+* Update node-exporter from v1.1.2 to [v1.2.0](https://github.com/prometheus/node_exporter/releases/tag/v1.2.0)
+* Update Grafana from v8.0.3 to [v8.0.6](https://github.com/grafana/grafana/releases/tag/v8.0.6)
+
+## v1.21.2
+
+* Kubernetes [v1.21.2](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.21.md#v1212)
+* Add Terraform v1.0.x support ([#974](https://github.com/poseidon/typhoon/pull/974))
+  * Continue to support Terraform v0.13.x, v0.14.4+, and v0.15.x
+* Update CoreDNS from v1.8.0 to [v1.8.4]([#1006](https://github.com/poseidon/typhoon/pull/1006))
+* Update Cilium from v1.9.6 to [v1.10.1](https://github.com/cilium/cilium/releases/tag/v1.10.1)
+* Update Calico from v3.19.0 to [v3.19.1](https://github.com/projectcalico/calico/releases/tag/v3.19.1)
+
+### Addons
+
+* Update kube-state-metrics from v2.0.0 to [v2.1.0](https://github.com/kubernetes/kube-state-metrics/releases/tag/v2.1.0)
+* Update Prometheus from v2.27.0 to [v2.28.0](https://github.com/prometheus/prometheus/releases/tag/v2.28.0)
+* Update Grafana from v7.5.6 to [v8.0.3](https://github.com/grafana/grafana/releases/tag/v8.0.3)
+* Update nginx-ingress from v0.46.0 to [v0.47.0](https://github.com/kubernetes/ingress-nginx/releases/tag/controller-v0.47.0)
+
+### Fedora CoreOS
+
+#### AWS
+
+* Extend experimental Fedora CoreOS arm64 support with Cilium
+  * CNI provider may now be `flannel` or `cilium` (new)
+
+#### Bare-Metal
+
+* Workaround systemd path unit issue [fedora-coreos-tracker/#861](https://github.com/coreos/fedora-coreos-tracker/issues/861)
+
+#### DigitalOcean
+
+* Workaround systemd path unit issue [fedora-coreos-tracker/#861](https://github.com/coreos/fedora-coreos-tracker/issues/861)
+
+### Known Issues
+
+* Cilium with recent Fedora CoreOS will have networking issues ([fedora-coreos#881](https://github.com/coreos/fedora-coreos-tracker/issues/881))
+
+## v1.21.1
+
+* Kubernetes [v1.21.1](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.21.md#v1211)
+* Add Terraform v0.15.x support ([#974](https://github.com/poseidon/typhoon/pull/974))
+  * Continue to support Terraform v0.13.x and v0.14.4+
+* Update etcd from v3.4.15 to [v3.4.16](https://github.com/etcd-io/etcd/releases/tag/v3.4.16)
+* Update Cilium from v1.9.5 to [v1.9.6](https://github.com/cilium/cilium/releases/tag/v1.9.6)
+* Update Calico from v3.18.1 to [v3.19.0](https://github.com/projectcalico/calico/releases/tag/v3.19.0)
+
+### AWS
+
+* Reduce the default `disk_size` from 40GB to 30GB ([#983](https://github.com/poseidon/typhoon/pull/983))
+
+### Azure
+
+* Reduce the default `disk_size` from 40GB to 30GB ([#983](https://github.com/poseidon/typhoon/pull/983))
+
+### Google Cloud
+
+* Reduce the default `disk_size` from 40GB to 30GB ([#983](https://github.com/poseidon/typhoon/pull/983))
+
+### Fedora CoreOS
+
+* Update Kubelet mounts for cgroups v2 ([#978](https://github.com/poseidon/typhoon/pull/978))
+
+### Addons
+
+* Update kube-state-metrics from v2.0.0-rc.1 to [v2.0.0](https://github.com/kubernetes/kube-state-metrics/releases/tag/v2.0.0)
+* Update Prometheus from v2.25.2 to [v2.27.0](https://github.com/prometheus/prometheus/releases/tag/v2.27.0)
+* Update Grafana from v7.5.3 to [v7.5.6](https://github.com/grafana/grafana/releases/tag/v7.5.6)
+* Update nginx-ingress from v0.45.0 to [v0.46.0](https://github.com/kubernetes/ingress-nginx/releases/tag/controller-v0.46.0)
+
+## v1.21.0
+
+* Kubernetes [v1.21.0](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.21.md#v1210)
+  * Enable `tokencleaner` controller ([#969](https://github.com/poseidon/typhoon/pull/969))
+  * Enable `kube-scheduler` and `kube-controller-manager` separate authn/z kubeconfig
+  * Change CNI config location from /etc/kubernetes/cni/net.d to /etc/cni/net.d ([#965](https://github.com/poseidon/typhoon/pull/965))
+  * Change `kube-controller-manager` to mount `/var/lib/kubelet/volumeplugins` directly
+  * Remove unused `cloud-provider` flags
+* Update Fedora CoreOS Config version from v1.1.0 to v1.2.0 ([#970](https://github.com/poseidon/typhoon/pull/970))
+  * Require [poseidon/ct](https://github.com/poseidon/terraform-provider-ct) Terraform provider v0.8+ ([notes](https://typhoon.psdn.io/topics/maintenance/#upgrade-terraform-provider-ct))
+  * Require any [snippets](https://typhoon.psdn.io/advanced/customization/#hosts) customizations to update to v1.2.0
+
+### AWS
+
+* Allow setting custom initial node taints on worker pools ([#968](https://github.com/poseidon/typhoon/pull/968))
+  * Add `node_taints` variable to internal `workers` pool module to set initial node taints
+  * Add `daemonset_tolerations` so `kube-system` DaemonSets can tolerate custom taints
+
+### Azure
+
+* Allow setting custom initial node taints on worker pools ([#968](https://github.com/poseidon/typhoon/pull/968))
+  * Add `node_taints` variable to internal `workers` pool module to set initial node taints
+  * Add `daemonset_tolerations` so `kube-system` DaemonSets can tolerate custom taints
+* Remove deprecated `azurerm_lb_backend_address_pool` field `resource_group_name` ([#972](https://github.com/poseidon/typhoon/pull/972))
+
+### Google Cloud
+
+* Allow setting custom initial node taints on worker pools ([#968](https://github.com/poseidon/typhoon/pull/968))
+  * Add `node_taints` variable to internal `workers` pool module to set initial node taints
+  * Add `daemonset_tolerations` so `kube-system` DaemonSets can tolerate custom taints
+
+### Addons
+
+* Update nginx-ingress from v0.44.0 to [v0.45.0](https://github.com/kubernetes/ingress-nginx/releases/tag/controller-v0.45.0)
+* Update kube-state-metrics from v2.0.0-rc.0 to [v2.0.0-rc.1](https://github.com/kubernetes/kube-state-metrics/releases/tag/v2.0.0-rc.1)
+* Update Grafana from v7.4.5 to [v7.5.3](https://github.com/grafana/grafana/releases/tag/v7.5.3)
+
+## v1.20.5
+
+* Kubernetes [v1.20.5](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.20.md#v1205)
+* Update etcd from v3.4.14 to [v3.4.15](https://github.com/etcd-io/etcd/releases/tag/v3.4.15)
+* Update Cilium from v1.9.4 to [v1.9.5](https://github.com/cilium/cilium/releases/tag/v1.9.5)
+* Update Calico from v3.17.3 to [v3.18.1](https://github.com/projectcalico/calico/releases/tag/v3.18.1)
+* Update CoreDNS from v1.7.0 to [v1.8.0](https://coredns.io/2020/10/22/coredns-1.8.0-release/)
+* Mark bootstrap token as sensitive in Terraform plans ([#949](https://github.com/poseidon/typhoon/pull/949))
+
+### Fedora CoreOS
+
+* Set Kubelet `provider-id` ([#951](https://github.com/poseidon/typhoon/pull/951))
+
+### Flatcar Linux
+
+#### AWS
+
+* Set Kubelet `provider-id` ([#951](https://github.com/poseidon/typhoon/pull/951))
+* Remove `os_image` option `flatcar-edge` ([#943](https://github.com/poseidon/typhoon/pull/943))
+
+#### Azure
+
+* Remove `os_image` option `flatcar-edge` ([#943](https://github.com/poseidon/typhoon/pull/943))
+
+#### Bare-Metal
+
+* Remove `os_channel` option `flatcar-edge` ([#943](https://github.com/poseidon/typhoon/pull/943))
+
+### Addons
+
+* Update Prometheus from v2.25.0 to [v2.25.2](https://github.com/prometheus/prometheus/releases/tag/v2.25.2)
+* Update kube-state-metrics from v2.0.0-alpha.3 to [v2.0.0-rc.0](https://github.com/kubernetes/kube-state-metrics/releases/tag/v2.0.0-rc.0)
+  * Switch image from `quay.io` to `k8s.gcr.io` ([#946](https://github.com/poseidon/typhoon/pull/946))
+* Update node-exporter from v1.1.1 to [v1.1.2](https://github.com/prometheus/node_exporter/releases/tag/v1.1.2)
+* Update Grafana from v7.4.2 to [v7.4.5](https://github.com/grafana/grafana/releases/tag/v7.4.5)
+
+## v1.20.4
+
 * Kubernetes [v1.20.4](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.20.md#v1204)
 * Update Cilium from v1.9.1 to [v1.9.4](https://github.com/cilium/cilium/releases/tag/v1.9.4)
 * Update Calico from v3.17.1 to [v3.17.3](https://github.com/projectcalico/calico/releases/tag/v3.17.3)

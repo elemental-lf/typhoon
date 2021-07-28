@@ -1,6 +1,6 @@
 # Bare-Metal
 
-In this tutorial, we'll network boot and provision a Kubernetes v1.20.4 cluster on bare-metal with Flatcar Linux.
+In this tutorial, we'll network boot and provision a Kubernetes v1.21.3 cluster on bare-metal with Flatcar Linux.
 
 First, we'll deploy a [Matchbox](https://github.com/poseidon/matchbox) service and setup a network boot environment. Then, we'll declare a Kubernetes cluster using the Typhoon Terraform module and power on machines. On PXE boot, machines will install Container Linux to disk, reboot into the disk install, and provision themselves as Kubernetes controllers or workers via Ignition.
 
@@ -111,7 +111,7 @@ Install [Terraform](https://www.terraform.io/downloads.html) v0.13.0+ on your sy
 
 ```sh
 $ terraform version
-Terraform v0.13.0
+Terraform v1.0.0
 ```
 
 Read [concepts](/architecture/concepts/) to learn about Terraform, modules, and organizing resources. Change to your infrastructure repository (e.g. `infra`).
@@ -138,7 +138,7 @@ terraform {
   required_providers {
     ct = {
       source  = "poseidon/ct"
-      version = "0.7.1"
+      version = "0.9.0"
     }
     matchbox = {
       source = "poseidon/matchbox"
@@ -154,7 +154,7 @@ Define a Kubernetes cluster using the module `bare-metal/flatcar-linux/kubernete
 
 ```tf
 module "mercury" {
-  source = "git::https://github.com/poseidon/typhoon//bare-metal/flatcar-linux/kubernetes?ref=v1.20.4"
+  source = "git::https://github.com/poseidon/typhoon//bare-metal/flatcar-linux/kubernetes?ref=v1.21.3"
 
   # bare-metal
   cluster_name            = "mercury"
@@ -293,9 +293,9 @@ List nodes in the cluster.
 $ export KUBECONFIG=/home/user/.kube/configs/mercury-config
 $ kubectl get nodes
 NAME                STATUS  ROLES   AGE  VERSION
-node1.example.com   Ready   <none>  10m  v1.20.4
-node2.example.com   Ready   <none>  10m  v1.20.4
-node3.example.com   Ready   <none>  10m  v1.20.4
+node1.example.com   Ready   <none>  10m  v1.21.3
+node2.example.com   Ready   <none>  10m  v1.21.3
+node3.example.com   Ready   <none>  10m  v1.21.3
 ```
 
 List the pods.
@@ -330,7 +330,7 @@ Check the [variables.tf](https://github.com/poseidon/typhoon/blob/master/bare-me
 |:-----|:------------|:--------|
 | cluster_name | Unique cluster name | "mercury" |
 | matchbox_http_endpoint | Matchbox HTTP read-only endpoint | "http://matchbox.example.com:port" |
-| os_channel | Channel for a Container Linux derivative | flatcar-stable, flatcar-beta, flatcar-alpha, flatcar-edge |
+| os_channel | Channel for a Container Linux derivative | flatcar-stable, flatcar-beta, flatcar-alpha |
 | os_version | Version for a Container Linux derivative to PXE and install | "2345.3.1" |
 | k8s_domain_name | FQDN resolving to the controller(s) nodes. Workers and kubectl will communicate with this endpoint | "myk8s.example.com" |
 | ssh_authorized_key | SSH public key for user 'core' | "ssh-rsa AAAAB3Nz..." |

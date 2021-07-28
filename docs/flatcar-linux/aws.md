@@ -1,6 +1,6 @@
 # AWS
 
-In this tutorial, we'll create a Kubernetes v1.20.4 cluster on AWS with Flatcar Linux.
+In this tutorial, we'll create a Kubernetes v1.21.3 cluster on AWS with Flatcar Linux.
 
 We'll declare a Kubernetes cluster using the Typhoon Terraform module. Then apply the changes to create a VPC, gateway, subnets, security groups, controller instances, worker auto-scaling group, network load balancer, and TLS assets.
 
@@ -18,7 +18,7 @@ Install [Terraform](https://www.terraform.io/downloads.html) v0.13.0+ on your sy
 
 ```sh
 $ terraform version
-Terraform v0.13.0
+Terraform v1.0.0
 ```
 
 Read [concepts](/architecture/concepts/) to learn about Terraform, modules, and organizing resources. Change to your infrastructure repository (e.g. `infra`).
@@ -51,11 +51,11 @@ terraform {
   required_providers {
     ct = {
       source  = "poseidon/ct"
-      version = "0.7.1"
+      version = "0.9.0"
     }
     aws = {
       source = "hashicorp/aws"
-      version = "3.28.0"
+      version = "3.48.0"
     }
   }
 }
@@ -72,7 +72,7 @@ Define a Kubernetes cluster using the module `aws/flatcar-linux/kubernetes`.
 
 ```tf
 module "tempest" {
-  source = "git::https://github.com/poseidon/typhoon//aws/flatcar-linux/kubernetes?ref=v1.20.4"
+  source = "git::https://github.com/poseidon/typhoon//aws/flatcar-linux/kubernetes?ref=v1.21.3"
 
   # AWS
   cluster_name = "tempest"
@@ -145,9 +145,9 @@ List nodes in the cluster.
 $ export KUBECONFIG=/home/user/.kube/configs/tempest-config
 $ kubectl get nodes
 NAME           STATUS  ROLES   AGE  VERSION
-ip-10-0-3-155  Ready   <none>  10m  v1.20.4
-ip-10-0-26-65  Ready   <none>  10m  v1.20.4
-ip-10-0-41-21  Ready   <none>  10m  v1.20.4
+ip-10-0-3-155  Ready   <none>  10m  v1.21.3
+ip-10-0-26-65  Ready   <none>  10m  v1.21.3
+ip-10-0-41-21  Ready   <none>  10m  v1.21.3
 ```
 
 List the pods.
@@ -210,9 +210,9 @@ Reference the DNS zone id with `aws_route53_zone.zone-for-clusters.zone_id`.
 | worker_count | Number of workers | 1 | 3 |
 | controller_type | EC2 instance type for controllers | "t3.small" | See below |
 | worker_type | EC2 instance type for workers | "t3.small" | See below |
-| os_image | AMI channel for a Container Linux derivative | "flatcar-stable" | flatcar-stable, flatcar-beta, flatcar-alpha, flatcar-edge |
-| disk_size | Size of the EBS volume in GB | 40 | 100 |
-| disk_type | Type of the EBS volume | "gp2" | standard, gp2, io1 |
+| os_image | AMI channel for a Container Linux derivative | "flatcar-stable" | flatcar-stable, flatcar-beta, flatcar-alpha |
+| disk_size | Size of the EBS volume in GB | 30 | 100 |
+| disk_type | Type of the EBS volume | "gp3" | standard, gp2, gp3, io1 |
 | disk_iops | IOPS of the EBS volume | 0 (i.e. auto) | 400 |
 | worker_target_groups | Target group ARNs to which worker instances should be added | [] | [aws_lb_target_group.app.id] |
 | worker_price | Spot price in USD for worker instances or 0 to use on-demand instances | 0/null | 0.10 |
