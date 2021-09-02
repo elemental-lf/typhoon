@@ -34,6 +34,18 @@ variable "apiserver_extra_arguments" {
   default     = []
 }
 
+variable "kubelet_controller_extra_arguments" {
+  description = "List of extra arguments for the kubelet on controller nodes"
+  type        = list(string)
+  default     = []
+}
+
+variable "kubelet_worker_extra_arguments" {
+  description = "List of extra arguments for the kubelet on worker nodes"
+  type        = list(string)
+  default     = []
+}
+
 variable "container_images" {
   description               = "Container images to use"
   type                      = map(string)

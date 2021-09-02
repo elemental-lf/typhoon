@@ -58,19 +58,21 @@ data "template_file" "controller-configs" {
 
   template = file("${path.module}/fcc/controller.yaml")
   vars = {
-    domain_name            = var.controllers.*.domain[count.index]
-    etcd_name              = var.controllers.*.name[count.index]
-    etcd_initial_cluster   = join(",", formatlist("%s=https://%s:2380", var.controllers.*.name, var.controllers.*.domain))
-    cluster_dns_service_ip = module.bootstrap.cluster_dns_service_ip
-    cluster_domain_suffix  = var.cluster_domain_suffix
-    ssh_authorized_key     = var.ssh_authorized_key
-    apiserver_vip          = var.apiserver_vip
-    etcd_cluster_exists    = var.etcd_cluster_exists
-    kubelet_image          = split(":", var.container_images["kubelet"])[0]
-    kubelet_tag            = split(":", var.container_images["kubelet"])[1]
-    enable_rbd_nbd         = var.enable_rbd_nbd
-    node_labels            = join(",", lookup(var.controller_node_labels, var.controllers.*.name[count.index], []))
-    node_taints            = join(",", lookup(var.controller_node_taints, var.controllers.*.name[count.index], []))
+    domain_name                        = var.controllers.*.domain[count.index]
+    etcd_name                          = var.controllers.*.name[count.index]
+    etcd_initial_cluster               = join(",", formatlist("%s=https://%s:2380", var.controllers.*.name, var.controllers.*.domain))
+    cluster_dns_service_ip             = module.bootstrap.cluster_dns_service_ip
+    cluster_domain_suffix              = var.cluster_domain_suffix
+    ssh_authorized_key                 = var.ssh_authorized_key
+    apiserver_vip                      = var.apiserver_vip
+    etcd_cluster_exists                = var.etcd_cluster_exists
+    kubelet_image                      = split(":", var.container_images["kubelet"])[0]
+    kubelet_tag                        = split(":", var.container_images["kubelet"])[1]
+    enable_rbd_nbd                     = var.enable_rbd_nbd
+    # Can only pass primiteves
+    node_labels                        = join(",", lookup(var.controller_node_labels, var.controllers.*.name[count.index], []))
+    node_taints                        = join(",", lookup(var.controller_node_taints, var.controllers.*.name[count.index], []))
+    kubelet_controller_extra_arguments = indent(10, join("\n", formatlist("%s \\", var.kubelet_controller_extra_arguments)))
   }
 }
 
@@ -99,14 +101,16 @@ data "template_file" "worker-configs" {
 
   template = file("${path.module}/fcc/worker.yaml")
   vars = {
-    domain_name            = var.workers.*.domain[count.index]
-    cluster_dns_service_ip = module.bootstrap.cluster_dns_service_ip
-    cluster_domain_suffix  = var.cluster_domain_suffix
-    ssh_authorized_key     = var.ssh_authorized_key
-    kubelet_image          = split(":", var.container_images["kubelet"])[0]
-    kubelet_tag            = split(":", var.container_images["kubelet"])[1]
-    enable_rbd_nbd         = var.enable_rbd_nbd
-    node_labels            = join(",", lookup(var.worker_node_labels, var.workers.*.name[count.index], []))
-    node_taints            = join(",", lookup(var.worker_node_taints, var.workers.*.name[count.index], []))
+    domain_name                    = var.workers.*.domain[count.index]
+    cluster_dns_service_ip         = module.bootstrap.cluster_dns_service_ip
+    cluster_domain_suffix          = var.cluster_domain_suffix
+    ssh_authorized_key             = var.ssh_authorized_key
+    kubelet_image                  = split(":", var.container_images["kubelet"])[0]
+    kubelet_tag                    = split(":", var.container_images["kubelet"])[1]
+    enable_rbd_nbd                 = var.enable_rbd_nbd
+    # Can only pass primiteves
+    node_labels                    = join(",", lookup(var.worker_node_labels, var.workers.*.name[count.index], []))
+    node_taints                    = join(",", lookup(var.worker_node_taints, var.workers.*.name[count.index], []))
+    kubelet_worker_extra_arguments = indent(10, join("\n", formatlist("%s \\", var.kubelet_worker_extra_arguments)))
   }
 }
