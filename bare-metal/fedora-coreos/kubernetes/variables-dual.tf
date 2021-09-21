@@ -51,22 +51,19 @@ variable "container_images" {
   type                      = map(string)
 
   default = {
-    calico                  = "quay.io/calico/node:v3.17.3"
-    calico_cni              = "quay.io/calico/cni:v3.17.3"
-    cilium_agent            = "quay.io/cilium/cilium:v1.9.4"
-    cilium_operator         = "quay.io/cilium/operator-generic:v1.9.4"
-    coredns                 = "k8s.gcr.io/coredns:1.7.0"
+    calico                  = "quay.io/calico/node:v3.20.0"
+    calico_cni              = "quay.io/calico/cni:v3.20.0"
+    cilium_agent            = "quay.io/cilium/cilium:v1.10.3"
+    cilium_operator         = "quay.io/cilium/operator-generic:v1.10.3"
+    coredns                 = "k8s.gcr.io/coredns/coredns:v1.8.4"
     flannel                 = "quay.io/coreos/flannel:v0.13.0"
     flannel_cni             = "quay.io/poseidon/flannel-cni:v0.4.2"
-    kube_apiserver          = "k8s.gcr.io/kube-apiserver:v1.20.4"
-    kube_controller_manager = "k8s.gcr.io/kube-controller-manager:v1.20.4"
-    kube_scheduler          = "k8s.gcr.io/kube-scheduler:v1.20.4"
-    kube_proxy              = "k8s.gcr.io/kube-proxy:v1.20.4"
-    # experimental
-    cilium_agent            = "docker.io/cilium/cilium:v1.8.4"
-    cilium_operator         = "docker.io/cilium/operator-generic:v1.8.4"
+    kube_apiserver          = "k8s.gcr.io/kube-apiserver:v1.22.1"
+    kube_controller_manager = "k8s.gcr.io/kube-controller-manager:v1.22.1"
+    kube_scheduler          = "k8s.gcr.io/kube-scheduler:v1.22.1"
+    kube_proxy              = "k8s.gcr.io/kube-proxy:v1.22.1"
     #
-    kubelet                 = "quay.io/poseidon/kubelet:v1.20.4"
+    kubelet                 = "ghcr.io/elemental-lf/kubelet:v1.22.2"
     keepalived_vip          = "osixia/keepalived:2.0.17"
   }
 }
