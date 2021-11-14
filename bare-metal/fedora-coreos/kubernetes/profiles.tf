@@ -1,35 +1,39 @@
 locals {
-  remote_kernel = "https://builds.coreos.fedoraproject.org/prod/streams/${var.os_stream}/builds/${var.os_version}/x86_64/fedora-coreos-${var.os_version}-live-kernel-x86_64"
-  remote_initrd = ["https://builds.coreos.fedoraproject.org/prod/streams/${var.os_stream}/builds/${var.os_version}/x86_64/fedora-coreos-${var.os_version}-live-initramfs.x86_64.img"]
+  all_nodes = concat(var.controllers[*].name, var.workers[*].name)
+  os_streams = {for node in local.all_nodes: node => lookup(var.os_overrides, node, null) != null ? lookup(var.os_overrides, node).os_stream : var.os_stream}
+  os_versions = {for node in local.all_nodes: node => lookup(var.os_overrides, node, null) != null ? lookup(var.os_overrides, node).os_version : var.os_version}
 
-  remote_args = [
+  remote_kernel = {for node in local.all_nodes: node => "https://builds.coreos.fedoraproject.org/prod/streams/${local.os_versions[node]}/builds/${local.os_streams[node]}/x86_64/fedora-coreos-${local.os_streams[node]}-live-kernel-x86_64"}
+  remote_initrd = {for node in local.all_nodes: node => ["https://builds.coreos.fedoraproject.org/prod/streams/${local.os_versions[node]}}/builds/${local.os_streams[node]}/x86_64/fedora-coreos-${local.os_streams[node]}-live-initramfs.x86_64.img"]}
+
+  remote_args = {for node in local.all_nodes: node => concat([
     "ip=dhcp",
     "rd.neednet=1",
-    "initrd=fedora-coreos-${var.os_version}-live-initramfs.x86_64.img",
-    "coreos.live.rootfs_url=https://builds.coreos.fedoraproject.org/prod/streams/${var.os_stream}/builds/${var.os_version}/x86_64/fedora-coreos-${var.os_version}-live-rootfs.x86_64.img",
+    "initrd=fedora-coreos-${local.os_versions[node]}-live-initramfs.x86_64.img",
+    "coreos.live.rootfs_url=https://builds.coreos.fedoraproject.org/prod/streams/${local.os_streams[node]}/builds/${local.os_versions[node]}/x86_64/fedora-coreos-${local.os_versions[node]}-live-rootfs.x86_64.img",
     "coreos.inst.ignition_url=${var.matchbox_http_endpoint}/ignition?uuid=$${uuid}&mac=$${mac:hexhyp}",
-    "coreos.inst.image_url=https://builds.coreos.fedoraproject.org/prod/streams/${var.os_stream}/builds/${var.os_version}/x86_64/fedora-coreos-${var.os_version}-metal.x86_64.raw.xz",
+    "coreos.inst.image_url=https://builds.coreos.fedoraproject.org/prod/streams/${local.os_streams[node]}/builds/${local.os_versions[node]}/x86_64/fedora-coreos-${local.os_versions[node]}-metal.x86_64.raw.xz",
     "console=tty0",
     "console=ttyS0",
-  ]
+  ], var.accept_insecure_images ? ["coreos.inst.insecure"] : [])}
 
-  cached_kernel = "/assets/fedora-coreos/fedora-coreos-${var.os_version}-live-kernel-x86_64"
-  cached_initrd = ["/assets/fedora-coreos/fedora-coreos-${var.os_version}-live-initramfs.x86_64.img"]
+  cached_kernel = {for node in local.all_nodes: node => "/assets/fedora-coreos/fedora-coreos-${local.os_versions[node]}-live-kernel-x86_64"}
+  cached_initrd = {for node in local.all_nodes: node => ["/assets/fedora-coreos/fedora-coreos-${local.os_versions[node]}-live-initramfs.x86_64.img"]}
 
-  cached_args = [
+  cached_args = {for node in local.all_nodes: node => concat([
     "ip=dhcp",
     "rd.neednet=1",
-    "initrd=fedora-coreos-${var.os_version}-live-initramfs.x86_64.img",
-    "coreos.live.rootfs_url=${var.matchbox_http_endpoint}/assets/fedora-coreos/fedora-coreos-${var.os_version}-live-rootfs.x86_64.img",
+    "initrd=fedora-coreos-${local.os_versions[node]}-live-initramfs.x86_64.img",
+    "coreos.live.rootfs_url=${var.matchbox_http_endpoint}/assets/fedora-coreos/fedora-coreos-${local.os_versions[node]}-live-rootfs.x86_64.img",
     "coreos.inst.ignition_url=${var.matchbox_http_endpoint}/ignition?uuid=$${uuid}&mac=$${mac:hexhyp}",
-    "coreos.inst.image_url=${var.matchbox_http_endpoint}/assets/fedora-coreos/fedora-coreos-${var.os_version}-metal.x86_64.raw.xz",
+    "coreos.inst.image_url=${var.matchbox_http_endpoint}/assets/fedora-coreos/fedora-coreos-${local.os_versions[node]}-metal.x86_64.raw.xz",
     "console=tty0",
     "console=ttyS0",
-  ]
+  ], var.accept_insecure_images ? ["coreos.inst.insecure"] : [])}
 
   kernel = var.cached_install ? local.cached_kernel : local.remote_kernel
   initrd = var.cached_install ? local.cached_initrd : local.remote_initrd
-  args   = concat(var.cached_install ? local.cached_args : local.remote_args, var.accept_insecure_images ? ["coreos.inst.insecure"] : [])
+  args   = var.cached_install ? local.cached_args : local.remote_args
 }
 
 
@@ -38,9 +42,9 @@ resource "matchbox_profile" "controllers" {
   count = length(var.controllers)
   name  = format("%s-controller-%s", var.cluster_name, var.controllers.*.name[count.index])
 
-  kernel = local.kernel
-  initrd = local.initrd
-  args = concat(local.args, var.kernel_args, ["coreos.inst.install_dev=${var.controllers[count.index]["install_disk"]}"])
+  kernel = local.kernel[var.controllers[count.index].name]
+  initrd = local.initrd[var.controllers[count.index].name]
+  args = concat(local.args[var.controllers[count.index].name], var.kernel_args, ["coreos.inst.install_dev=${var.controllers[count.index]["install_disk"]}"])
 
   raw_ignition = data.ct_config.controller-ignitions.*.rendered[count.index]
 }
@@ -81,9 +85,9 @@ resource "matchbox_profile" "workers" {
   count = length(var.workers)
   name  = format("%s-worker-%s", var.cluster_name, var.workers.*.name[count.index])
 
-  kernel = local.kernel
-  initrd = local.initrd
-  args = concat(local.args, var.kernel_args, ["coreos.inst.install_dev=${var.workers[count.index]["install_disk"]}"])
+  kernel = local.kernel[var.workers[count.index].name]
+  initrd = local.initrd[var.workers[count.index].name]
+  args = concat(local.args[var.workers[count.index].name], var.kernel_args, ["coreos.inst.install_dev=${var.workers[count.index]["install_disk"]}"])
 
   raw_ignition = data.ct_config.worker-ignitions.*.rendered[count.index]
 }

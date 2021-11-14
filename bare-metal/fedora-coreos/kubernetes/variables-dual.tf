@@ -88,3 +88,12 @@ variable "accept_insecure_images" {
   type        = bool
   default     = false
 }
+
+variable "os_overrides" {
+  description = "Fedora CoreOS version overrides for individual hosts"
+  type        = map(object({
+    os_stream = string
+    os_version = string
+  }))
+  default     = {}
+}
