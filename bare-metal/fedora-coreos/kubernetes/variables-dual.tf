@@ -64,7 +64,7 @@ variable "container_images" {
     kube_proxy              = "k8s.gcr.io/kube-proxy:v1.22.4"
     #
     kubelet                 = "ghcr.io/elemental-lf/kubelet:v1.22.4"
-    keepalived_vip          = "osixia/keepalived:2.0.17"
+    keepalived_vip          = "osixia/keepalived:2.0.20"
   }
 }
 
