@@ -1,66 +1,83 @@
 # ARM64
 
-!!! warning
-    ARM64 support is experimental
-
-Typhoon has experimental support for ARM64 with Fedora CoreOS on AWS. Full clusters can be created with ARM64 controller and worker nodes. Or worker pools of ARM64 nodes can be attached to an AMD64 cluster to create a hybrid/mixed architecture cluster.
+Typhoon has experimental support for ARM64 on AWS, with Fedora CoreOS or Flatcar Linux. Clusters can be created with ARM64 controller and worker nodes. Or worker pools of ARM64 nodes can be attached to an AMD64 cluster to create a hybrid/mixed architecture cluster.
 
 !!! note
-    Currently, CNI networking must be set to flannel or Cilium.
-
-## AMIs
-
-In lieu of official Fedora CoreOS ARM64 AMIs, Poseidon publishes experimental ARM64 AMIs to a few regions (us-east-1, us-east-2, us-west-1). These AMIs may be **removed** at any time and will be replaced when Fedora CoreOS publishes equivalents.
-
-!!! note
-    AMIs are only published to a few regions, and AWS availability of ARM instance types varies.
+    Currently, CNI networking must be set to `flannel` or `cilium`.
 
 ## Cluster
 
 Create a cluster with ARM64 controller and worker nodes. Container workloads must be `arm64` compatible and use `arm64` container images.
 
-```tf
-module "gravitas" {
-  source = "git::https://github.com/poseidon/typhoon//aws/fedora-coreos/kubernetes?ref=v1.22.1"
+=== "Fedora CoreOS Cluster (arm64)"
 
-  # AWS
-  cluster_name = "gravitas"
-  dns_zone     = "aws.example.com"
-  dns_zone_id  = "Z3PAABBCFAKEC0"
+    ```tf
+    module "gravitas" {
+      source = "git::https://github.com/poseidon/typhoon//aws/fedora-coreos/kubernetes?ref=v1.23.3"
 
-  # configuration
-  ssh_authorized_key = "ssh-ed25519 AAAAB3Nz..."
+      # AWS
+      cluster_name = "gravitas"
+      dns_zone     = "aws.example.com"
+      dns_zone_id  = "Z3PAABBCFAKEC0"
 
-  # optional
-  arch         = "arm64"
-  networking   = "cilium"
-  worker_count = 2
-  worker_price = "0.0168"
+      # configuration
+      ssh_authorized_key = "ssh-ed25519 AAAAB3Nz..."
 
-  controller_type = "t4g.small"
-  worker_type     = "t4g.small"
-}
-```
+      # optional
+      arch         = "arm64"
+      networking   = "cilium"
+      worker_count = 2
+      worker_price = "0.0168"
 
-Verify the cluster has only arm64 (`aarch64`) nodes.
+      controller_type = "t4g.small"
+      worker_type     = "t4g.small"
+    }
+    ```
+
+=== "Flatcar Linux Cluster (arm64)"
+
+    ```tf
+    module "gravitas" {
+      source = "git::https://github.com/poseidon/typhoon//aws/flatcar-linux/kubernetes?ref=v1.23.3"
+
+      # AWS
+      cluster_name = "gravitas"
+      dns_zone     = "aws.example.com"
+      dns_zone_id  = "Z3PAABBCFAKEC0"
+
+      # configuration
+      ssh_authorized_key = "ssh-ed25519 AAAAB3Nz..."
+
+      # optional
+      arch         = "arm64"
+      networking   = "cilium"
+      worker_count = 2
+      worker_price = "0.0168"
+
+      controller_type = "t4g.small"
+      worker_type     = "t4g.small"
+    }
+    ```
+
+Verify the cluster has only arm64 (`aarch64`) nodes. For Flatcar Linux, describe nodes.
 
 ```
 $ kubectl get nodes -o wide
-NAME             STATUS   ROLES    AGE    VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE                          KERNEL-VERSION            CONTAINER-RUNTIME
-ip-10-0-12-178   Ready    <none>   101s   v1.22.1   10.0.12.178   <none>        Fedora CoreOS 32.20201104.dev.0   5.8.17-200.fc32.aarch64   docker://19.3.11
-ip-10-0-18-93    Ready    <none>   102s   v1.22.1   10.0.18.93    <none>        Fedora CoreOS 32.20201104.dev.0   5.8.17-200.fc32.aarch64   docker://19.3.11
-ip-10-0-90-10    Ready    <none>   104s   v1.22.1   10.0.90.10    <none>        Fedora CoreOS 32.20201104.dev.0   5.8.17-200.fc32.aarch64   docker://19.3.11
+NAME             STATUS   ROLES    AGE   VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE                        KERNEL-VERSION            CONTAINER-RUNTIME
+ip-10-0-21-119   Ready    <none>   77s   v1.23.3   10.0.21.119   <none>        Fedora CoreOS 35.20211215.3.0   5.15.7-200.fc35.aarch64   containerd://1.5.8
+ip-10-0-32-166   Ready    <none>   80s   v1.23.3   10.0.32.166   <none>        Fedora CoreOS 35.20211215.3.0   5.15.7-200.fc35.aarch64   containerd://1.5.8
+ip-10-0-5-79     Ready    <none>   77s   v1.23.3   10.0.5.79     <none>        Fedora CoreOS 35.20211215.3.0   5.15.7-200.fc35.aarch64   containerd://1.5.8
 ```
 
 ## Hybrid
 
 Create a hybrid/mixed arch cluster by defining an AWS cluster. Then define a [worker pool](worker-pools.md#aws) with ARM64 workers. Optional taints are added to aid in scheduling.
 
-=== "Cluster (amd64)"
+=== "FCOS Cluster"
 
     ```tf
     module "gravitas" {
-      source = "git::https://github.com/poseidon/typhoon//aws/fedora-coreos/kubernetes?ref=v1.22.1"
+      source = "git::https://github.com/poseidon/typhoon//aws/fedora-coreos/kubernetes?ref=v1.23.3"
 
       # AWS
       cluster_name = "gravitas"
@@ -79,11 +96,58 @@ Create a hybrid/mixed arch cluster by defining an AWS cluster. Then define a [wo
     }
     ```
 
-=== "Worker Pool (arm64)"
+=== "Flatcar Cluster"
+
+    ```tf
+    module "gravitas" {
+      source = "git::https://github.com/poseidon/typhoon//aws/flatcar-linux/kubernetes?ref=v1.23.3"
+
+      # AWS
+      cluster_name = "gravitas"
+      dns_zone     = "aws.example.com"
+      dns_zone_id  = "Z3PAABBCFAKEC0"
+
+      # configuration
+      ssh_authorized_key = "ssh-ed25519 AAAAB3Nz..."
+
+      # optional
+      networking   = "cilium"
+      worker_count = 2
+      worker_price = "0.021"
+
+      daemonset_tolerations = ["arch"]     # important
+    }
+    ```
+
+=== "FCOS ARM64 Workers"
 
     ```tf
     module "gravitas-arm64" {
-      source = "git::https://github.com/poseidon/typhoon//aws/fedora-coreos/kubernetes/workers?ref=v1.22.1"
+      source = "git::https://github.com/poseidon/typhoon//aws/fedora-coreos/kubernetes/workers?ref=v1.23.3"
+
+      # AWS
+      vpc_id          = module.gravitas.vpc_id
+      subnet_ids      = module.gravitas.subnet_ids
+      security_groups = module.gravitas.worker_security_groups
+
+      # configuration
+      name               = "gravitas-arm64"
+      kubeconfig         = module.gravitas.kubeconfig
+      ssh_authorized_key = var.ssh_authorized_key
+
+      # optional
+      arch          = "arm64"
+      instance_type = "t4g.small"
+      spot_price    = "0.0168"
+      node_taints   = ["arch=arm64:NoSchedule"]
+    }
+    ```
+
+=== "Flatcar ARM64 Workers"
+
+    ```tf
+    module "gravitas-arm64" {
+      source = "git::https://github.com/poseidon/typhoon//aws/flatcar-linux/kubernetes/workers?ref=v1.23.3"
 
       # AWS
       vpc_id          = module.gravitas.vpc_id
@@ -107,10 +171,10 @@ Verify amd64 (x86_64) and arm64 (aarch64) nodes are present.
 
 ```
 $ kubectl get nodes -o wide
-NAME            STATUS   ROLES    AGE     VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE                          KERNEL-VERSION             CONTAINER-RUNTIME
-ip-10-0-1-81    Ready    <none>   4m28s   v1.22.1   10.0.1.81     <none>        Fedora CoreOS 34.20210427.3.0     5.11.15-300.fc34.x86_64    docker://20.10.6
-ip-10-0-17-86   Ready    <none>   4m28s   v1.22.1   10.0.17.86    <none>        Fedora CoreOS 33.20210413.dev.0   5.10.19-200.fc33.aarch64   docker://19.3.13
-ip-10-0-21-45   Ready    <none>   4m28s   v1.22.1   10.0.21.45    <none>        Fedora CoreOS 34.20210427.3.0     5.11.15-300.fc34.x86_64    docker://20.10.6
-ip-10-0-40-36   Ready    <none>   4m22s   v1.22.1   10.0.40.36    <none>        Fedora CoreOS 34.20210427.3.0     5.11.15-300.fc34.x86_64    docker://20.10.6
+NAME                       STATUS   ROLES    AGE    VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE                                             KERNEL-VERSION            CONTAINER-RUNTIME
+ip-10-0-1-73               Ready    <none>   111m   v1.23.3   10.0.1.73     <none>        Fedora CoreOS 35.20211215.3.0                        5.15.7-200.fc35.x86_64    containerd://1.5.8
+ip-10-0-22-79...           Ready    <none>   111m   v1.23.3   10.0.22.79    <none>        Flatcar Container Linux by Kinvolk 3033.2.0 (Oklo)   5.10.84-flatcar           containerd://1.5.8
+ip-10-0-24-130             Ready    <none>   111m   v1.23.3   10.0.24.130   <none>        Fedora CoreOS 35.20211215.3.0                        5.15.7-200.fc35.x86_64    containerd://1.5.8
+ip-10-0-39-19              Ready    <none>   111m   v1.23.3   10.0.39.19    <none>        Fedora CoreOS 35.20211215.3.0                        5.15.7-200.fc35.x86_64    containerd://1.5.8
 ```
 

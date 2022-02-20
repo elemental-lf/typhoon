@@ -66,8 +66,8 @@ variable "disk_type" {
 
 variable "disk_iops" {
   type        = number
-  description = "IOPS of the EBS volume (e.g. 100)"
-  default     = 0
+  description = "IOPS of the EBS volume (e.g. 3000)"
+  default     = 3000
 }
 
 variable "worker_price" {
@@ -142,8 +142,8 @@ variable "enable_reporting" {
 
 variable "enable_aggregation" {
   type        = bool
-  description = "Enable the Kubernetes Aggregation Layer (defaults to false)"
-  default     = false
+  description = "Enable the Kubernetes Aggregation Layer"
+  default     = true
 }
 
 variable "worker_node_labels" {
@@ -158,6 +158,17 @@ variable "cluster_domain_suffix" {
   type        = string
   description = "Queries for domains with the suffix will be answered by CoreDNS. Default is cluster.local (e.g. foo.default.svc.cluster.local)"
   default     = "cluster.local"
+}
+
+variable "arch" {
+  type        = string
+  description = "Container architecture (amd64 or arm64)"
+  default     = "amd64"
+
+  validation {
+    condition     = var.arch == "amd64" || var.arch == "arm64"
+    error_message = "The arch must be amd64 or arm64."
+  }
 }
 
 variable "daemonset_tolerations" {

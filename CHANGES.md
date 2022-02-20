@@ -4,6 +4,157 @@ Notable changes between versions.
 
 ## Latest
 
+## V1.23.3
+
+* Kubernetes [v1.23.3](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.23.md#v1233)
+
+### Flatcar Linux
+
+#### Google Cloud
+
+* Switch to using official Kinvolk Flatcar Linux images
+* Promote Typhoon on Flatcar Linux / Google Cloud to stable
+* Change `os_image` to `flatcar-stable`, `flatcar-beta`, or `flatcar-alpha` (**action required**)
+
+## v1.23.2
+
+* Kubernetes [v1.23.2](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.23.md#v1232)
+* Remove Kubelet flag `--network-plugin`. Unused since `docker-shim` isn't used ([#1106](https://github.com/poseidon/typhoon/pull/1106))
+
+### Fedora CoreOS
+
+* Switch Kubernetes Container Runtime from `docker` to `containerd` ([#1101](https://github.com/poseidon/typhoon/pull/1101))
+* Mask `docker.service` to prevent it from being socket activated ([#1105](https://github.com/poseidon/typhoon/pull/1105))
+
+### Flatcar Linux
+
+#### AWS
+
+* Add experimental Flatcar Linux ARM64 support ([docs](https://typhoon.psdn.io/advanced/arm64/), [#1102](https://github.com/poseidon/typhoon/pull/1102))
+  * Add `arch` variable to AWS `kubernetes` and `workers` modules
+  * Allow arm64 full-cluster or mixed/hybrid cluster with arm64 workers
+  * Requires `flannel` or `cilium` CNI provider
+
+### DigitalOcean
+
+* Upgrade DigitalOcean Terraform provider to [v2.x](https://registry.terraform.io/providers/digitalocean/digitalocean/latest/docs) ([#1109](https://github.com/poseidon/typhoon/pull/1109))
+
+### Addons
+
+* Update nginx-ingress from v1.1.0 to [v1.1.1](https://github.com/kubernetes/ingress-nginx/releases/tag/controller-v1.1.1)
+* Update Grafana from v8.3.3 to [v8.3.4](https://github.com/grafana/grafana/releases/tag/v8.3.4)
+
+## v1.23.1
+
+* Kubernetes [v1.23.1](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.23.md#v1231)
+* Workaround Terraform v1.1 regression in `file` provisioner ([#1093](https://github.com/poseidon/typhoon/pull/1093))
+
+### Flatcar Linux
+
+* Switch Kubernetes Container Runtime from `docker` to `containerd` ([#1087](https://github.com/poseidon/typhoon/pull/1087))
+
+### Addons
+
+* Configure Prometheus to allow a custom scrape query parameter ([#1095](https://github.com/poseidon/typhoon/pull/1095))
+* Configure Prometheus to probe Kubernetes Ingress via `blackbox-exporter` ([#1096](https://github.com/poseidon/typhoon/pull/1096))
+* Fix Prometheus Service probes to use `blackbox-exporter`, not `blackbox` ([#1096](https://github.com/poseidon/typhoon/pull/1096))
+
+## v1.23.0
+
+* Kubernetes [v1.23.0](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.23.md#v1230)
+* Normalize CA cert mounts in static Pods and kube-proxy ([#1078](https://github.com/poseidon/typhoon/pull/1078))
+* Set Kubelet resolver config to `/run/systemd/resolve/resolv.conf` ([#1082](https://github.com/poseidon/typhoon/pull/1082))
+* Update Cilium from v1.10.5 to [v1.11.0](https://github.com/cilium/cilium/releases/tag/v1.11.0) ([#1083](https://github.com/poseidon/typhoon/pull/1083))
+* With Calico, add missing `caliconodestatuses` CRD ([#289](https://github.com/poseidon/terraform-render-bootstrap/pull/289))
+* Change `enable_aggregation` default to true ([#279](https://github.com/poseidon/terraform-render-bootstrap/pull/279))
+* Remove deprecated `--port` from `kube-scheduler` ([#1078](https://github.com/poseidon/typhoon/pull/1078))
+
+### AWS
+
+* Change controller node default `disk_iops` to 3000 ([#1073](https://github.com/poseidon/typhoon/pull/1073))
+
+### Azure
+
+* Fix warning about deprecated `backend_address_pool_id` ([#1086](https://github.com/poseidon/typhoon/pull/1086))
+
+### Fedora CoreOS
+
+* Fix Fedora ARM64 workers to official Fedora CoreOS AMIs ([#1072](https://github.com/poseidon/typhoon/pull/1072))
+  * Should have been changed alongside controller AMIs in ([#1038](https://github.com/poseidon/typhoon/pull/1038))
+  * Old Poseidon built ARM64 AMIs have been deleted
+
+### Addons
+
+* Update nginx-ingress from v1.0.5 to [v1.1.0](https://github.com/kubernetes/ingress-nginx/releases/tag/controller-v1.1.0)
+* Update Prometheus from v2.31.1 to [v2.32.0](https://github.com/prometheus/prometheus/releases/tag/v2.32.0)
+* Update kube-state-metrics from v2.2.4 to [v2.3.0](https://github.com/kubernetes/kube-state-metrics/releases/tag/v2.3.0)
+* Update node-exporter from v1.3.0 to [v1.3.1](https://github.com/prometheus/node_exporter/releases/tag/v1.3.1)
+* Update Grafana from v8.2.4 to [v8.3.3](https://github.com/grafana/grafana/releases/tag/v8.3.3)
+
+### Known Issues
+
+* Calico does not yet support Kubernetes v1.23.0, use `flannel` or `cilium` ([calico#5011](https://github.com/projectcalico/calico/issues/5011))
+
+## v1.22.4
+
+* Kubernetes [v1.22.4](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.22.md#v1224)
+* Update CoreDNS from v1.8.4 to [v1.8.6](https://github.com/poseidon/terraform-render-bootstrap/pull/284)
+* Update Calico from v3.20.2 to [v3.21.0](https://github.com/projectcalico/calico/releases/tag/v3.21.0)
+* Update flannel from v0.14.0 to [v0.15.1](https://github.com/flannel-io/flannel/releases/tag/v0.15.1)
+
+### Google
+
+* Allow use of Terraform provider `google` [v4.0+](https://github.com/hashicorp/terraform-provider-google/releases/tag/v4.0.0)
+
+### Flatcar Linux
+
+* Change Kubelet mounts for cgroups v2 ([#1064](https://github.com/poseidon/typhoon/pull/1064))
+* Update cgroup driver from cgroupfs to systemd (Flatcar Linux changed default) ([#1064](https://github.com/poseidon/typhoon/pull/1064))
+
+### Addons
+
+* Update Prometheus from v2.30.3 to [v2.31.1](https://github.com/prometheus/prometheus/releases/tag/v2.31.1)
+* Update node-exporter from v1.2.2 to [v1.3.0](https://github.com/prometheus/node_exporter/releases/tag/v1.3.0)
+* Update kube-state-metrics from v2.2.3 to [v2.2.4](https://github.com/kubernetes/kube-state-metrics/releases/tag/v2.2.4)
+* Update Grafana from v8.2.1 to [v8.2.4](https://github.com/grafana/grafana/releases/tag/v8.2.4)
+* Update nginx-ingress from v1.0.4 to [v1.0.5](https://github.com/kubernetes/ingress-nginx/releases/tag/controller-v1.0.5)
+
+## v1.23.3
+
+* Kubernetes [v1.22.3](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.22.md#v1223)
+* Update etcd from v3.5.0 to [v3.5.1](https://github.com/etcd-io/etcd/releases/tag/v3.5.1)
+* Update Cilium from v1.10.4 to [v1.10.5](https://github.com/cilium/cilium/releases/tag/v1.10.5)
+* Update Calico from v3.20.1 to [v3.20.2](https://github.com/projectcalico/calico/releases/tag/v3.20.2)
+  * Use Calico's iptables legacy vs nft auto-detection
+* Update flannel from v0.13.0 to v0.14.0
+
+### Bare-Metal
+
+* Require Terraform provider `poseidon/matchbox` v0.5+ ([#1048](https://github.com/poseidon/typhoon/pull/1048))
+
+### Addons
+
+* Update nginx-ingress from v1.0.0 to [v1.0.4](https://github.com/kubernetes/ingress-nginx/releases/tag/controller-v1.0.4)
+* Update Prometheus from v2.29.2 to [v2.30.3](https://github.com/prometheus/prometheus/releases/tag/v2.30.3)
+* Update kube-state-metrics from v2.2.0 to [v2.2.3](https://github.com/kubernetes/kube-state-metrics/releases/tag/v2.2.3)
+* Update Grafana from v8.1.2 to [v8.2.1](https://github.com/grafana/grafana/releases/tag/v8.2.1)
+
+## v1.22.2
+
+* Kubernetes [v1.22.2](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.22.md#v1222)
+* Update Cilium from v1.10.3 to [v1.10.4](https://github.com/cilium/cilium/releases/tag/v1.10.4)
+* Update Calico from v3.20.0 to [v3.20.1](https://github.com/projectcalico/calico/releases/tag/v3.20.1)
+* Fix access to ClusterIP services with Cilium ([#276](https://github.com/poseidon/terraform-render-bootstrap/pull/276))
+
+### Fedora CoreOS
+
+* Use Fedora CoreOS ARM64 AMIs ([#1038](https://github.com/poseidon/typhoon/pull/1038))
+
+### Addons
+
+* Update Prometheus from v2.29.1 to [v2.29.2](https://github.com/prometheus/prometheus/releases/tag/v2.29.2)
+* Update kube-state-metrics from v2.1.1 to [v2.2.0](https://github.com/kubernetes/kube-state-metrics/releases/tag/v2.2.0)
+
 ## v1.22.1
 
 * Kubernetes [v1.22.1](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.22.md#v1221)

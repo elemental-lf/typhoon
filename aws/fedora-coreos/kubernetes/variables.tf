@@ -66,8 +66,8 @@ variable "disk_type" {
 
 variable "disk_iops" {
   type        = number
-  description = "IOPS of the EBS volume (e.g. 100)"
-  default     = 0
+  description = "IOPS of the EBS volume (e.g. 3000)"
+  default     = 3000
 }
 
 variable "worker_price" {
@@ -142,8 +142,8 @@ variable "enable_reporting" {
 
 variable "enable_aggregation" {
   type        = bool
-  description = "Enable the Kubernetes Aggregation Layer (defaults to false)"
-  default     = false
+  description = "Enable the Kubernetes Aggregation Layer"
+  default     = true
 }
 
 variable "worker_node_labels" {

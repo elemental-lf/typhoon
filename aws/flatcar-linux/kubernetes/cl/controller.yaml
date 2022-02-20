@@ -10,7 +10,7 @@ systemd:
         Requires=docker.service
         After=docker.service
         [Service]
-        Environment=ETCD_IMAGE=quay.io/coreos/etcd:v3.5.0
+        Environment=ETCD_IMAGE=quay.io/coreos/etcd:v3.5.1
         ExecStartPre=/usr/bin/docker run -d \
           --name etcd \
           --network host \
@@ -57,7 +57,7 @@ systemd:
         After=coreos-metadata.service
         Wants=rpc-statd.service
         [Service]
-        Environment=KUBELET_IMAGE=quay.io/poseidon/kubelet:v1.22.1
+        Environment=KUBELET_IMAGE=quay.io/poseidon/kubelet:v1.23.3
         EnvironmentFile=/run/metadata/coreos
         ExecStartPre=/bin/mkdir -p /etc/cni/net.d
         ExecStartPre=/bin/mkdir -p /etc/kubernetes/manifests
@@ -76,10 +76,9 @@ systemd:
           -v /usr/lib/os-release:/etc/os-release:ro \
           -v /lib/modules:/lib/modules:ro \
           -v /run:/run \
-          -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
-          -v /sys/fs/cgroup/systemd:/sys/fs/cgroup/systemd \
+          -v /sys/fs/cgroup:/sys/fs/cgroup \
           -v /var/lib/calico:/var/lib/calico:ro \
-          -v /var/lib/docker:/var/lib/docker \
+          -v /var/lib/containerd:/var/lib/containerd \
           -v /var/lib/kubelet:/var/lib/kubelet:rshared \
           -v /var/log:/var/log \
           -v /opt/cni/bin:/opt/cni/bin \
@@ -88,16 +87,19 @@ systemd:
           --authentication-token-webhook \
           --authorization-mode=Webhook \
           --bootstrap-kubeconfig=/etc/kubernetes/kubeconfig \
+          --cgroup-driver=systemd \
+          --container-runtime=remote \
+          --container-runtime-endpoint=unix:///run/containerd/containerd.sock \
           --client-ca-file=/etc/kubernetes/ca.crt \
           --cluster_dns=${cluster_dns_service_ip} \
           --cluster_domain=${cluster_domain_suffix} \
           --healthz-port=0 \
           --kubeconfig=/var/lib/kubelet/kubeconfig \
-          --network-plugin=cni \
           --node-labels=node.kubernetes.io/controller="true" \
           --pod-manifest-path=/etc/kubernetes/manifests \
           --provider-id=aws:///$${COREOS_EC2_AVAILABILITY_ZONE}/$${COREOS_EC2_INSTANCE_ID} \
           --read-only-port=0 \
+          --resolv-conf=/run/systemd/resolve/resolv.conf \
           --register-with-taints=node-role.kubernetes.io/controller=:NoSchedule \
           --rotate-certificates \
           --volume-plugin-dir=/var/lib/kubelet/volumeplugins
@@ -119,7 +121,7 @@ systemd:
         Type=oneshot
         RemainAfterExit=true
         WorkingDirectory=/opt/bootstrap
-        Environment=KUBELET_IMAGE=quay.io/poseidon/kubelet:v1.22.1
+        Environment=KUBELET_IMAGE=quay.io/poseidon/kubelet:v1.23.3
         ExecStart=/usr/bin/docker run \
             -v /etc/kubernetes/pki:/etc/kubernetes/pki:ro \
             -v /opt/bootstrap/assets:/assets:ro \

@@ -1,6 +1,6 @@
 # Kubernetes assets (kubeconfig, manifests)
 module "bootstrap" {
-  source = "git::https://github.com/poseidon/terraform-render-bootstrap.git?ref=d7fd3f62661def56e231602a3b101ff5e9ea8447"
+  source = "git::https://github.com/poseidon/terraform-render-bootstrap.git?ref=26bea83b957d18b99e16435405983181c4a6e159"
 
   cluster_name = var.cluster_name
   api_servers  = [format("%s.%s", var.cluster_name, var.dns_zone)]
@@ -17,8 +17,5 @@ module "bootstrap" {
   cluster_domain_suffix = var.cluster_domain_suffix
   enable_reporting      = var.enable_reporting
   enable_aggregation    = var.enable_aggregation
-
-  # Fedora CoreOS
-  trusted_certs_dir = "/etc/pki/tls/certs"
 }
 

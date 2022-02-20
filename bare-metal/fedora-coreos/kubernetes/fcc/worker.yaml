@@ -3,8 +3,10 @@ variant: fcos
 version: 1.4.0
 systemd:
   units:
-    - name: docker.service
+    - name: containerd.service
       enabled: true
+    - name: docker.service
+      mask: true
     - name: kubelet-env-watcher.service
       contents: |
         [Unit]
@@ -64,7 +66,7 @@ systemd:
           --volume /dev:/dev \
           --volume /sys/fs/cgroup:/sys/fs/cgroup \
           --volume /var/lib/calico:/var/lib/calico:ro \
-          --volume /var/lib/docker:/var/lib/docker \
+          --volume /var/lib/containerd:/var/lib/containerd \
           --volume /var/lib/kubelet:/var/lib/kubelet:rshared \
           --volume /var/log:/var/log \
           --volume /var/run/lock:/var/run/lock:z \
@@ -80,6 +82,8 @@ systemd:
           --bootstrap-kubeconfig=/etc/kubernetes/kubeconfig \
           --cgroup-driver=systemd \
           --cgroups-per-qos=true \
+          --container-runtime=remote \
+          --container-runtime-endpoint=unix:///run/containerd/containerd.sock \
           --enforce-node-allocatable=pods \
           --client-ca-file=/etc/kubernetes/ca.crt \
           --cluster_dns=${cluster_dns_service_ip} \
@@ -87,7 +91,6 @@ systemd:
           --healthz-port=0 \
           --hostname-override=${domain_name} \
           --kubeconfig=/var/lib/kubelet/kubeconfig \
-          --network-plugin=cni \
           --node-labels=node.kubernetes.io/node \
           %{~ for label in compact(split(",", node_labels)) ~}
           --node-labels=${label} \
@@ -97,6 +100,7 @@ systemd:
           %{~ endfor ~}
           --pod-manifest-path=/etc/kubernetes/manifests \
           --read-only-port=0 \
+          --resolv-conf=/run/systemd/resolve/resolv.conf \
           --rotate-certificates \
           --volume-plugin-dir=/var/lib/kubelet/volumeplugins
         ExecStop=-/usr/bin/podman stop kubelet
@@ -160,19 +164,26 @@ storage:
           DefaultCPUAccounting=yes
           DefaultMemoryAccounting=yes
           DefaultBlockIOAccounting=yes
-    - path: /etc/sysconfig/docker
-      mode: 0644
+    - path: /etc/fedora-coreos/iptables-legacy.stamp
+    - path: /etc/containerd/config.toml
       overwrite: true
       contents:
         inline: |
-          # Modify these options if you want to change the way the docker daemon runs
-          OPTIONS="--selinux-enabled \
-            --log-driver=journald \
-            --live-restore \
-            --default-ulimit nofile=1048576:1048576 \
-            --init-path /usr/libexec/docker/docker-init \
-            --userland-proxy-path /usr/libexec/docker/docker-proxy \
-          "
+          version = 2
+          root = "/var/lib/containerd"
+          state = "/run/containerd"
+          subreaper = true
+          oom_score = -999
+          [grpc]
+          address = "/run/containerd/containerd.sock"
+          uid = 0
+          gid = 0
+          [plugins."io.containerd.grpc.v1.cri"]
+          enable_selinux = true
+          [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc]
+          runtime_type = "io.containerd.runc.v2"
+          [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]
+          SystemdCgroup = true
 passwd:
   users:
     - name: core
