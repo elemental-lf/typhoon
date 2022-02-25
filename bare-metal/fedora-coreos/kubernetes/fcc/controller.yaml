@@ -206,7 +206,9 @@ storage:
           rsync -a --delete static-manifests/ /etc/kubernetes/manifests/
           mkdir -p /opt/bootstrap/assets
           rsync -a --delete manifests/ /opt/bootstrap/assets/manifests/
-          mv manifests-networking/* /opt/bootstrap/assets/manifests/
+          # This directory may be empty of networking is set to none.
+          # (Bash magic based on http://mywiki.wooledge.org/BashFAQ/004)
+          ( shopt -s dotglob failglob; : manifests-networking/*; ) 2>/dev/null && mv manifests-networking/* /opt/bootstrap/assets/manifests/
           rsync -a --delete extra-assets/ /etc/kubernetes/extra-assets/
           cd ..
           rm -rf assets assets-unpacked
