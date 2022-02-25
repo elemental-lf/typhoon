@@ -19,6 +19,7 @@ module "bootstrap" {
   enable_reporting                = var.enable_reporting
   enable_aggregation              = var.enable_aggregation
   container_images                = var.container_images
+  enable_kube_proxy               = var.enable_kube_proxy
 }
 
 

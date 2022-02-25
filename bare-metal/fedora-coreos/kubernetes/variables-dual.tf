@@ -94,3 +94,9 @@ variable "os_overrides" {
   }))
   default     = {}
 }
+
+variable "enable_kube_proxy" {
+  description = "Enable kube-proxy daemon set"
+  type        = bool
+  default     = true
+}
