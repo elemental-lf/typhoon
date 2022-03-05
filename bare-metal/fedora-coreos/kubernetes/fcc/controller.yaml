@@ -82,6 +82,8 @@ systemd:
         ExecStartPre=/bin/mkdir -p /var/lib/kubelet/volumeplugins
         ExecStartPre=/usr/bin/bash -c "grep 'certificate-authority-data' /etc/kubernetes/kubeconfig | awk '{print $2}' | base64 -d > /etc/kubernetes/ca.crt"
         ExecStartPre=-/usr/bin/podman rm kubelet
+        # The two SELinux mounts are needed so that mount can properly detect a system with enabled SELinux.
+        # See https://github.com/rook/rook/issues/7575#issuecomment-1039954280.
         ExecStart=/usr/bin/podman run --name kubelet \
           --privileged \
           --pid host \
@@ -99,6 +101,8 @@ systemd:
           --volume /var/log:/var/log \
           --volume /var/run/lock:/var/run/lock:z \
           --volume /opt/cni/bin:/opt/cni/bin:z \
+          --volume /etc/selinux:/etc/selinux:ro \
+          --volume /sys/fs/selinux:/sys/fs/selinux:ro \
 %{ if enable_rbd_nbd == "true" ~}
           --volume /etc/modprobe.d/rbd-nbd.conf:/etc/modprobe.d/rbd-nbd.conf \
 %{ endif ~}
