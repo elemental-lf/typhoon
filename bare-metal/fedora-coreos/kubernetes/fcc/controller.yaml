@@ -306,6 +306,38 @@ storage:
           runtime_type = "io.containerd.runc.v2"
           [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]
           SystemdCgroup = true
+    - path: /etc/systemd/system/containerd.service
+      contents:
+        inline: |
+          # This replaces the containerd unit file supplied by Fedora with an adapted
+          # version of the unit file supplied by the containerd project.
+          # See https://github.com/containerd/containerd/blob/release/1.5/containerd.service.
+          # The version for containerd 1.6 is the same at the time of writing so an update by
+          # Fedora from 1.5 to 1.6 should require no changes here.
+          [Unit]
+          Description=containerd container runtime
+          Documentation=https://containerd.io
+          After=network.target local-fs.target
+          
+          [Service]
+          ExecStartPre=-/sbin/modprobe overlay
+          ExecStart=/usr/bin/containerd
+          
+          Type=notify
+          Delegate=yes
+          KillMode=process
+          Restart=always
+          RestartSec=5
+          LimitNPROC=infinity
+          LimitCORE=infinity
+          # Upstream uses infinity here now (used to be 1048576 in previous release of containerd) but we've seen 
+          # problems with HAProxy with this setting.
+          LimitNOFILE=1048576
+          TasksMax=infinity
+          OOMScoreAdjust=-999
+          
+          [Install]
+          WantedBy=multi-user.target
 passwd:
   users:
     - name: core
