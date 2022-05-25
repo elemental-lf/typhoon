@@ -63,18 +63,19 @@ systemd:
           --volume /etc/cni/net.d:/etc/cni/net.d:ro,z \
           --volume /etc/kubernetes:/etc/kubernetes:ro,z \
           --volume /usr/lib/os-release:/etc/os-release:ro \
+          --volume /etc/machine-id:/etc/machine-id:ro \
           --volume /lib/modules:/lib/modules:ro \
           --volume /run:/run \
           --volume /dev:/dev \
           --volume /sys/fs/cgroup:/sys/fs/cgroup \
+          --volume /etc/selinux:/etc/selinux \
+          --volume /sys/fs/selinux:/sys/fs/selinux \
           --volume /var/lib/calico:/var/lib/calico:ro \
           --volume /var/lib/containerd:/var/lib/containerd \
           --volume /var/lib/kubelet:/var/lib/kubelet:rshared \
           --volume /var/log:/var/log \
           --volume /var/run/lock:/var/run/lock:z \
           --volume /opt/cni/bin:/opt/cni/bin:z \
-          --volume /etc/selinux:/etc/selinux:ro \
-          --volume /sys/fs/selinux:/sys/fs/selinux:ro \
 %{ if enable_rbd_nbd == "true" ~}
           --volume /etc/modprobe.d/rbd-nbd.conf:/etc/modprobe.d/rbd-nbd.conf \
 %{ endif ~}

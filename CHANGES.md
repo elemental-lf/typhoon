@@ -4,6 +4,76 @@ Notable changes between versions.
 
 ## Latest
 
+## v1.24.0
+
+* Kubernetes [v1.24.0](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.24.md#v1240)
+* Update etcd from v3.5.2 to [v3.5.4](https://github.com/etcd-io/etcd/releases/tag/v3.5.4)
+* Add Kubelet mounts to enable relabeling workload volumes ([#1152](https://github.com/poseidon/typhoon/pull/1152))
+  * StorageClass no longer require explicit SELinux mount contexts
+
+### Addons
+
+* Update nginx-ingress from v1.1.3 to [v1.2.0](https://github.com/kubernetes/ingress-nginx/releases/tag/controller-v1.2.0)
+* Update Prometheus from v2.34.0 to [v2.35.0](https://github.com/prometheus/prometheus/releases/tag/v2.35.0)
+* Update Grafana from v8.4.5 to [v8.5.1](https://github.com/grafana/grafana/releases/tag/v8.5.1)
+
+## v1.23.6
+
+* Kubernetes [v1.23.6](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.23.md#v1236)
+* Update Cilium from v1.11.2 to [v1.11.4](https://github.com/cilium/cilium/releases/tag/v1.11.4)
+* Rename Cilium DaemonSet from `cilium-agent` to `cilium` to match Cilium CLI tools ([#303](https://github.com/poseidon/terraform-render-bootstrap/pull/303))
+* Update Calico from v3.22.1 to [v3.22.2](https://github.com/projectcalico/calico/releases/tag/v3.22.2)
+* Mount /etc/machine-id from host into Kubelet ([#1143](https://github.com/poseidon/typhoon/pull/1143))
+* Remove deprecated use of `key_algorithm` in `hashicorp/tls` resources
+
+### Azure
+
+* Allow upgrading Azure Terraform provider to v3.x ([#1144](https://github.com/poseidon/typhoon/pull/1144))
+* Rename `worker_address_prefix` output to `worker_address_prefixes`
+
+### Google Cloud
+
+* Fix issue on Flatcar Linux with controller nodes not ignoring os image changes ([#1149](https://github.com/poseidon/typhoon/pull/1149))
+  * Nodes will auto-update, Terraform should not attempt to delete/recreate them
+
+### Addons
+
+* Update nginx-ingress from v1.1.2 to [v1.1.3](https://github.com/kubernetes/ingress-nginx/releases/tag/controller-v1.1.3)
+* Update Prometheus from v2.33.5 to [v2.34.0](https://github.com/prometheus/prometheus/releases/tag/v2.34.0)
+* Update Grafana from v8.4.4 to [v8.4.5](https://github.com/grafana/grafana/releases/tag/v8.4.5)
+
+## v1.23.5
+
+* Kubernetes [v1.23.5](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.23.md#v1235)
+* Update Cilium from v1.11.1 to [v1.11.2](https://github.com/cilium/cilium/releases/tag/v1.11.2)
+* Update Calico from v3.21.2 to [v3.22.1](https://github.com/projectcalico/calico/releases/tag/v3.22.1)
+  * Fix [calico#5011](https://github.com/projectcalico/calico/issues/5011), broken since v1.23.0
+
+### Addons
+
+* Refresh Prometheus rules and Grafana dashboards ([#1136](https://github.com/poseidon/typhoon/pull/1136))
+* Update nginx-ingress from v1.1.1 to [v1.1.2](https://github.com/kubernetes/ingress-nginx/releases/tag/controller-v1.1.2)
+* Update Prometheus from v2.33.3 to [v2.33.5](https://github.com/prometheus/prometheus/releases/tag/v2.33.5)
+* Update Grafana from v8.4.1 to [v8.4.3](https://github.com/grafana/grafana/releases/tag/v8.4.3)
+* Update kube-state-metrics from v2.3.0 to [v2.4.2](https://github.com/kubernetes/kube-state-metrics/releases/tag/v2.4.2)
+
+## v1.23.4
+
+* Kubernetes [v1.23.4](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.23.md#v1234)
+* Update etcd from v3.5.1 to [v3.5.2](https://github.com/etcd-io/etcd/releases/tag/v3.5.2)
+* Change default CNI `networking` provider from `calico` to `cilium` ([#1114](https://github.com/poseidon/typhoon/pull/1114))
+
+### AWS
+
+* Allow upgrading AWS Terraform Provider to v4.x
+
+### Addons
+
+* Align nginx-ingress `--controller-class` with `IngressClass`
+  * Watch only `public` IngressClass objects, better [example](https://kubernetes.github.io/ingress-nginx/user-guide/multiple-ingress/)
+* Update Prometheus from v2.32.1 to [v2.33.3](https://github.com/prometheus/prometheus/releases/tag/v2.33.3)
+* Update Grafana from v8.3.6 to [v8.4.1](https://github.com/grafana/grafana/releases/tag/v8.4.1)
+
 ## V1.23.3
 
 * Kubernetes [v1.23.3](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.23.md#v1233)
@@ -19,6 +89,7 @@ Notable changes between versions.
 ## v1.23.2
 
 * Kubernetes [v1.23.2](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.23.md#v1232)
+* Update Cilium from v1.11.0 to [v1.11.1](https://github.com/cilium/cilium/releases/tag/v1.11.1)
 * Remove Kubelet flag `--network-plugin`. Unused since `docker-shim` isn't used ([#1106](https://github.com/poseidon/typhoon/pull/1106))
 
 ### Fedora CoreOS

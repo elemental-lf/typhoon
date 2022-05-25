@@ -1,6 +1,6 @@
 # AWS
 
-In this tutorial, we'll create a Kubernetes v1.23.3 cluster on AWS with Fedora CoreOS.
+In this tutorial, we'll create a Kubernetes v1.24.0 cluster on AWS with Fedora CoreOS.
 
 We'll declare a Kubernetes cluster using the Typhoon Terraform module. Then apply the changes to create a VPC, gateway, subnets, security groups, controller instances, worker auto-scaling group, network load balancer, and TLS assets.
 
@@ -51,11 +51,11 @@ terraform {
   required_providers {
     ct = {
       source  = "poseidon/ct"
-      version = "0.9.1"
+      version = "0.10.0"
     }
     aws = {
       source = "hashicorp/aws"
-      version = "3.72.0"
+      version = "4.5.0"
     }
   }
 }
@@ -72,7 +72,7 @@ Define a Kubernetes cluster using the module `aws/fedora-coreos/kubernetes`.
 
 ```tf
 module "tempest" {
-  source = "git::https://github.com/poseidon/typhoon//aws/fedora-coreos/kubernetes?ref=v1.23.3"
+  source = "git::https://github.com/poseidon/typhoon//aws/fedora-coreos/kubernetes?ref=v1.24.0"
 
   # AWS
   cluster_name = "tempest"
@@ -145,9 +145,9 @@ List nodes in the cluster.
 $ export KUBECONFIG=/home/user/.kube/configs/tempest-config
 $ kubectl get nodes
 NAME           STATUS  ROLES    AGE  VERSION
-ip-10-0-3-155  Ready   <none>   10m  v1.23.3
-ip-10-0-26-65  Ready   <none>   10m  v1.23.3
-ip-10-0-41-21  Ready   <none>   10m  v1.23.3
+ip-10-0-3-155  Ready   <none>   10m  v1.24.0
+ip-10-0-26-65  Ready   <none>   10m  v1.24.0
+ip-10-0-41-21  Ready   <none>   10m  v1.24.0
 ```
 
 List the pods.
@@ -218,7 +218,7 @@ Reference the DNS zone id with `aws_route53_zone.zone-for-clusters.zone_id`.
 | worker_price | Spot price in USD for worker instances or 0 to use on-demand instances | 0 | 0.10 |
 | controller_snippets | Controller Butane snippets | [] | [examples](/advanced/customization/) |
 | worker_snippets | Worker Butane snippets | [] | [examples](/advanced/customization/) |
-| networking | Choice of networking provider | "calico" | "calico" or "cilium" or "flannel" |
+| networking | Choice of networking provider | "cilium" | "calico" or "cilium" or "flannel" |
 | network_mtu | CNI interface MTU (calico only) | 1480 | 8981 |
 | host_cidr | CIDR IPv4 range to assign to EC2 instances | "10.0.0.0/16" | "10.1.0.0/16" |
 | pod_cidr | CIDR IPv4 range to assign to Kubernetes pods | "10.2.0.0/16" | "10.22.0.0/16" |

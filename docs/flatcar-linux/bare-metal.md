@@ -1,6 +1,6 @@
 # Bare-Metal
 
-In this tutorial, we'll network boot and provision a Kubernetes v1.23.3 cluster on bare-metal with Flatcar Linux.
+In this tutorial, we'll network boot and provision a Kubernetes v1.24.0 cluster on bare-metal with Flatcar Linux.
 
 First, we'll deploy a [Matchbox](https://github.com/poseidon/matchbox) service and setup a network boot environment. Then, we'll declare a Kubernetes cluster using the Typhoon Terraform module and power on machines. On PXE boot, machines will install Container Linux to disk, reboot into the disk install, and provision themselves as Kubernetes controllers or workers via Ignition.
 
@@ -138,7 +138,7 @@ terraform {
   required_providers {
     ct = {
       source  = "poseidon/ct"
-      version = "0.9.1"
+      version = "0.10.0"
     }
     matchbox = {
       source = "poseidon/matchbox"
@@ -154,7 +154,7 @@ Define a Kubernetes cluster using the module `bare-metal/flatcar-linux/kubernete
 
 ```tf
 module "mercury" {
-  source = "git::https://github.com/poseidon/typhoon//bare-metal/flatcar-linux/kubernetes?ref=v1.23.3"
+  source = "git::https://github.com/poseidon/typhoon//bare-metal/flatcar-linux/kubernetes?ref=v1.24.0"
 
   # bare-metal
   cluster_name            = "mercury"
@@ -293,9 +293,9 @@ List nodes in the cluster.
 $ export KUBECONFIG=/home/user/.kube/configs/mercury-config
 $ kubectl get nodes
 NAME                STATUS  ROLES   AGE  VERSION
-node1.example.com   Ready   <none>  10m  v1.23.3
-node2.example.com   Ready   <none>  10m  v1.23.3
-node3.example.com   Ready   <none>  10m  v1.23.3
+node1.example.com   Ready   <none>  10m  v1.24.0
+node2.example.com   Ready   <none>  10m  v1.24.0
+node3.example.com   Ready   <none>  10m  v1.24.0
 ```
 
 List the pods.
@@ -344,7 +344,7 @@ Check the [variables.tf](https://github.com/poseidon/typhoon/blob/master/bare-me
 | download_protocol | Protocol iPXE uses to download the kernel and initrd. iPXE must be compiled with [crypto](https://ipxe.org/crypto) support for https. Unused if cached_install is true | "https" | "http" |
 | cached_install | PXE boot and install from the Matchbox `/assets` cache. Admin MUST have downloaded Container Linux or Flatcar images into the cache | false | true |
 | install_disk | Disk device where Container Linux should be installed | "/dev/sda" | "/dev/sdb" |
-| networking | Choice of networking provider | "calico" | "calico" or "cilium" or "flannel" |
+| networking | Choice of networking provider | "cilium" | "calico" or "cilium" or "flannel" |
 | network_mtu | CNI interface MTU (calico-only) | 1480 | - |
 | snippets | Map from machine names to lists of Container Linux Config snippets | {} | [examples](/advanced/customization/) |
 | network_ip_autodetection_method | Method to detect host IPv4 address (calico-only) | "first-found" | "can-reach=10.0.0.1" |

@@ -1,6 +1,6 @@
 # Bare-Metal
 
-In this tutorial, we'll network boot and provision a Kubernetes v1.23.3 cluster on bare-metal with Fedora CoreOS.
+In this tutorial, we'll network boot and provision a Kubernetes v1.24.0 cluster on bare-metal with Fedora CoreOS.
 
 First, we'll deploy a [Matchbox](https://github.com/poseidon/matchbox) service and setup a network boot environment. Then, we'll declare a Kubernetes cluster using the Typhoon Terraform module and power on machines. On PXE boot, machines will install Fedora CoreOS to disk, reboot into the disk install, and provision themselves as Kubernetes controllers or workers via Ignition.
 
@@ -138,7 +138,7 @@ terraform {
   required_providers {
     ct = {
       source  = "poseidon/ct"
-      version = "0.9.1"
+      version = "0.10.0"
     }
     matchbox = {
       source = "poseidon/matchbox"
@@ -154,7 +154,7 @@ Define a Kubernetes cluster using the module `bare-metal/fedora-coreos/kubernete
 
 ```tf
 module "mercury" {
-  source = "git::https://github.com/poseidon/typhoon//bare-metal/fedora-coreos/kubernetes?ref=v1.23.3"
+  source = "git::https://github.com/poseidon/typhoon//bare-metal/fedora-coreos/kubernetes?ref=v1.24.0"
 
   # bare-metal
   cluster_name            = "mercury"
@@ -283,9 +283,9 @@ List nodes in the cluster.
 $ export KUBECONFIG=/home/user/.kube/configs/mercury-config
 $ kubectl get nodes
 NAME                STATUS  ROLES   AGE  VERSION
-node1.example.com   Ready   <none>  10m  v1.23.3
-node2.example.com   Ready   <none>  10m  v1.23.3
-node3.example.com   Ready   <none>  10m  v1.23.3
+node1.example.com   Ready   <none>  10m  v1.24.0
+node2.example.com   Ready   <none>  10m  v1.24.0
+node3.example.com   Ready   <none>  10m  v1.24.0
 ```
 
 List the pods.
@@ -333,7 +333,7 @@ Check the [variables.tf](https://github.com/poseidon/typhoon/blob/master/bare-me
 |:-----|:------------|:--------|:--------|
 | cached_install | PXE boot and install from the Matchbox `/assets` cache. Admin MUST have downloaded Fedora CoreOS images into the cache | false | true |
 | install_disk | Disk device where Fedora CoreOS should be installed | "sda" (not "/dev/sda" like Container Linux) | "sdb" |
-| networking | Choice of networking provider | "calico" | "calico" or "cilium" or "flannel" |
+| networking | Choice of networking provider | "cilium" | "calico" or "cilium" or "flannel" |
 | network_mtu | CNI interface MTU (calico-only) | 1480 | - |
 | snippets | Map from machine names to lists of Butane snippets | {} | [examples](/advanced/customization/) |
 | network_ip_autodetection_method | Method to detect host IPv4 address (calico-only) | "first-found" | "can-reach=10.0.0.1" |

@@ -1,6 +1,6 @@
 # DigitalOcean
 
-In this tutorial, we'll create a Kubernetes v1.23.3 cluster on DigitalOcean with Flatcar Linux.
+In this tutorial, we'll create a Kubernetes v1.24.0 cluster on DigitalOcean with Flatcar Linux.
 
 We'll declare a Kubernetes cluster using the Typhoon Terraform module. Then apply the changes to create controller droplets, worker droplets, DNS records, tags, and TLS assets.
 
@@ -51,11 +51,11 @@ terraform {
   required_providers {
     ct = {
       source  = "poseidon/ct"
-      version = "0.9.1"
+      version = "0.10.0"
     }
     digitalocean = {
       source = "digitalocean/digitalocean"
-      version = "2.17.0"
+      version = "2.18.0"
     }
   }
 }
@@ -81,7 +81,7 @@ Define a Kubernetes cluster using the module `digital-ocean/flatcar-linux/kubern
 
 ```tf
 module "nemo" {
-  source = "git::https://github.com/poseidon/typhoon//digital-ocean/flatcar-linux/kubernetes?ref=v1.23.3"
+  source = "git::https://github.com/poseidon/typhoon//digital-ocean/flatcar-linux/kubernetes?ref=v1.24.0"
 
   # Digital Ocean
   cluster_name = "nemo"
@@ -155,9 +155,9 @@ List nodes in the cluster.
 $ export KUBECONFIG=/home/user/.kube/configs/nemo-config
 $ kubectl get nodes
 NAME               STATUS  ROLES   AGE  VERSION
-10.132.110.130     Ready   <none>  10m  v1.23.3
-10.132.115.81      Ready   <none>  10m  v1.23.3
-10.132.124.107     Ready   <none>  10m  v1.23.3
+10.132.110.130     Ready   <none>  10m  v1.24.0
+10.132.115.81      Ready   <none>  10m  v1.24.0
+10.132.124.107     Ready   <none>  10m  v1.24.0
 ```
 
 List the pods.
@@ -240,7 +240,7 @@ Digital Ocean requires the SSH public key be uploaded to your account, so you ma
 | worker_type | Droplet type for workers | "s-1vcpu-2gb" | s-1vcpu-2gb, s-2vcpu-2gb, ... |
 | controller_snippets | Controller Container Linux Config snippets | [] | [example](/advanced/customization/) |
 | worker_snippets | Worker Container Linux Config snippets | [] | [example](/advanced/customization/) |
-| networking | Choice of networking provider | "calico" | "calico" or "cilium" or "flannel" |
+| networking | Choice of networking provider | "cilium" | "calico" or "cilium" or "flannel" |
 | pod_cidr | CIDR IPv4 range to assign to Kubernetes pods | "10.2.0.0/16" | "10.22.0.0/16" |
 | service_cidr | CIDR IPv4 range to assign to Kubernetes services | "10.3.0.0/16" | "10.3.0.0/24" |
 

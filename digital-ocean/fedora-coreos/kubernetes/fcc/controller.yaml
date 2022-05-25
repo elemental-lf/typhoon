@@ -12,7 +12,7 @@ systemd:
         Wants=network-online.target network.target
         After=network-online.target
         [Service]
-        Environment=ETCD_IMAGE=quay.io/coreos/etcd:v3.5.1
+        Environment=ETCD_IMAGE=quay.io/coreos/etcd:v3.5.4
         Type=exec
         ExecStartPre=/bin/mkdir -p /var/lib/etcd
         ExecStartPre=-/usr/bin/podman rm etcd
@@ -54,7 +54,7 @@ systemd:
         After=afterburn.service
         Wants=rpc-statd.service
         [Service]
-        Environment=KUBELET_IMAGE=quay.io/poseidon/kubelet:v1.23.3
+        Environment=KUBELET_IMAGE=quay.io/poseidon/kubelet:v1.24.0
         EnvironmentFile=/run/metadata/afterburn
         ExecStartPre=/bin/mkdir -p /etc/cni/net.d
         ExecStartPre=/bin/mkdir -p /etc/kubernetes/manifests
@@ -70,9 +70,12 @@ systemd:
           --volume /etc/cni/net.d:/etc/cni/net.d:ro,z \
           --volume /etc/kubernetes:/etc/kubernetes:ro,z \
           --volume /usr/lib/os-release:/etc/os-release:ro \
+          --volume /etc/machine-id:/etc/machine-id:ro \
           --volume /lib/modules:/lib/modules:ro \
           --volume /run:/run \
           --volume /sys/fs/cgroup:/sys/fs/cgroup \
+          --volume /etc/selinux:/etc/selinux \
+          --volume /sys/fs/selinux:/sys/fs/selinux \
           --volume /var/lib/calico:/var/lib/calico:ro \
           --volume /var/lib/containerd:/var/lib/containerd \
           --volume /var/lib/kubelet:/var/lib/kubelet:rshared,z \
@@ -133,7 +136,7 @@ systemd:
             --volume /opt/bootstrap/assets:/assets:ro,Z \
             --volume /opt/bootstrap/apply:/apply:ro,Z \
             --entrypoint=/apply \
-            quay.io/poseidon/kubelet:v1.23.3
+            quay.io/poseidon/kubelet:v1.24.0
         ExecStartPost=/bin/touch /opt/bootstrap/bootstrap.done
         ExecStartPost=-/usr/bin/podman stop bootstrap
 storage:

@@ -1,6 +1,6 @@
 # Google Cloud
 
-In this tutorial, we'll create a Kubernetes v1.23.3 cluster on Google Compute Engine with Flatcar Linux.
+In this tutorial, we'll create a Kubernetes v1.24.0 cluster on Google Compute Engine with Flatcar Linux.
 
 We'll declare a Kubernetes cluster using the Typhoon Terraform module. Then apply the changes to create a network, firewall rules, health checks, controller instances, worker managed instance group, load balancers, and TLS assets.
 
@@ -52,11 +52,11 @@ terraform {
   required_providers {
     ct = {
       source  = "poseidon/ct"
-      version = "0.9.1"
+      version = "0.10.0"
     }
     google = {
       source = "hashicorp/google"
-      version = "4.7.0"
+      version = "4.13.0"
     }
   }
 }
@@ -73,7 +73,7 @@ Define a Kubernetes cluster using the module `google-cloud/flatcar-linux/kuberne
 
 ```tf
 module "yavin" {
-  source = "git::https://github.com/poseidon/typhoon//google-cloud/flatcar-linux/kubernetes?ref=v1.23.3"
+  source = "git::https://github.com/poseidon/typhoon//google-cloud/flatcar-linux/kubernetes?ref=v1.24.0"
 
   # Google Cloud
   cluster_name  = "yavin"
@@ -147,9 +147,9 @@ List nodes in the cluster.
 $ export KUBECONFIG=/home/user/.kube/configs/yavin-config
 $ kubectl get nodes
 NAME                                       ROLES    STATUS  AGE  VERSION
-yavin-controller-0.c.example-com.internal  <none>   Ready   6m   v1.23.3
-yavin-worker-jrbf.c.example-com.internal   <none>   Ready   5m   v1.23.3
-yavin-worker-mzdm.c.example-com.internal   <none>   Ready   5m   v1.23.3
+yavin-controller-0.c.example-com.internal  <none>   Ready   6m   v1.24.0
+yavin-worker-jrbf.c.example-com.internal   <none>   Ready   5m   v1.24.0
+yavin-worker-mzdm.c.example-com.internal   <none>   Ready   5m   v1.24.0
 ```
 
 List the pods.
@@ -220,7 +220,7 @@ resource "google_dns_managed_zone" "zone-for-clusters" {
 | worker_preemptible | If enabled, Compute Engine will terminate workers randomly within 24 hours | false | true |
 | controller_snippets | Controller Container Linux Config snippets | [] | [example](/advanced/customization/) |
 | worker_snippets | Worker Container Linux Config snippets | [] | [example](/advanced/customization/) |
-| networking | Choice of networking provider | "calico" | "calico" or "cilium" or "flannel" |
+| networking | Choice of networking provider | "cilium" | "calico" or "cilium" or "flannel" |
 | pod_cidr | CIDR IPv4 range to assign to Kubernetes pods | "10.2.0.0/16" | "10.22.0.0/16" |
 | service_cidr | CIDR IPv4 range to assign to Kubernetes services | "10.3.0.0/16" | "10.3.0.0/24" |
 | worker_node_labels | List of initial worker node labels | [] | ["worker-pool=default"] |
