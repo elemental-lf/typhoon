@@ -142,7 +142,7 @@ storage:
       contents:
         inline: |
           fs.inotify.max_user_watches=1048576
-          fs.inotify.max_user_instances=2048
+          fs.inotify.max_user_instances=4096
 %{ if enable_rbd_nbd == "true" ~}
     - path: /etc/modprobe.d/rbd-nbd.conf
       contents:
