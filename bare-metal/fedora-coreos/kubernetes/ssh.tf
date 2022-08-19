@@ -34,7 +34,7 @@ resource "null_resource" "copy-controller-secrets" {
 
   provisioner "file" {
     content     = local.kubelet_env
-    destination = "$HOME/kubelet.env"
+    destination = "/home/core/kubelet.env"
   }
 
   provisioner "file" {
@@ -82,7 +82,7 @@ resource "null_resource" "copy-worker-secrets" {
 
   provisioner "file" {
     content     = local.kubelet_env
-    destination = "$HOME/kubelet.env"
+    destination = "/home/core/kubelet.env"
   }
 
   provisioner "file" {
