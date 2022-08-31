@@ -51,18 +51,18 @@ variable "container_images" {
   type                      = map(string)
 
   default = {
-    calico                  = "quay.io/calico/node:v3.22.2"
-    calico_cni              = "quay.io/calico/cni:v3.22.2"
+    calico                  = "quay.io/calico/node:v3.23.3"
+    calico_cni              = "quay.io/calico/cni:v3.23.3"
     cilium_agent            = "quay.io/cilium/cilium:v1.12.1"
     cilium_operator         = "quay.io/cilium/operator-generic:v1.12.1"
     coredns                 = "registry.k8s.io/coredns/coredns:v1.9.3"
     flannel                 = "quay.io/coreos/flannel:v0.15.1"
     flannel_cni             = "quay.io/poseidon/flannel-cni:v0.4.2"
-    kube_apiserver          = "registry.k8s.io/kube-apiserver:v1.24.4"
-    kube_controller_manager = "registry.k8s.io/kube-controller-manager:v1.24.4"
-    kube_scheduler          = "registry.k8s.io/kube-scheduler:v1.24.4"
-    kube_proxy              = "registry.k8s.io/kube-proxy:v1.24.4"
-    kubelet                 = "quay.io/poseidon/kubelet:v1.24.4"
+    kube_apiserver          = "registry.k8s.io/kube-apiserver:v1.25.0"
+    kube_controller_manager = "registry.k8s.io/kube-controller-manager:v1.25.0"
+    kube_scheduler          = "registry.k8s.io/kube-scheduler:v1.25.0"
+    kube_proxy              = "registry.k8s.io/kube-proxy:v1.25.0"
+    kubelet                 = "quay.io/poseidon/kubelet:v1.25.0"
     keepalived_vip          = "osixia/keepalived:2.0.20"
   }
 }
