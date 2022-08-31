@@ -1,6 +1,6 @@
 # Google Cloud
 
-In this tutorial, we'll create a Kubernetes v1.24.0 cluster on Google Compute Engine with Flatcar Linux.
+In this tutorial, we'll create a Kubernetes v1.25.0 cluster on Google Compute Engine with Flatcar Linux.
 
 We'll declare a Kubernetes cluster using the Typhoon Terraform module. Then apply the changes to create a network, firewall rules, health checks, controller instances, worker managed instance group, load balancers, and TLS assets.
 
@@ -52,11 +52,11 @@ terraform {
   required_providers {
     ct = {
       source  = "poseidon/ct"
-      version = "0.10.0"
+      version = "0.11.0"
     }
     google = {
       source = "hashicorp/google"
-      version = "4.13.0"
+      version = "4.32.0"
     }
   }
 }
@@ -73,7 +73,7 @@ Define a Kubernetes cluster using the module `google-cloud/flatcar-linux/kuberne
 
 ```tf
 module "yavin" {
-  source = "git::https://github.com/poseidon/typhoon//google-cloud/flatcar-linux/kubernetes?ref=v1.24.0"
+  source = "git::https://github.com/poseidon/typhoon//google-cloud/flatcar-linux/kubernetes?ref=v1.25.0"
 
   # Google Cloud
   cluster_name  = "yavin"
@@ -112,7 +112,7 @@ Plan the resources to be created.
 
 ```sh
 $ terraform plan
-Plan: 64 to add, 0 to change, 0 to destroy.
+Plan: 78 to add, 0 to change, 0 to destroy.
 ```
 
 Apply the changes to create the cluster.
@@ -125,7 +125,7 @@ module.yavin.null_resource.bootstrap: Still creating... (5m30s elapsed)
 module.yavin.null_resource.bootstrap: Still creating... (5m40s elapsed)
 module.yavin.null_resource.bootstrap: Creation complete (ID: 5768638456220583358)
 
-Apply complete! Resources: 62 added, 0 changed, 0 destroyed.
+Apply complete! Resources: 78 added, 0 changed, 0 destroyed.
 ```
 
 In 4-8 minutes, the Kubernetes cluster will be ready.
@@ -147,9 +147,9 @@ List nodes in the cluster.
 $ export KUBECONFIG=/home/user/.kube/configs/yavin-config
 $ kubectl get nodes
 NAME                                       ROLES    STATUS  AGE  VERSION
-yavin-controller-0.c.example-com.internal  <none>   Ready   6m   v1.24.0
-yavin-worker-jrbf.c.example-com.internal   <none>   Ready   5m   v1.24.0
-yavin-worker-mzdm.c.example-com.internal   <none>   Ready   5m   v1.24.0
+yavin-controller-0.c.example-com.internal  <none>   Ready   6m   v1.25.0
+yavin-worker-jrbf.c.example-com.internal   <none>   Ready   5m   v1.25.0
+yavin-worker-mzdm.c.example-com.internal   <none>   Ready   5m   v1.25.0
 ```
 
 List the pods.

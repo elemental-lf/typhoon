@@ -1,6 +1,6 @@
 # DigitalOcean
 
-In this tutorial, we'll create a Kubernetes v1.24.0 cluster on DigitalOcean with Flatcar Linux.
+In this tutorial, we'll create a Kubernetes v1.25.0 cluster on DigitalOcean with Flatcar Linux.
 
 We'll declare a Kubernetes cluster using the Typhoon Terraform module. Then apply the changes to create controller droplets, worker droplets, DNS records, tags, and TLS assets.
 
@@ -51,11 +51,11 @@ terraform {
   required_providers {
     ct = {
       source  = "poseidon/ct"
-      version = "0.10.0"
+      version = "0.11.0"
     }
     digitalocean = {
       source = "digitalocean/digitalocean"
-      version = "2.18.0"
+      version = "2.22.1"
     }
   }
 }
@@ -63,13 +63,13 @@ terraform {
 
 ### Flatcar Linux Images
 
-Flatcar Linux publishes DigitalOcean images, but does not yet upload them. DigitalOcean allows [custom images](https://blog.digitalocean.com/custom-images/) to be uploaded via URLor file.
+Flatcar Linux publishes DigitalOcean images, but does not yet upload them. DigitalOcean allows [custom images](https://blog.digitalocean.com/custom-images/) to be uploaded via a URL or file.
 
-[Download](https://www.flatcar-linux.org/releases/) the Flatcar Linux DigitalOcean bin image. Rename the image with the channel and version (to refer to these images over time) and [upload](https://cloud.digitalocean.com/images/custom_images) it as a custom image.
+Choose a Flatcar Linux [release](https://www.flatcar-linux.org/releases/) from Flatcar's file [server](https://stable.release.flatcar-linux.net/amd64-usr/). Copy the URL to the `flatcar_production_digitalocean_image.bin.bz2`, import it into DigitalOcean, and name it as a custom image. Add a data reference to the image in Terraform:
 
 ```tf
-data "digitalocean_image" "flatcar-stable-2303-4-0" {
-  name = "flatcar-stable-2303.4.0.bin.bz2"
+data "digitalocean_image" "flatcar-stable-3227-2-0" {
+  name = "flatcar-stable-3227.2.0.bin.bz2"
 }
 ```
 
@@ -81,7 +81,7 @@ Define a Kubernetes cluster using the module `digital-ocean/flatcar-linux/kubern
 
 ```tf
 module "nemo" {
-  source = "git::https://github.com/poseidon/typhoon//digital-ocean/flatcar-linux/kubernetes?ref=v1.24.0"
+  source = "git::https://github.com/poseidon/typhoon//digital-ocean/flatcar-linux/kubernetes?ref=v1.25.0"
 
   # Digital Ocean
   cluster_name = "nemo"
@@ -155,9 +155,9 @@ List nodes in the cluster.
 $ export KUBECONFIG=/home/user/.kube/configs/nemo-config
 $ kubectl get nodes
 NAME               STATUS  ROLES   AGE  VERSION
-10.132.110.130     Ready   <none>  10m  v1.24.0
-10.132.115.81      Ready   <none>  10m  v1.24.0
-10.132.124.107     Ready   <none>  10m  v1.24.0
+10.132.110.130     Ready   <none>  10m  v1.25.0
+10.132.115.81      Ready   <none>  10m  v1.25.0
+10.132.124.107     Ready   <none>  10m  v1.25.0
 ```
 
 List the pods.

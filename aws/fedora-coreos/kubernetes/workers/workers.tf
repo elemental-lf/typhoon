@@ -1,6 +1,6 @@
 # Workers AutoScaling Group
 resource "aws_autoscaling_group" "workers" {
-  name = "${var.name}-worker ${aws_launch_configuration.worker.name}"
+  name = "${var.name}-worker"
 
   # count
   desired_capacity          = var.worker_count
@@ -22,6 +22,14 @@ resource "aws_autoscaling_group" "workers" {
     var.target_groups,
   ])
 
+  instance_refresh {
+    strategy = "Rolling"
+    preferences {
+      instance_warmup        = 120
+      min_healthy_percentage = 90
+    }
+  }
+
   lifecycle {
     # override the default destroy and replace update behavior
     create_before_destroy = true
@@ -42,12 +50,13 @@ resource "aws_autoscaling_group" "workers" {
 
 # Worker template
 resource "aws_launch_configuration" "worker" {
-  image_id          = var.arch == "arm64" ? data.aws_ami.fedora-coreos-arm[0].image_id : data.aws_ami.fedora-coreos.image_id
+  name_prefix       = "${var.name}-worker"
+  image_id          = local.ami_id
   instance_type     = var.instance_type
   spot_price        = var.spot_price > 0 ? var.spot_price : null
   enable_monitoring = false
 
-  user_data = data.ct_config.worker-ignition.rendered
+  user_data = data.ct_config.worker.rendered
 
   # storage
   root_block_device {
@@ -67,24 +76,16 @@ resource "aws_launch_configuration" "worker" {
   }
 }
 
-# Worker Ignition config
-data "ct_config" "worker-ignition" {
-  content  = data.template_file.worker-config.rendered
-  strict   = true
-  snippets = var.snippets
-}
-
-# Worker Fedora CoreOS config
-data "template_file" "worker-config" {
-  template = file("${path.module}/fcc/worker.yaml")
-
-  vars = {
+# Fedora CoreOS worker
+data "ct_config" "worker" {
+  content = templatefile("${path.module}/butane/worker.yaml", {
     kubeconfig             = indent(10, var.kubeconfig)
     ssh_authorized_key     = var.ssh_authorized_key
     cluster_dns_service_ip = cidrhost(var.service_cidr, 10)
     cluster_domain_suffix  = var.cluster_domain_suffix
     node_labels            = join(",", var.node_labels)
     node_taints            = join(",", var.node_taints)
-  }
+  })
+  strict   = true
+  snippets = var.snippets
 }
-

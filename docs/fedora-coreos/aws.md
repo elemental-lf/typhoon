@@ -1,6 +1,6 @@
 # AWS
 
-In this tutorial, we'll create a Kubernetes v1.24.0 cluster on AWS with Fedora CoreOS.
+In this tutorial, we'll create a Kubernetes v1.25.0 cluster on AWS with Fedora CoreOS.
 
 We'll declare a Kubernetes cluster using the Typhoon Terraform module. Then apply the changes to create a VPC, gateway, subnets, security groups, controller instances, worker auto-scaling group, network load balancer, and TLS assets.
 
@@ -51,11 +51,11 @@ terraform {
   required_providers {
     ct = {
       source  = "poseidon/ct"
-      version = "0.10.0"
+      version = "0.11.0"
     }
     aws = {
       source = "hashicorp/aws"
-      version = "4.5.0"
+      version = "4.26.0"
     }
   }
 }
@@ -72,7 +72,7 @@ Define a Kubernetes cluster using the module `aws/fedora-coreos/kubernetes`.
 
 ```tf
 module "tempest" {
-  source = "git::https://github.com/poseidon/typhoon//aws/fedora-coreos/kubernetes?ref=v1.24.0"
+  source = "git::https://github.com/poseidon/typhoon//aws/fedora-coreos/kubernetes?ref=v1.25.0"
 
   # AWS
   cluster_name = "tempest"
@@ -111,7 +111,7 @@ Plan the resources to be created.
 
 ```sh
 $ terraform plan
-Plan: 81 to add, 0 to change, 0 to destroy.
+Plan: 109 to add, 0 to change, 0 to destroy.
 ```
 
 Apply the changes to create the cluster.
@@ -123,7 +123,7 @@ module.tempest.null_resource.bootstrap: Still creating... (4m50s elapsed)
 module.tempest.null_resource.bootstrap: Still creating... (5m0s elapsed)
 module.tempest.null_resource.bootstrap: Creation complete after 5m8s (ID: 3961816482286168143)
 
-Apply complete! Resources: 98 added, 0 changed, 0 destroyed.
+Apply complete! Resources: 109 added, 0 changed, 0 destroyed.
 ```
 
 In 4-8 minutes, the Kubernetes cluster will be ready.
@@ -145,9 +145,9 @@ List nodes in the cluster.
 $ export KUBECONFIG=/home/user/.kube/configs/tempest-config
 $ kubectl get nodes
 NAME           STATUS  ROLES    AGE  VERSION
-ip-10-0-3-155  Ready   <none>   10m  v1.24.0
-ip-10-0-26-65  Ready   <none>   10m  v1.24.0
-ip-10-0-41-21  Ready   <none>   10m  v1.24.0
+ip-10-0-3-155  Ready   <none>   10m  v1.25.0
+ip-10-0-26-65  Ready   <none>   10m  v1.25.0
+ip-10-0-41-21  Ready   <none>   10m  v1.25.0
 ```
 
 List the pods.

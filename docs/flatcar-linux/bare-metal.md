@@ -1,6 +1,6 @@
 # Bare-Metal
 
-In this tutorial, we'll network boot and provision a Kubernetes v1.24.0 cluster on bare-metal with Flatcar Linux.
+In this tutorial, we'll network boot and provision a Kubernetes v1.25.0 cluster on bare-metal with Flatcar Linux.
 
 First, we'll deploy a [Matchbox](https://github.com/poseidon/matchbox) service and setup a network boot environment. Then, we'll declare a Kubernetes cluster using the Typhoon Terraform module and power on machines. On PXE boot, machines will install Container Linux to disk, reboot into the disk install, and provision themselves as Kubernetes controllers or workers via Ignition.
 
@@ -138,11 +138,11 @@ terraform {
   required_providers {
     ct = {
       source  = "poseidon/ct"
-      version = "0.10.0"
+      version = "0.11.0"
     }
     matchbox = {
       source = "poseidon/matchbox"
-      version = "0.5.0"
+      version = "0.5.2"
     }
   }
 }
@@ -154,7 +154,7 @@ Define a Kubernetes cluster using the module `bare-metal/flatcar-linux/kubernete
 
 ```tf
 module "mercury" {
-  source = "git::https://github.com/poseidon/typhoon//bare-metal/flatcar-linux/kubernetes?ref=v1.24.0"
+  source = "git::https://github.com/poseidon/typhoon//bare-metal/flatcar-linux/kubernetes?ref=v1.25.0"
 
   # bare-metal
   cluster_name            = "mercury"
@@ -269,10 +269,10 @@ To watch the bootstrap process in detail, SSH to the first controller and journa
 ```
 $ ssh core@node1.example.com
 $ journalctl -f -u bootstrap
-rkt[1750]: The connection to the server cluster.example.com:6443 was refused - did you specify the right host or port?
-rkt[1750]: Waiting for static pod control plane
+The connection to the server cluster.example.com:6443 was refused - did you specify the right host or port?
+Waiting for static pod control plane
 ...
-rkt[1750]: serviceaccount/calico-node unchanged
+serviceaccount/calico-node unchanged
 systemd[1]: Started Kubernetes control plane.
 ```
 
@@ -293,9 +293,9 @@ List nodes in the cluster.
 $ export KUBECONFIG=/home/user/.kube/configs/mercury-config
 $ kubectl get nodes
 NAME                STATUS  ROLES   AGE  VERSION
-node1.example.com   Ready   <none>  10m  v1.24.0
-node2.example.com   Ready   <none>  10m  v1.24.0
-node3.example.com   Ready   <none>  10m  v1.24.0
+node1.example.com   Ready   <none>  10m  v1.25.0
+node2.example.com   Ready   <none>  10m  v1.25.0
+node3.example.com   Ready   <none>  10m  v1.25.0
 ```
 
 List the pods.

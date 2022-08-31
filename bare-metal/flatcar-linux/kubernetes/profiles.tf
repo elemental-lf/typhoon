@@ -18,12 +18,10 @@ resource "matchbox_profile" "flatcar-install" {
     "initrd=flatcar_production_pxe_image.cpio.gz",
     "flatcar.config.url=${var.matchbox_http_endpoint}/ignition?uuid=$${uuid}&mac=$${mac:hexhyp}",
     "flatcar.first_boot=yes",
-    "console=tty0",
-    "console=ttyS0",
     var.kernel_args,
   ])
 
-  container_linux_config = data.template_file.install-configs.*.rendered[count.index]
+  raw_ignition = data.ct_config.install.*.rendered[count.index]
 }
 
 // Flatcar Linux Install profile (from matchbox /assets cache)
@@ -42,101 +40,84 @@ resource "matchbox_profile" "cached-flatcar-install" {
     "initrd=flatcar_production_pxe_image.cpio.gz",
     "flatcar.config.url=${var.matchbox_http_endpoint}/ignition?uuid=$${uuid}&mac=$${mac:hexhyp}",
     "flatcar.first_boot=yes",
-    "console=tty0",
-    "console=ttyS0",
     var.kernel_args,
   ])
 
-  container_linux_config = data.template_file.cached-install-configs.*.rendered[count.index]
+  raw_ignition = data.ct_config.cached-install.*.rendered[count.index]
 }
 
-data "template_file" "install-configs" {
+# Flatcar Linux install
+data "ct_config" "install" {
   count = length(var.controllers) + length(var.workers)
-
-  template = file("${path.module}/cl/install.yaml")
-
-  vars = {
+  content = templatefile("${path.module}/butane/install.yaml", {
     os_channel         = local.channel
     os_version         = var.os_version
     ignition_endpoint  = format("%s/ignition", var.matchbox_http_endpoint)
+    mac                = concat(var.controllers.*.mac, var.workers.*.mac)[count.index]
     install_disk       = var.install_disk
     ssh_authorized_key = var.ssh_authorized_key
     # only cached profile adds -b baseurl
     baseurl_flag = ""
-  }
+  })
+  strict = true
 }
 
-data "template_file" "cached-install-configs" {
+# Flatcar Linux cached install
+data "ct_config" "cached-install" {
   count = length(var.controllers) + length(var.workers)
-
-  template = file("${path.module}/cl/install.yaml")
-
-  vars = {
+  content = templatefile("${path.module}/butane/install.yaml", {
     os_channel         = local.channel
     os_version         = var.os_version
     ignition_endpoint  = format("%s/ignition", var.matchbox_http_endpoint)
+    mac                = concat(var.controllers.*.mac, var.workers.*.mac)[count.index]
     install_disk       = var.install_disk
     ssh_authorized_key = var.ssh_authorized_key
     # profile uses -b baseurl to install from matchbox cache
     baseurl_flag = "-b ${var.matchbox_http_endpoint}/assets/flatcar"
-  }
+  })
+  strict = true
 }
-
 
 // Kubernetes Controller profiles
 resource "matchbox_profile" "controllers" {
   count        = length(var.controllers)
   name         = format("%s-controller-%s", var.cluster_name, var.controllers.*.name[count.index])
-  raw_ignition = data.ct_config.controller-ignitions.*.rendered[count.index]
+  raw_ignition = data.ct_config.controllers.*.rendered[count.index]
 }
 
-data "ct_config" "controller-ignitions" {
-  count    = length(var.controllers)
-  content  = data.template_file.controller-configs.*.rendered[count.index]
-  strict   = true
-  snippets = lookup(var.snippets, var.controllers.*.name[count.index], [])
-}
-
-data "template_file" "controller-configs" {
+# Flatcar Linux controllers
+data "ct_config" "controllers" {
   count = length(var.controllers)
-
-  template = file("${path.module}/cl/controller.yaml")
-
-  vars = {
+  content = templatefile("${path.module}/butane/controller.yaml", {
     domain_name            = var.controllers.*.domain[count.index]
     etcd_name              = var.controllers.*.name[count.index]
     etcd_initial_cluster   = join(",", formatlist("%s=https://%s:2380", var.controllers.*.name, var.controllers.*.domain))
     cluster_dns_service_ip = module.bootstrap.cluster_dns_service_ip
     cluster_domain_suffix  = var.cluster_domain_suffix
     ssh_authorized_key     = var.ssh_authorized_key
-  }
+  })
+  strict   = true
+  snippets = lookup(var.snippets, var.controllers.*.name[count.index], [])
 }
 
 // Kubernetes Worker profiles
 resource "matchbox_profile" "workers" {
   count        = length(var.workers)
   name         = format("%s-worker-%s", var.cluster_name, var.workers.*.name[count.index])
-  raw_ignition = data.ct_config.worker-ignitions.*.rendered[count.index]
+  raw_ignition = data.ct_config.workers.*.rendered[count.index]
 }
 
-data "ct_config" "worker-ignitions" {
-  count    = length(var.workers)
-  content  = data.template_file.worker-configs.*.rendered[count.index]
-  strict   = true
-  snippets = lookup(var.snippets, var.workers.*.name[count.index], [])
-}
-
-data "template_file" "worker-configs" {
+# Flatcar Linux workers
+data "ct_config" "workers" {
   count = length(var.workers)
-
-  template = file("${path.module}/cl/worker.yaml")
-
-  vars = {
+  content = templatefile("${path.module}/butane/worker.yaml", {
     domain_name            = var.workers.*.domain[count.index]
     cluster_dns_service_ip = module.bootstrap.cluster_dns_service_ip
     cluster_domain_suffix  = var.cluster_domain_suffix
     ssh_authorized_key     = var.ssh_authorized_key
     node_labels            = join(",", lookup(var.worker_node_labels, var.workers.*.name[count.index], []))
     node_taints            = join(",", lookup(var.worker_node_taints, var.workers.*.name[count.index], []))
-  }
+  })
+  strict   = true
+  snippets = lookup(var.snippets, var.workers.*.name[count.index], [])
 }
