@@ -12,7 +12,6 @@ locals {
     "initrd=fedora-coreos-${local.os_versions[node]}-live-initramfs.x86_64.img",
     "coreos.live.rootfs_url=https://builds.coreos.fedoraproject.org/prod/streams/${local.os_streams[node]}/builds/${local.os_versions[node]}/x86_64/fedora-coreos-${local.os_versions[node]}-live-rootfs.x86_64.img",
     "coreos.inst.ignition_url=${var.matchbox_http_endpoint}/ignition?uuid=$${uuid}&mac=$${mac:hexhyp}",
-    "coreos.inst.image_url=https://builds.coreos.fedoraproject.org/prod/streams/${local.os_streams[node]}/builds/${local.os_versions[node]}/x86_64/fedora-coreos-${local.os_versions[node]}-metal.x86_64.raw.xz",
     "console=tty0",
     "console=ttyS0",
   ], var.accept_insecure_images ? ["coreos.inst.insecure"] : [])}
@@ -26,7 +25,6 @@ locals {
     "initrd=fedora-coreos-${local.os_versions[node]}-live-initramfs.x86_64.img",
     "coreos.live.rootfs_url=${var.matchbox_http_endpoint}/assets/fedora-coreos/fedora-coreos-${local.os_versions[node]}-live-rootfs.x86_64.img",
     "coreos.inst.ignition_url=${var.matchbox_http_endpoint}/ignition?uuid=$${uuid}&mac=$${mac:hexhyp}",
-    "coreos.inst.image_url=${var.matchbox_http_endpoint}/assets/fedora-coreos/fedora-coreos-${local.os_versions[node]}-metal.x86_64.raw.xz",
     "console=tty0",
     "console=ttyS0",
   ], var.accept_insecure_images ? ["coreos.inst.insecure"] : [])}
