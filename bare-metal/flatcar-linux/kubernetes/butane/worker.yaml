@@ -36,7 +36,7 @@ systemd:
         After=docker.service
         Wants=rpc-statd.service
         [Service]
-        Environment=KUBELET_IMAGE=quay.io/poseidon/kubelet:v1.25.0
+        Environment=KUBELET_IMAGE=quay.io/poseidon/kubelet:v1.25.2
         ExecStartPre=/bin/mkdir -p /etc/cni/net.d
         ExecStartPre=/bin/mkdir -p /etc/kubernetes/manifests
         ExecStartPre=/bin/mkdir -p /opt/cni/bin
@@ -115,11 +115,7 @@ storage:
             - ${cluster_dns_service_ip}
           clusterDomain: ${cluster_domain_suffix}
           healthzPort: 0
-          featureGates:
-            LocalStorageCapacityIsolationFSQuotaMonitoring: false
           rotateCertificates: true
-          shutdownGracePeriod: 45s
-          shutdownGracePeriodCriticalPods: 30s
           staticPodPath: /etc/kubernetes/manifests
           readOnlyPort: 0
           resolvConf: /run/systemd/resolve/resolv.conf

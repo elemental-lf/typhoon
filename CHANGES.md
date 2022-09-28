@@ -4,6 +4,29 @@ Notable changes between versions.
 
 ## Latest
 
+* Kubernetes [v1.25.2](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.25.md#v1252)
+
+## v1.25.1
+
+* Kubernetes [v1.25.1](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.25.md#v1251)
+* Update etcd from v3.5.4 to [v3.5.5](https://github.com/etcd-io/etcd/releases/tag/v3.5.5)
+* Update Cilium from v1.12.1 to [v1.12.2](https://github.com/cilium/cilium/releases/tag/v1.12.2)
+* Update Calico from v3.23.3 to [v3.24.1](https://github.com/projectcalico/calico/releases/tag/v3.24.1)
+* Revert Kubelet Graceful Node Shutdown on worker nodes ([#1227](https://github.com/poseidon/typhoon/pull/1227))
+  * Fix issue where non-critical pods are left in Error/Completed state on node shutdown
+* Remove feature flag disable workaround for [kubernetes/kubernetes#112081](https://github.com/kubernetes/kubernetes/issues/112081)
+  * Kubernetes [reverted](https://github.com/kubernetes/kubernetes/pull/112078) `LocalStorageCapacityIsolationFSQuotaMonitoring` back to alpha
+* Remove workaround for preventing `search .` propagation in [kubernetes/kubernetes#112135](https://github.com/kubernetes/kubernetes/issues/112135)
+  * Upstream Kubernetes [fix](https://github.com/kubernetes/kubernetes/pull/112157)
+
+### Addons
+
+* Update kube-state-metrics from v2.5.0 to [v2.6.0](https://github.com/kubernetes/kube-state-metrics/releases/tag/v2.6.0)
+* Update ingress-nginx from v1.3.0 to [v1.3.1](https://github.com/kubernetes/ingress-nginx/releases/tag/controller-v1.3.1)
+* Update Grafana from v9.1.0 to [v9.1.6](https://github.com/grafana/grafana/releases/tag/v9.1.6)
+
+## v1.25.0
+
 * Kubernetes [v1.25.0](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.25.md#v1250)
   * Disable LocalStorageCapacityIsolationFSQuotaMonitoring feature gate ([#1220](https://github.com/poseidon/typhoon/pull/1220), fixes [kubernetes#112081](https://github.com/kubernetes/kubernetes/issues/112081))
   * Add workaround to revert adding "search ." to containers' `/etc/resolv.conf` ([#1224](https://github.com/poseidon/typhoon/pull/1224), fixes [kubernetes#112135](https://github.com/kubernetes/kubernetes/issues/112135))
