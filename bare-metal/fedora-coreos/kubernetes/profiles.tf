@@ -9,7 +9,7 @@ locals {
   ]}
 
   remote_args = {for node in local.all_nodes: node => concat([
-    "initrd=fedora-coreos-${local.os_versions[node]}-live-initramfs.x86_64.img",
+    "initrd=main",
     "coreos.live.rootfs_url=https://builds.coreos.fedoraproject.org/prod/streams/${local.os_streams[node]}/builds/${local.os_versions[node]}/x86_64/fedora-coreos-${local.os_versions[node]}-live-rootfs.x86_64.img",
     "coreos.inst.ignition_url=${var.matchbox_http_endpoint}/ignition?uuid=$${uuid}&mac=$${mac:hexhyp}",
     "console=tty0",
@@ -22,7 +22,7 @@ locals {
   ]}
 
   cached_args = {for node in local.all_nodes: node => concat([
-    "initrd=fedora-coreos-${local.os_versions[node]}-live-initramfs.x86_64.img",
+    "initrd=main",
     "coreos.live.rootfs_url=${var.matchbox_http_endpoint}/assets/fedora-coreos/fedora-coreos-${local.os_versions[node]}-live-rootfs.x86_64.img",
     "coreos.inst.ignition_url=${var.matchbox_http_endpoint}/ignition?uuid=$${uuid}&mac=$${mac:hexhyp}",
     "console=tty0",
