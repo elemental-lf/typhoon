@@ -1,6 +1,6 @@
 # Azure
 
-In this tutorial, we'll create a Kubernetes v1.25.2 cluster on Azure with Flatcar Linux.
+In this tutorial, we'll create a Kubernetes v1.25.4 cluster on Azure with Flatcar Linux.
 
 We'll declare a Kubernetes cluster using the Typhoon Terraform module. Then apply the changes to create a resource group, virtual network, subnets, security groups, controller availability set, worker scale set, load balancer, and TLS assets.
 
@@ -65,8 +65,8 @@ Additional configuration options are described in the `azurerm` provider [docs](
 Flatcar Linux publishes images to the Azure Marketplace and requires accepting terms.
 
 ```
-az vm image terms show --publish kinvolk --offer flatcar-container-linux-free --plan stable
 az vm image terms accept --publish kinvolk --offer flatcar-container-linux-free --plan stable
+az vm image terms accept --publish kinvolk --offer flatcar-container-linux-free --plan stable-gen2
 ```
 
 ## Cluster
@@ -75,7 +75,7 @@ Define a Kubernetes cluster using the module `azure/flatcar-linux/kubernetes`.
 
 ```tf
 module "ramius" {
-  source = "git::https://github.com/poseidon/typhoon//azure/flatcar-linux/kubernetes?ref=v1.25.2"
+  source = "git::https://github.com/poseidon/typhoon//azure/flatcar-linux/kubernetes?ref=v1.25.4"
 
   # Azure
   cluster_name   = "ramius"
@@ -149,9 +149,9 @@ List nodes in the cluster.
 $ export KUBECONFIG=/home/user/.kube/configs/ramius-config
 $ kubectl get nodes
 NAME                  STATUS  ROLES   AGE  VERSION
-ramius-controller-0   Ready   <none>  24m  v1.25.2
-ramius-worker-000001  Ready   <none>  25m  v1.25.2
-ramius-worker-000002  Ready   <none>  24m  v1.25.2
+ramius-controller-0   Ready   <none>  24m  v1.25.4
+ramius-worker-000001  Ready   <none>  25m  v1.25.4
+ramius-worker-000002  Ready   <none>  24m  v1.25.4
 ```
 
 List the pods.
@@ -227,7 +227,7 @@ Reference the DNS zone with `azurerm_dns_zone.clusters.name` and its resource gr
 | controller_count | Number of controllers (i.e. masters) | 1 | 1 |
 | worker_count | Number of workers | 1 | 3 |
 | controller_type | Machine type for controllers | "Standard_B2s" | See below |
-| worker_type | Machine type for workers | "Standard_DS1_v2" | See below |
+| worker_type | Machine type for workers | "Standard_D2as_v5" | See below |
 | os_image | Channel for a Container Linux derivative | "flatcar-stable" | flatcar-stable, flatcar-beta, flatcar-alpha |
 | disk_size | Size of the disk in GB | 30 | 100 |
 | worker_priority | Set priority to Spot to use reduced cost surplus capacity, with the tradeoff that instances can be deallocated at any time | Regular | Spot |

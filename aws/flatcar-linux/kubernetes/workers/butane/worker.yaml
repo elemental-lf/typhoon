@@ -30,7 +30,7 @@ systemd:
         After=coreos-metadata.service
         Wants=rpc-statd.service
         [Service]
-        Environment=KUBELET_IMAGE=quay.io/poseidon/kubelet:v1.25.2
+        Environment=KUBELET_IMAGE=quay.io/poseidon/kubelet:v1.25.4
         EnvironmentFile=/run/metadata/coreos
         ExecStartPre=/bin/mkdir -p /etc/cni/net.d
         ExecStartPre=/bin/mkdir -p /etc/kubernetes/manifests
@@ -78,19 +78,6 @@ systemd:
         RestartSec=5
         [Install]
         WantedBy=multi-user.target
-    - name: delete-node.service
-      enabled: true
-      contents: |
-        [Unit]
-        Description=Delete Kubernetes node on shutdown
-        [Service]
-        Environment=KUBELET_IMAGE=quay.io/poseidon/kubelet:v1.25.2
-        Type=oneshot
-        RemainAfterExit=true
-        ExecStart=/bin/true
-        ExecStop=/bin/bash -c '/usr/bin/docker run -v /var/lib/kubelet:/var/lib/kubelet:ro --entrypoint /usr/local/bin/kubectl $${KUBELET_IMAGE} --kubeconfig=/var/lib/kubelet/kubeconfig delete node $HOSTNAME'
-        [Install]
-        WantedBy=multi-user.target
 storage:
   files:
     - path: /etc/kubernetes/kubeconfig
@@ -119,6 +106,8 @@ storage:
           clusterDomain: ${cluster_domain_suffix}
           healthzPort: 0
           rotateCertificates: true
+          shutdownGracePeriod: 45s
+          shutdownGracePeriodCriticalPods: 30s
           staticPodPath: /etc/kubernetes/manifests
           readOnlyPort: 0
           resolvConf: /run/systemd/resolve/resolv.conf

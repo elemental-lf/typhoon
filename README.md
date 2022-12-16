@@ -1,4 +1,4 @@
-# Typhoon [![Release](https://img.shields.io/github/v/release/poseidon/typhoon)](https://github.com/poseidon/typhoon/releases) [![Stars](https://img.shields.io/github/stars/poseidon/typhoon)](https://github.com/poseidon/typhoon/stargazers) [![Sponsors](https://img.shields.io/github/sponsors/poseidon?logo=github)](https://github.com/sponsors/poseidon) [![Twitter](https://img.shields.io/badge/follow-news-1da1f2?logo=twitter)](https://twitter.com/typhoon8s)
+# Typhoon [![Release](https://img.shields.io/github/v/release/poseidon/typhoon)](https://github.com/poseidon/typhoon/releases) [![Stars](https://img.shields.io/github/stars/poseidon/typhoon)](https://github.com/poseidon/typhoon/stargazers) [![Sponsors](https://img.shields.io/github/sponsors/poseidon?logo=github)](https://github.com/sponsors/poseidon) [![Twitter](https://img.shields.io/badge/follow-news-1da1f2?logo=twitter)](https://twitter.com/typhoon8s) [![Mastodon](https://img.shields.io/badge/follow-news-6364ff?logo=mastodon)](https://fosstodon.org/@typhoon)
 
 <img align="right" src="https://storage.googleapis.com/poseidon/typhoon-logo.png">
 
@@ -13,7 +13,7 @@ Typhoon distributes upstream Kubernetes, architectural conventions, and cluster 
 
 ## Features <a href="https://www.cncf.io/certification/software-conformance/"><img align="right" src="https://storage.googleapis.com/poseidon/certified-kubernetes.png"></a>
 
-* Kubernetes v1.25.2 (upstream)
+* Kubernetes v1.25.4 (upstream)
 * Single or multi-master, [Calico](https://www.projectcalico.org/) or [Cilium](https://github.com/cilium/cilium) or [flannel](https://github.com/coreos/flannel) networking
 * On-cluster etcd with TLS, [RBAC](https://kubernetes.io/docs/admin/authorization/rbac/)-enabled, [network policy](https://kubernetes.io/docs/concepts/services-networking/network-policies/), SELinux enforcing
 * Advanced features like [worker pools](https://typhoon.psdn.io/advanced/worker-pools/), [preemptible](https://typhoon.psdn.io/flatcar-linux/google-cloud/#preemption) workers, and [snippets](https://typhoon.psdn.io/advanced/customization/#hosts) customization
@@ -50,6 +50,7 @@ Typhoon is available for [Flatcar Linux](https://www.flatcar-linux.org/releases/
 | Platform      | Operating System | Terraform Module | Status |
 |---------------|------------------|------------------|--------|
 | AWS           | Flatcar Linux (ARM64) | [aws/flatcar-linux/kubernetes](aws/flatcar-linux/kubernetes) | alpha |
+| Azure         | Flatcar Linux (ARM64) | [azure/flatcar-linux/kubernetes](azure/flatcar-linux/kubernetes) | alpha |
 
 ## Documentation
 
@@ -64,7 +65,7 @@ Define a Kubernetes cluster by using the Terraform module for your chosen platfo
 
 ```tf
 module "yavin" {
-  source = "git::https://github.com/poseidon/typhoon//google-cloud/fedora-coreos/kubernetes?ref=v1.25.2"
+  source = "git::https://github.com/poseidon/typhoon//google-cloud/fedora-coreos/kubernetes?ref=v1.25.4"
 
   # Google Cloud
   cluster_name  = "yavin"
@@ -103,9 +104,9 @@ In 4-8 minutes (varies by platform), the cluster will be ready. This Google Clou
 $ export KUBECONFIG=/home/user/.kube/configs/yavin-config
 $ kubectl get nodes
 NAME                                       ROLES    STATUS  AGE  VERSION
-yavin-controller-0.c.example-com.internal  <none>   Ready   6m   v1.25.2
-yavin-worker-jrbf.c.example-com.internal   <none>   Ready   5m   v1.25.2
-yavin-worker-mzdm.c.example-com.internal   <none>   Ready   5m   v1.25.2
+yavin-controller-0.c.example-com.internal  <none>   Ready   6m   v1.25.4
+yavin-worker-jrbf.c.example-com.internal   <none>   Ready   5m   v1.25.4
+yavin-worker-mzdm.c.example-com.internal   <none>   Ready   5m   v1.25.4
 ```
 
 List the pods.
@@ -157,6 +158,13 @@ Poseidon's Github [Sponsors](https://github.com/sponsors/poseidon) support the i
 <a href="https://www.digitalocean.com/">
     <img src="https://opensource.nyc3.cdn.digitaloceanspaces.com/attribution/assets/SVG/DO_Logo_horizontal_blue.svg" width="201px">
 </a>
+<br>
+<br>
+
+<a href="https://deploy.equinix.com/">
+  <img src="https://storage.googleapis.com/poseidon/equinix.png" width="201px">
+</a>
+<br>
 <br>
 
 If you'd like your company here, please contact dghubble at psdn.io.

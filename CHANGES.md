@@ -4,7 +4,77 @@ Notable changes between versions.
 
 ## Latest
 
-* Kubernetes [v1.25.2](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.25.md#v1252)
+* Update etcd from v3.5.5 to [v3.5.6](https://github.com/etcd-io/etcd/releases/tag/v3.5.6)
+* Update Cilium from v1.12.3 to [v1.12.4](https://github.com/cilium/cilium/releases/tag/v1.12.4)
+* Update flannel from v0.15.1 to [v0.20.1](https://github.com/flannel-io/flannel/releases/tag/v0.20.1)
+
+### AWS
+
+* Migrate AWS launch configurations to launch templates ([#1275](https://github.com/poseidon/typhoon/pull/1275))
+  * Starting Dec 31, 2022 AWS won't add new instance types/families to launch configurations
+
+### Addons
+
+* Update Prometheus from v2.40.1 to [v2.40.2](https://github.com/prometheus/prometheus/releases/tag/v2.40.2)
+* Update Grafana from v9.2.4 to [v9.2.6](https://github.com/grafana/grafana/releases/tag/v9.2.6)
+
+## v1.25.4
+
+* Kubernetes [v1.25.4](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.25.md#v1254)
+* Update Calico from v3.24.1 to [v3.24.5](https://github.com/projectcalico/calico/releases/tag/v3.24.5)
+* Allow Kubelet kubeconfig to drain nodes, if desired ([#330](https://github.com/poseidon/terraform-render-bootstrap/pull/330))
+* Re-enable Kubelet Graceful Node Shutdown ([#1261](https://github.com/poseidon/typhoon/pull/1261))
+  * Introduce companion project [poseidon/scuttle](https://github.com/poseidon/scuttle)
+* Link to new Mastodon account for release announcements
+  * [@typhoon@fosstodon.org](https://fosstodon.org/@typhoon)
+  * [@poseidon@fosstodon.org](https://fosstodon.org/@poseidon)
+
+### Fedora CoreOS
+
+* Remove unused `Wants=network.target` from `etcd-member.service` ([#1254](https://github.com/poseidon/typhoon/pull/1254))
+
+### Cloud
+
+* Remove defunct `delete-node.service` from worker node configurations ([#1256](https://github.com/poseidon/typhoon/pull/1256))
+
+### Addons
+
+* Update Prometheus from v2.39.1 to [v2.40.1](https://github.com/prometheus/prometheus/releases/tag/v2.40.1)
+* Update Grafana from v9.1.7 to [v9.2.4](https://github.com/grafana/grafana/releases/tag/v9.2.4)
+
+## v1.25.3
+
+* Kubernetes [v1.25.3](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.25.md#v1253)
+* Switch Kubernetes registry from `k8s.gcr.io` to `registry.k8s.io` for addons ([#1246](https://github.com/poseidon/typhoon/pull/1246))
+* Update Cilium from v1.12.2 to [v1.12.3](https://github.com/cilium/cilium/releases/tag/v1.12.3) ([#1253](https://github.com/poseidon/typhoon/pull/1253))
+
+### Azure
+
+* Change default Azure `worker_type` from [`Standard_DS1_v2`](https://learn.microsoft.com/en-us/azure/virtual-machines/dv2-dsv2-series#dsv2-series) to [`Standard_D2as_v5`](https://learn.microsoft.com/en-us/azure/virtual-machines/dasv5-dadsv5-series#dasv5-series) ([#1248](https://github.com/poseidon/typhoon/pull/1248))
+  * Get 2 VCPU, 7 GiB, 12500Mbps (vs 1 VCPU, 3.5GiB, 750 Mbps)
+  * Small increase in pay-as-you-go price ($53.29 -> $62.78)
+  * Small increase in spot price ($5.64/mo -> $7.37/mo)
+  * Change from Intel to AMD EPYC (`D2as_v5` cheaper than `D2s_v5`)
+
+### Flatcar Linux
+
+* Add Flatcar Linux ARM64 support on Azure ([docs](https://typhoon.psdn.io/advanced/arm64/), [#1251](https://github.com/poseidon/typhoon/pull/1251))
+* Switch from Azure Hypervisor gen1 to gen2 (**action required**) ([#1248](https://github.com/poseidon/typhoon/pull/1248))
+  * Run `az vm image terms accept --publish kinvolk --offer flatcar-container-linux-free --plan stable-gen2`
+
+### Docs
+
+* Remove old docs note about not supporting ARM64 with Calico
+  * Typhoon supports ARM64 with `cilium`, `calico`, and `flannel`
+
+### Addons
+
+* Update Prometheus from v2.38.0 to [v2.39.1](https://github.com/prometheus/prometheus/releases/tag/v2.39.1)
+* Update Grafana from v9.1.6 to [v9.1.7](https://github.com/grafana/grafana/releases/tag/v9.1.7)
+
+## v1.25.2
+
+Kubernetes v1.25.2 was skipped since there were minimal changes upstream.
 
 ## v1.25.1
 

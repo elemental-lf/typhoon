@@ -43,7 +43,7 @@ variable "controller_type" {
 variable "worker_type" {
   type        = string
   description = "Machine type for workers (see `az vm list-skus --location centralus`)"
-  default     = "Standard_DS1_v2"
+  default     = "Standard_D2as_v5"
 }
 
 variable "os_image" {
@@ -133,16 +133,27 @@ variable "worker_node_labels" {
   default     = []
 }
 
-# unofficial, undocumented, unsupported
-
-variable "cluster_domain_suffix" {
+variable "arch" {
   type        = string
-  description = "Queries for domains with the suffix will be answered by coredns. Default is cluster.local (e.g. foo.default.svc.cluster.local) "
-  default     = "cluster.local"
+  description = "Container architecture (amd64 or arm64)"
+  default     = "amd64"
+
+  validation {
+    condition     = var.arch == "amd64" || var.arch == "arm64"
+    error_message = "The arch must be amd64 or arm64."
+  }
 }
 
 variable "daemonset_tolerations" {
   type        = list(string)
   description = "List of additional taint keys kube-system DaemonSets should tolerate (e.g. ['custom-role', 'gpu-role'])"
   default     = []
+}
+
+# unofficial, undocumented, unsupported
+
+variable "cluster_domain_suffix" {
+  type        = string
+  description = "Queries for domains with the suffix will be answered by coredns. Default is cluster.local (e.g. foo.default.svc.cluster.local) "
+  default     = "cluster.local"
 }

@@ -1,19 +1,21 @@
 # ARM64
 
-Typhoon has experimental support for ARM64 on AWS, with Fedora CoreOS or Flatcar Linux. Clusters can be created with ARM64 controller and worker nodes. Or worker pools of ARM64 nodes can be attached to an AMD64 cluster to create a hybrid/mixed architecture cluster.
+Typhoon supports ARM64 Kubernetes clusters with ARM64 controller and worker nodes (full-cluster) or adding worker pools of ARM64 nodes to clusters with an x86/amd64 control plane for a hybdrid (mixed-arch) cluster.
 
-!!! note
-    Currently, CNI networking must be set to `flannel` or `cilium`.
+Typhoon ARM64 clusters (full-cluster or mixed-arch) are available on:
+
+* AWS with Fedora CoreOS or Flatcar Linux
+* Azure with Flatcar Linux
 
 ## Cluster
 
-Create a cluster with ARM64 controller and worker nodes. Container workloads must be `arm64` compatible and use `arm64` container images.
+Create a cluster on AWS with ARM64 controller and worker nodes. Container workloads must be `arm64` compatible and use `arm64` (or multi-arch) container images.
 
 === "Fedora CoreOS Cluster (arm64)"
 
     ```tf
     module "gravitas" {
-      source = "git::https://github.com/poseidon/typhoon//aws/fedora-coreos/kubernetes?ref=v1.25.2"
+      source = "git::https://github.com/poseidon/typhoon//aws/fedora-coreos/kubernetes?ref=v1.25.4"
 
       # AWS
       cluster_name = "gravitas"
@@ -38,7 +40,7 @@ Create a cluster with ARM64 controller and worker nodes. Container workloads mus
 
     ```tf
     module "gravitas" {
-      source = "git::https://github.com/poseidon/typhoon//aws/flatcar-linux/kubernetes?ref=v1.25.2"
+      source = "git::https://github.com/poseidon/typhoon//aws/flatcar-linux/kubernetes?ref=v1.25.4"
 
       # AWS
       cluster_name = "gravitas"
@@ -64,9 +66,9 @@ Verify the cluster has only arm64 (`aarch64`) nodes. For Flatcar Linux, describe
 ```
 $ kubectl get nodes -o wide
 NAME             STATUS   ROLES    AGE   VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE                        KERNEL-VERSION            CONTAINER-RUNTIME
-ip-10-0-21-119   Ready    <none>   77s   v1.25.2   10.0.21.119   <none>        Fedora CoreOS 35.20211215.3.0   5.15.7-200.fc35.aarch64   containerd://1.5.8
-ip-10-0-32-166   Ready    <none>   80s   v1.25.2   10.0.32.166   <none>        Fedora CoreOS 35.20211215.3.0   5.15.7-200.fc35.aarch64   containerd://1.5.8
-ip-10-0-5-79     Ready    <none>   77s   v1.25.2   10.0.5.79     <none>        Fedora CoreOS 35.20211215.3.0   5.15.7-200.fc35.aarch64   containerd://1.5.8
+ip-10-0-21-119   Ready    <none>   77s   v1.25.4   10.0.21.119   <none>        Fedora CoreOS 35.20211215.3.0   5.15.7-200.fc35.aarch64   containerd://1.5.8
+ip-10-0-32-166   Ready    <none>   80s   v1.25.4   10.0.32.166   <none>        Fedora CoreOS 35.20211215.3.0   5.15.7-200.fc35.aarch64   containerd://1.5.8
+ip-10-0-5-79     Ready    <none>   77s   v1.25.4   10.0.5.79     <none>        Fedora CoreOS 35.20211215.3.0   5.15.7-200.fc35.aarch64   containerd://1.5.8
 ```
 
 ## Hybrid
@@ -77,7 +79,7 @@ Create a hybrid/mixed arch cluster by defining an AWS cluster. Then define a [wo
 
     ```tf
     module "gravitas" {
-      source = "git::https://github.com/poseidon/typhoon//aws/fedora-coreos/kubernetes?ref=v1.25.2"
+      source = "git::https://github.com/poseidon/typhoon//aws/fedora-coreos/kubernetes?ref=v1.25.4"
 
       # AWS
       cluster_name = "gravitas"
@@ -100,7 +102,7 @@ Create a hybrid/mixed arch cluster by defining an AWS cluster. Then define a [wo
 
     ```tf
     module "gravitas" {
-      source = "git::https://github.com/poseidon/typhoon//aws/flatcar-linux/kubernetes?ref=v1.25.2"
+      source = "git::https://github.com/poseidon/typhoon//aws/flatcar-linux/kubernetes?ref=v1.25.4"
 
       # AWS
       cluster_name = "gravitas"
@@ -123,7 +125,7 @@ Create a hybrid/mixed arch cluster by defining an AWS cluster. Then define a [wo
 
     ```tf
     module "gravitas-arm64" {
-      source = "git::https://github.com/poseidon/typhoon//aws/fedora-coreos/kubernetes/workers?ref=v1.25.2"
+      source = "git::https://github.com/poseidon/typhoon//aws/fedora-coreos/kubernetes/workers?ref=v1.25.4"
 
       # AWS
       vpc_id          = module.gravitas.vpc_id
@@ -147,7 +149,7 @@ Create a hybrid/mixed arch cluster by defining an AWS cluster. Then define a [wo
 
     ```tf
     module "gravitas-arm64" {
-      source = "git::https://github.com/poseidon/typhoon//aws/flatcar-linux/kubernetes/workers?ref=v1.25.2"
+      source = "git::https://github.com/poseidon/typhoon//aws/flatcar-linux/kubernetes/workers?ref=v1.25.4"
 
       # AWS
       vpc_id          = module.gravitas.vpc_id
@@ -172,9 +174,34 @@ Verify amd64 (x86_64) and arm64 (aarch64) nodes are present.
 ```
 $ kubectl get nodes -o wide
 NAME                       STATUS   ROLES    AGE    VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE                                             KERNEL-VERSION            CONTAINER-RUNTIME
-ip-10-0-1-73               Ready    <none>   111m   v1.25.2   10.0.1.73     <none>        Fedora CoreOS 35.20211215.3.0                        5.15.7-200.fc35.x86_64    containerd://1.5.8
-ip-10-0-22-79...           Ready    <none>   111m   v1.25.2   10.0.22.79    <none>        Flatcar Container Linux by Kinvolk 3033.2.0 (Oklo)   5.10.84-flatcar           containerd://1.5.8
-ip-10-0-24-130             Ready    <none>   111m   v1.25.2   10.0.24.130   <none>        Fedora CoreOS 35.20211215.3.0                        5.15.7-200.fc35.x86_64    containerd://1.5.8
-ip-10-0-39-19              Ready    <none>   111m   v1.25.2   10.0.39.19    <none>        Fedora CoreOS 35.20211215.3.0                        5.15.7-200.fc35.x86_64    containerd://1.5.8
+ip-10-0-1-73               Ready    <none>   111m   v1.25.4   10.0.1.73     <none>        Fedora CoreOS 35.20211215.3.0                        5.15.7-200.fc35.x86_64    containerd://1.5.8
+ip-10-0-22-79...           Ready    <none>   111m   v1.25.4   10.0.22.79    <none>        Flatcar Container Linux by Kinvolk 3033.2.0 (Oklo)   5.10.84-flatcar           containerd://1.5.8
+ip-10-0-24-130             Ready    <none>   111m   v1.25.4   10.0.24.130   <none>        Fedora CoreOS 35.20211215.3.0                        5.15.7-200.fc35.x86_64    containerd://1.5.8
+ip-10-0-39-19              Ready    <none>   111m   v1.25.4   10.0.39.19    <none>        Fedora CoreOS 35.20211215.3.0                        5.15.7-200.fc35.x86_64    containerd://1.5.8
 ```
 
+## Azure
+
+Create a cluster on Azure with ARM64 controller and worker nodes. Container workloads must be `arm64` compatible and use `arm64` (or multi-arch) container images.
+
+```tf
+module "ramius" {
+  source = "git::https://github.com/poseidon/typhoon//azure/flatcar-linux/kubernetes?ref=v1.25.4"
+
+  # Azure
+  cluster_name   = "ramius"
+  region         = "centralus"
+  dns_zone       = "azure.example.com"
+  dns_zone_group = "example-group"
+
+  # configuration
+  ssh_authorized_key = "ssh-rsa AAAAB3Nz..."
+
+  # optional
+  arch            = "arm64"
+  controller_type = "Standard_D2pls_v5"
+  worker_type     = "Standard_D2pls_v5"
+  worker_count    = 2
+  host_cidr       = "10.0.0.0/20"
+}
+```

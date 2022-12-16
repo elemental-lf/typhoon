@@ -11,7 +11,7 @@ Typhoon distributes upstream Kubernetes, architectural conventions, and cluster 
 
 ## Features <a href="https://www.cncf.io/certification/software-conformance/"><img align="right" src="https://storage.googleapis.com/poseidon/certified-kubernetes.png"></a>
 
-* Kubernetes v1.25.2 (upstream)
+* Kubernetes v1.25.4 (upstream)
 * Single or multi-master, [Calico](https://www.projectcalico.org/) or [Cilium](https://github.com/cilium/cilium) or [flannel](https://github.com/coreos/flannel) networking
 * On-cluster etcd with TLS, [RBAC](https://kubernetes.io/docs/admin/authorization/rbac/)-enabled, [network policy](https://kubernetes.io/docs/concepts/services-networking/network-policies/), SELinux enforcing
 * Advanced features like [worker pools](advanced/worker-pools/), [preemptible](fedora-coreos/google-cloud/#preemption) workers, and [snippets](advanced/customization/#hosts) customization
@@ -48,6 +48,7 @@ Typhoon is available for [Flatcar Linux](https://www.flatcar-linux.org/releases/
 | Platform      | Operating System | Terraform Module | Status |
 |---------------|------------------|------------------|--------|
 | AWS           | Flatcar Linux (ARM64) | [aws/flatcar-linux/kubernetes](advanced/arm64.md) | alpha |
+| Azure         | Flatcar Linux (ARM64) | [azure/flatcar-linux/kubernetes](advanced/arm64.md) | alpha |
 
 ## Documentation
 
@@ -61,7 +62,7 @@ Define a Kubernetes cluster by using the Terraform module for your chosen platfo
 
 ```tf
 module "yavin" {
-  source = "git::https://github.com/poseidon/typhoon//google-cloud/fedora-coreos/kubernetes?ref=v1.25.2"
+  source = "git::https://github.com/poseidon/typhoon//google-cloud/fedora-coreos/kubernetes?ref=v1.25.4"
 
   # Google Cloud
   cluster_name  = "yavin"
@@ -99,9 +100,9 @@ In 4-8 minutes (varies by platform), the cluster will be ready. This Google Clou
 $ export KUBECONFIG=/home/user/.kube/configs/yavin-config
 $ kubectl get nodes
 NAME                                       ROLES    STATUS  AGE  VERSION
-yavin-controller-0.c.example-com.internal  <none>   Ready   6m   v1.25.2
-yavin-worker-jrbf.c.example-com.internal   <none>   Ready   5m   v1.25.2
-yavin-worker-mzdm.c.example-com.internal   <none>   Ready   5m   v1.25.2
+yavin-controller-0.c.example-com.internal  <none>   Ready   6m   v1.25.4
+yavin-worker-jrbf.c.example-com.internal   <none>   Ready   5m   v1.25.4
+yavin-worker-mzdm.c.example-com.internal   <none>   Ready   5m   v1.25.4
 ```
 
 List the pods.
