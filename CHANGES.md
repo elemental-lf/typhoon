@@ -4,9 +4,22 @@ Notable changes between versions.
 
 ## Latest
 
+## v1.26.1
+
+* Kubernetes [v1.26.1](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.26.md#v1261)
+* Update etcd from v3.5.6 to [v3.5.7](https://github.com/etcd-io/etcd/releases/tag/v3.5.7)
+* Update Cilium from v1.12.4 to [v1.12.5](https://github.com/cilium/cilium/releases/tag/v1.12.5)
+* Update Calico from v3.24.5 to [v3.25.0](https://github.com/projectcalico/calico/releases/tag/v3.25.0)
+* Update CoreDNS from v1.9.3 to [v1.9.4](https://github.com/poseidon/terraform-render-bootstrap/pull/341)
+
+## v1.26.0
+
+* Kubernetes [v1.26.0](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.26.md#v1260)
 * Update etcd from v3.5.5 to [v3.5.6](https://github.com/etcd-io/etcd/releases/tag/v3.5.6)
 * Update Cilium from v1.12.3 to [v1.12.4](https://github.com/cilium/cilium/releases/tag/v1.12.4)
-* Update flannel from v0.15.1 to [v0.20.1](https://github.com/flannel-io/flannel/releases/tag/v0.20.1)
+* Update flannel from v0.15.1 to [v0.20.2](https://github.com/flannel-io/flannel/releases/tag/v0.20.2)
+* Reminder: Modules are no longer published to the [Terraform Module Registry](https://registry.terraform.io/search/modules?q=poseidon) ([#1282](https://github.com/poseidon/typhoon/pull/1282))
+  * See [#1282](https://github.com/poseidon/typhoon/pull/1282) and [v1.25.4](https://github.com/poseidon/typhoon/releases/tag/v1.25.4) for details
 
 ### AWS
 
@@ -15,8 +28,11 @@ Notable changes between versions.
 
 ### Addons
 
-* Update Prometheus from v2.40.1 to [v2.40.2](https://github.com/prometheus/prometheus/releases/tag/v2.40.2)
-* Update Grafana from v9.2.4 to [v9.2.6](https://github.com/grafana/grafana/releases/tag/v9.2.6)
+* Update ingress-nginx from v1.3.1 to [v1.5.1](https://github.com/kubernetes/ingress-nginx/releases/tag/controller-v1.5.1)
+* Update Prometheus from v2.40.1 to [v2.40.5](https://github.com/prometheus/prometheus/releases/tag/v2.40.5)
+* Update node-exporter from v1.3.1 to [v1.5.0](https://github.com/prometheus/node_exporter/releases/tag/v1.5.0)
+* Update kube-state-metrics from v2.6.0 to [v2.7.0](https://github.com/kubernetes/kube-state-metrics/releases/tag/v2.7.0)
+* Update Grafana from v9.2.4 to [v9.3.1](https://github.com/grafana/grafana/releases/tag/v9.3.1)
 
 ## v1.25.4
 
@@ -28,6 +44,11 @@ Notable changes between versions.
 * Link to new Mastodon account for release announcements
   * [@typhoon@fosstodon.org](https://fosstodon.org/@typhoon)
   * [@poseidon@fosstodon.org](https://fosstodon.org/@poseidon)
+* Deprecate publishing to the [Terraform Module Registry](https://registry.terraform.io/search/modules?q=poseidon)
+  * Typhoon docs have always shown using Git-based module sources, not the Terraform Module Registry
+  * Module usage should be `source = "git::https://github.com/poseidon/typhoon/...` not `source = poseidon/kubernetes/...`
+  * Terraform's Module Registry requires subtree mirroring typhoon to special terraform-platform-kubernetes repos, only supports release versions (no commit SHAs or forks), only ever contained Flatcar Linux modules (not Fedora CoreOS) for historical reasons
+  * Note, this does not affect Terraform Providers like `poseidon/matchbox` or `poseidon/ct`, the registry works well for providers
 
 ### Fedora CoreOS
 
