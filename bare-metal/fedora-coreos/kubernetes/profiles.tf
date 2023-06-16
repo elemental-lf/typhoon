@@ -34,16 +34,6 @@ locals {
   args   = var.cached_install ? local.cached_args : local.remote_args
 }
 
-# Match a controller to a profile by MAC
-resource "matchbox_group" "controller" {
-  count   = length(var.controllers)
-  name    = format("%s-%s", var.cluster_name, var.controllers.*.name[count.index])
-  profile = matchbox_profile.controllers.*.name[count.index]
-
-  selector = {
-    mac = var.controllers.*.mac[count.index]
-  }
-}
 
 // Fedora CoreOS controller profile
 resource "matchbox_profile" "controllers" {
@@ -56,6 +46,7 @@ resource "matchbox_profile" "controllers" {
 
   raw_ignition = data.ct_config.controllers.*.rendered[count.index]
 }
+
 
 # Fedora CoreOS controllers
 data "ct_config" "controllers" {

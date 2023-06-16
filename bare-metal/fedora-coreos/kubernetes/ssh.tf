@@ -15,6 +15,7 @@ resource "null_resource" "copy-controller-secrets" {
   # matchbox groups are written, causing a deadlock.
   depends_on = [
     matchbox_group.controller,
+    matchbox_group.worker,
     module.bootstrap,
   ]
 
@@ -105,6 +106,7 @@ resource "null_resource" "bootstrap" {
   # while no Kubelets are running.
   depends_on = [
     null_resource.copy-controller-secrets,
+    null_resource.copy-worker-secrets,
   ]
 
   triggers = {
