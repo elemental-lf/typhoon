@@ -1,6 +1,6 @@
 # Bare-Metal
 
-In this tutorial, we'll network boot and provision a Kubernetes v1.26.1 cluster on bare-metal with Flatcar Linux.
+In this tutorial, we'll network boot and provision a Kubernetes v1.27.2 cluster on bare-metal with Flatcar Linux.
 
 First, we'll deploy a [Matchbox](https://github.com/poseidon/matchbox) service and setup a network boot environment. Then, we'll declare a Kubernetes cluster using the Typhoon Terraform module and power on machines. On PXE boot, machines will install Container Linux to disk, reboot into the disk install, and provision themselves as Kubernetes controllers or workers via Ignition.
 
@@ -154,7 +154,7 @@ Define a Kubernetes cluster using the module `bare-metal/flatcar-linux/kubernete
 
 ```tf
 module "mercury" {
-  source = "git::https://github.com/poseidon/typhoon//bare-metal/flatcar-linux/kubernetes?ref=v1.26.1"
+  source = "git::https://github.com/poseidon/typhoon//bare-metal/flatcar-linux/kubernetes?ref=v1.27.2"
 
   # bare-metal
   cluster_name            = "mercury"
@@ -188,6 +188,36 @@ module "mercury" {
   # set to http only if you cannot chainload to iPXE firmware with https support
   # download_protocol = "http"
 }
+```
+
+Workers with similar features can be defined inline using the `workers` field as shown above. It's also possible to define discrete workers that attach to the cluster. Discrete workers are more advanced, but more verbose.
+
+```tf
+module "mercury-node1" {
+  source = "git::https://github.com/poseidon/typhoon//bare-metal/fedora-coreos/kubernetes/worker?ref=v1.27.2"
+
+  # bare-metal
+  cluster_name = "mercury"
+  matchbox_http_endpoint  = "http://matchbox.example.com"
+  os_channel              = "flatcar-stable"
+  os_version              = "2345.3.1"
+
+  # configuration
+  name               = "node2"
+  mac                = "52:54:00:b2:2f:86"
+  domain             = "node2.example.com"
+  kubeconfig         = module.mercury.kubeconfig
+  ssh_authorized_key = "ssh-rsa AAAAB3Nz..."
+
+  # optional
+  snippets       = []
+  node_labels    = []
+  node_tains     = []
+  install_disk   = "/dev/vda"
+  cached_install = false
+}
+
+...
 ```
 
 Reference the [variables docs](#variables) or the [variables.tf](https://github.com/poseidon/typhoon/blob/master/bare-metal/flatcar-linux/kubernetes/variables.tf) source.
@@ -293,9 +323,9 @@ List nodes in the cluster.
 $ export KUBECONFIG=/home/user/.kube/configs/mercury-config
 $ kubectl get nodes
 NAME                STATUS  ROLES   AGE  VERSION
-node1.example.com   Ready   <none>  10m  v1.26.1
-node2.example.com   Ready   <none>  10m  v1.26.1
-node3.example.com   Ready   <none>  10m  v1.26.1
+node1.example.com   Ready   <none>  10m  v1.27.2
+node2.example.com   Ready   <none>  10m  v1.27.2
+node3.example.com   Ready   <none>  10m  v1.27.2
 ```
 
 List the pods.
@@ -335,12 +365,12 @@ Check the [variables.tf](https://github.com/poseidon/typhoon/blob/master/bare-me
 | k8s_domain_name | FQDN resolving to the controller(s) nodes. Workers and kubectl will communicate with this endpoint | "myk8s.example.com" |
 | ssh_authorized_key | SSH public key for user 'core' | "ssh-rsa AAAAB3Nz..." |
 | controllers | List of controller machine detail objects (unique name, identifying MAC address, FQDN) | `[{name="node1", mac="52:54:00:a1:9c:ae", domain="node1.example.com"}]` |
-| workers | List of worker machine detail objects (unique name, identifying MAC address, FQDN) | `[{name="node2", mac="52:54:00:b2:2f:86", domain="node2.example.com"}, {name="node3", mac="52:54:00:c3:61:77", domain="node3.example.com"}]` |
 
 ### Optional
 
 | Name | Description | Default | Example |
 |:-----|:------------|:--------|:--------|
+| workers | List of worker machine detail objects (unique name, identifying MAC address, FQDN) | [] | `[{name="node2", mac="52:54:00:b2:2f:86", domain="node2.example.com"}, {name="node3", mac="52:54:00:c3:61:77", domain="node3.example.com"}]` |
 | download_protocol | Protocol iPXE uses to download the kernel and initrd. iPXE must be compiled with [crypto](https://ipxe.org/crypto) support for https. Unused if cached_install is true | "https" | "http" |
 | cached_install | PXE boot and install from the Matchbox `/assets` cache. Admin MUST have downloaded Container Linux or Flatcar images into the cache | false | true |
 | install_disk | Disk device where Container Linux should be installed | "/dev/sda" | "/dev/sdb" |
@@ -353,4 +383,4 @@ Check the [variables.tf](https://github.com/poseidon/typhoon/blob/master/bare-me
 | kernel_args | Additional kernel args to provide at PXE boot | [] | ["kvm-intel.nested=1"] |
 | worker_node_labels | Map from worker name to list of initial node labels | {} | {"node2" = ["role=special"]} |
 | worker_node_taints | Map from worker name to list of initial node taints | {} | {"node2" = ["role=special:NoSchedule"]} |
-
+| oem_type | An OEM type to install with `flatcar-install`. | "" | "vmware_raw" |

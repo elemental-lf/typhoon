@@ -1,0 +1,12 @@
+name: publish
+on:
+  push:
+    branches:
+      - release-docs
+jobs:
+  mkdocs:
+    name: mkdocs
+    uses: poseidon/matchbox/.github/workflows/mkdocs-pages.yaml@main
+    # Add content write for GitHub Pages
+    permissions:
+      contents: write

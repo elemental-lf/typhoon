@@ -54,6 +54,7 @@ List of worker machine details (unique name, identifying MAC address, FQDN, inst
   { name = "node3", mac = "52:54:00:c3:61:77", domain = "node3.example.com", install_disk = "/dev/sda"}
 ]
 EOD
+  default     = []
 }
 
 variable "snippets" {
@@ -167,6 +168,17 @@ variable "enable_aggregation" {
   type        = bool
   description = "Enable the Kubernetes Aggregation Layer"
   default     = true
+}
+
+variable "oem_type" {
+  type        = string
+  description = <<EOD
+An OEM type to install with flatcar-install. Find available types by looking for Flatcar image files
+ending in `image.bin.bz2`. The OEM identifier is contained in the filename.
+E.g., `flatcar_production_vmware_raw_image.bin.bz2` leads to `vmware_raw`.
+See: https://www.flatcar.org/docs/latest/installing/bare-metal/installing-to-disk/#choose-a-channel
+EOD
+  default     = ""
 }
 
 # unofficial, undocumented, unsupported

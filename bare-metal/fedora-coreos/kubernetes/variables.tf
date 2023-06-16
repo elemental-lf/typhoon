@@ -55,6 +55,7 @@ List of worker machine details (unique name, identifying MAC address, FQDN, inst
   { name = "node3", mac = "52:54:00:c3:61:77", domain = "node3.example.com", install_disk = "/dev/sda"}
 ]
 EOD
+  default     = []
 }
 
 variable "snippets" {

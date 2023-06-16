@@ -4,6 +4,59 @@ Notable changes between versions.
 
 ## Latest
 
+* Update etcd from v3.5.7 to [v3.5.9](https://github.com/etcd-io/etcd/releases/tag/v3.5.9)
+* Update Cilium from v1.13.2 to [v1.13.3](https://github.com/cilium/cilium/releases/tag/v1.13.3)
+* Update flannel from v0.21.2 to [v0.22.0](https://github.com/flannel-io/flannel/releases/tag/v0.22.0)
+
+### AWS
+
+* Allow upgrading AWS Terraform provider to v5.x ([#1353](https://github.com/poseidon/typhoon/pull/1353))
+
+### Azure
+
+* Enable boot diagnostics for controller and worker VMs ([#1351](https://github.com/poseidon/typhoon/pull/1351))
+
+## v1.27.2
+
+* Kubernetes [v1.27.2](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.27.md#v1272)
+
+### Fedora CoreOS
+
+* Update Butane Config version from v1.4.0 to v1.5.0
+  * Require any custom Butane [snippets](https://typhoon.psdn.io/advanced/customization/#hosts) update to v1.5.0
+* Require Fedora CoreOS `37.20230303.3.0` or newer (with ignition v2.15)
+* Require poseidon/ct v0.13+ (**action required**)
+
+## v1.27.1
+
+* Kubernetes [v1.27.1](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.27.md#v1271)
+* Update etcd from v3.5.7 to [v3.5.8](https://github.com/etcd-io/etcd/releases/tag/v3.5.8)
+* Update Cilium from v1.13.1 to [v1.13.2](https://github.com/cilium/cilium/releases/tag/v1.13.2)
+* Update Calico from v3.25.0 to [v3.25.1](https://github.com/projectcalico/calico/releases/tag/v3.25.1)
+
+## v1.26.3
+
+* Kubernetes [v1.26.3](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.26.md#v1263)
+* Update Cilium from v1.12.6 to [v1.13.1](https://github.com/cilium/cilium/releases/tag/v1.13.1)
+
+### Bare-Metal
+
+* Add `oem_type` variable for Flatcar Linux ([#1302](https://github.com/poseidon/typhoon/pull/1302))
+
+## v1.26.2
+
+* Kubernetes [v1.26.2](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.26.md#v1262)
+* Update Cilium from v1.12.5 to [v1.12.6](https://github.com/cilium/cilium/releases/tag/v1.12.6)
+* Update flannel from v0.20.2 to [v0.21.2](https://github.com/flannel-io/flannel/releases/tag/v0.21.2)
+
+### Bare-Metal
+
+* Add a `worker` module to allow customizing individual worker nodes ([#1295](https://github.com/poseidon/typhoon/pull/1295))
+
+### Known Issues
+
+* Fedora CoreOS [issue](https://github.com/coreos/fedora-coreos-tracker/issues/1423) fix is progressing through channels
+
 ## v1.26.1
 
 * Kubernetes [v1.26.1](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.26.md#v1261)
