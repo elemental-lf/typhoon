@@ -58,11 +58,11 @@ variable "container_images" {
     coredns                 = "registry.k8s.io/coredns/coredns:v1.9.4"
     flannel                 = "quay.io/coreos/flannel:v0.20.2"
     flannel_cni             = "quay.io/poseidon/flannel-cni:v0.4.2"
-    kube_apiserver          = "registry.k8s.io/kube-apiserver:v1.26.3"
-    kube_controller_manager = "registry.k8s.io/kube-controller-manager:v1.26.3"
-    kube_scheduler          = "registry.k8s.io/kube-scheduler:v1.26.3"
-    kube_proxy              = "registry.k8s.io/kube-proxy:v1.26.3"
-    kubelet                 = "quay.io/poseidon/kubelet:v1.26.3"
+    kube_apiserver          = "registry.k8s.io/kube-apiserver:v1.26.7"
+    kube_controller_manager = "registry.k8s.io/kube-controller-manager:v1.26.7"
+    kube_scheduler          = "registry.k8s.io/kube-scheduler:v1.26.7"
+    kube_proxy              = "registry.k8s.io/kube-proxy:v1.26.7"
+    kubelet                 = "ghcr.io/elemental-lf/kubelet:v1.26.7"
 
     keepalived_vip          = "osixia/keepalived:2.0.20"
   }
