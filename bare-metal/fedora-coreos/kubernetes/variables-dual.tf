@@ -100,3 +100,15 @@ variable "enable_kube_proxy" {
   type        = bool
   default     = true
 }
+
+variable "apiserver_cert_dns_names" {
+  description = "List of additional DNS names to add to the kube-apiserver TLS certificate"
+  type        = list(string)
+  default     = []
+}
+
+variable "apiserver_cert_ip_addresses" {
+  description = "List of additional IP addresses to add to the kube-apiserver TLS certificate"
+  type        = list(string)
+  default     = []
+}

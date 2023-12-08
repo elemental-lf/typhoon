@@ -20,6 +20,8 @@ module "bootstrap" {
   enable_aggregation              = var.enable_aggregation
   container_images                = var.container_images
   enable_kube_proxy               = var.enable_kube_proxy
+  apiserver_cert_dns_names        = var.apiserver_cert_dns_names
+  apiserver_cert_ip_addresses     = var.apiserver_cert_ip_addresses
 }
 
 
