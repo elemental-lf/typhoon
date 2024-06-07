@@ -4,6 +4,83 @@ Notable changes between versions.
 
 ## Latest
 
+* Update Cilium from v1.15.1 to [v1.15.2](https://github.com/cilium/cilium/releases/tag/v1.15.2)
+* Update flannel from v0.24.2 to [v0.24.4](https://github.com/flannel-io/flannel/releases/tag/v0.24.4)
+
+## v1.29.2
+
+* Kubernetes [v1.29.2](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.29.md#v1292)
+* Update Cilium from v1.14.3 to [v1.15.1](https://github.com/cilium/cilium/releases/tag/v1.15.1)
+* Update Calico from v3.26.3 to [v3.27.2](https://github.com/projectcalico/calico/releases/tag/v3.27.2)
+  * Fix upstream incompatibility with Fedora CoreOS ([calico#8372](https://github.com/projectcalico/calico/issues/8372))
+* Update flannel from v0.22.2 to [v0.24.2](https://github.com/flannel-io/flannel/releases/tag/v0.24.2)
+* Add an `install_container_networking` variable (default `true`)
+  * When `true`, the chosen container `networking` provider is installed during cluster bootstrap
+  * Set `false` to self-manage the container networking provider. This allows flannel, Calico, or Cilium
+  to be managed via Terraform (like any other Kubernetes resources). Nodes will be NotReady until you
+  apply the self-managed container networking provider. This may become the default in future.
+  * Continue to set `networking` to one of the three supported container networking providers. Most
+  require custom firewall / security policies be present across nodes so they have some infra tie-ins.
+
+## v1.29.1
+
+* Kubernetes [v1.29.1](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.29.md#v1291)
+
+### AWS
+
+* Continue to support AWS IMDSv1 ([#1412](https://github.com/poseidon/typhoon/pull/1412))
+
+### Known Issues
+
+* Calico and Fedora CoreOS cannot be used together currently ([calico#8372](https://github.com/projectcalico/calico/issues/8372))
+
+## v1.29.0
+
+* Kubernetes [v1.29.0](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.29.md#v1290)
+
+### Known Issues
+
+* Calico and Fedora CoreOS cannot be used together currently ([calico#8372](https://github.com/projectcalico/calico/issues/8372))
+
+## v1.28.4
+
+* Kubernetes [v1.28.4](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.28.md#v1284)
+
+## v1.28.3
+
+* Kubernetes [v1.28.3](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.28.md#v1283)
+* Update etcd from v3.5.9 to [v3.5.10](https://github.com/etcd-io/etcd/releases/tag/v3.5.10)
+* Update Cilium from v1.14.2 to [v1.14.3](https://github.com/cilium/cilium/releases/tag/v1.14.3)
+* Workaround problems in Cilium v1.14's partial `kube-proxy` implementation ([#365](https://github.com/poseidon/terraform-render-bootstrap/pull/365))
+* Update Calico from v3.26.1 to [v3.26.3](https://github.com/projectcalico/calico/releases/tag/v3.26.3)
+
+### Google Cloud
+
+* Allow upgrading Google Cloud Terraform provider to v5.x
+
+## v1.28.2
+
+* Kubernetes [v1.28.2](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.28.md#v1282)
+* Update Cilium from v1.14.1 to [v1.14.2](https://github.com/cilium/cilium/releases/tag/v1.14.2)
+
+### Azure
+
+* Add optional `azure_authorized_key` variable
+  * Azure obtusely inspects public keys, requires RSA keys, and forbids more secure key formats (e.g. ed25519)
+  * Allow passing a dummy RSA key via `azure_authorized_key` (delete the private key) to satisfy Azure validations, then the usual `ssh_authorized_key` variable can new newer formats (e.g. ed25519)
+
+## v1.28.1
+
+* Kubernetes [v1.28.1](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.28.md#v1281)
+
+## v1.28.0
+
+* Kubernetes [v1.28.0](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.28.md#v1280)
+* Update Cilium from v1.13.4 to [v1.14.1](https://github.com/cilium/cilium/releases/tag/v1.14.1)
+* Update flannel from v0.22.0 to [v0.22.2](https://github.com/flannel-io/flannel/releases/tag/v0.22.2)
+
+## v1.27.4
+
 * Kubernetes [v1.27.4](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.27.md#v1274)
 
 ## v1.27.3

@@ -51,18 +51,18 @@ variable "container_images" {
   type                      = map(string)
 
   default = {
-    calico                  = "quay.io/calico/node:v3.26.3"
-    calico_cni              = "quay.io/calico/cni:v3.26.3"
-    cilium_agent            = "quay.io/cilium/cilium:v1.14.3"
-    cilium_operator         = "quay.io/cilium/operator-generic:v1.14.3"
+    calico                  = "quay.io/calico/node:v3.27.3"
+    calico_cni              = "quay.io/calico/cni:v3.27.3"
+    cilium_agent            = "quay.io/cilium/cilium:v1.15.5"
+    cilium_operator         = "quay.io/cilium/operator-generic:v1.15.5"
     coredns                 = "registry.k8s.io/coredns/coredns:v1.9.4"
-    flannel                 = "docker.io/flannel/flannel:v0.22.3"
-    flannel_cni             = "quay.io/poseidon/flannel-cni:v0.4.2"
-    kube_apiserver          = "registry.k8s.io/kube-apiserver:v1.28.9"
-    kube_controller_manager = "registry.k8s.io/kube-controller-manager:v1.28.9"
-    kube_scheduler          = "registry.k8s.io/kube-scheduler:v1.28.9"
-    kube_proxy              = "registry.k8s.io/kube-proxy:v1.28.9"
-    kubelet                 = "ghcr.io/elemental-lf/kubelet:v1.28.9"
+    flannel                 = "docker.io/flannel/flannel:v0.25.1"
+    flannel_cni             = "quay.io/poseidon/flannel-cni:v0.4.4"
+    kube_apiserver          = "registry.k8s.io/kube-apiserver:v1.29.5"
+    kube_controller_manager = "registry.k8s.io/kube-controller-manager:v1.29.5"
+    kube_scheduler          = "registry.k8s.io/kube-scheduler:v1.29.5"
+    kube_proxy              = "registry.k8s.io/kube-proxy:v1.29.5"
+    kubelet                 = "ghcr.io/elemental-lf/kubelet:v1.29.5"
 
     keepalived_vip          = "osixia/keepalived:2.0.20"
   }
@@ -111,4 +111,64 @@ variable "apiserver_cert_ip_addresses" {
   description = "List of additional IP addresses to add to the kube-apiserver TLS certificate"
   type        = list(string)
   default     = []
+}
+
+variable "components" {
+  description = "Configure pre-installed cluster components"
+  type = object({
+    enable = optional(bool, true)
+    coredns = optional(
+      object({
+        enable = optional(bool, true)
+      }),
+      {
+        enable = true
+      }
+    )
+    kube_proxy = optional(
+      object({
+        enable = optional(bool, true)
+      }),
+      {
+        enable = true
+      }
+    )
+    # CNI providers are enabled for pre-install by default, but only the
+    # provider matching var.networking is actually installed.
+    flannel = optional(
+      object({
+        enable = optional(bool, true)
+      }),
+      {
+        enable = true
+      }
+    )
+    calico = optional(
+      object({
+        enable = optional(bool, true)
+      }),
+      {
+        enable = true
+      }
+    )
+    cilium = optional(
+      object({
+        enable = optional(bool, true)
+      }),
+      {
+        enable = true
+      }
+    )
+  })
+  default = {
+    enable     = true
+    coredns    = null
+    kube_proxy = null
+    flannel    = null
+    calico     = null
+    cilium     = null
+  }
+  # Set the variable value to the default value when the caller
+  # sets it to null.
+  nullable = false
 }

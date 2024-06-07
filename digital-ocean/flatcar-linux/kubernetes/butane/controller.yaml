@@ -11,7 +11,7 @@ systemd:
         Requires=docker.service
         After=docker.service
         [Service]
-        Environment=ETCD_IMAGE=quay.io/coreos/etcd:v3.5.9
+        Environment=ETCD_IMAGE=quay.io/coreos/etcd:v3.5.12
         ExecStartPre=/usr/bin/docker run -d \
           --name etcd \
           --network host \
@@ -66,7 +66,7 @@ systemd:
         After=coreos-metadata.service
         Wants=rpc-statd.service
         [Service]
-        Environment=KUBELET_IMAGE=quay.io/poseidon/kubelet:v1.27.4
+        Environment=KUBELET_IMAGE=quay.io/poseidon/kubelet:v1.29.3
         EnvironmentFile=/run/metadata/coreos
         ExecStartPre=/bin/mkdir -p /etc/cni/net.d
         ExecStartPre=/bin/mkdir -p /etc/kubernetes/manifests
@@ -117,7 +117,7 @@ systemd:
         Type=oneshot
         RemainAfterExit=true
         WorkingDirectory=/opt/bootstrap
-        Environment=KUBELET_IMAGE=quay.io/poseidon/kubelet:v1.27.4
+        Environment=KUBELET_IMAGE=quay.io/poseidon/kubelet:v1.29.3
         ExecStart=/usr/bin/docker run \
             -v /etc/kubernetes/pki:/etc/kubernetes/pki:ro \
             -v /opt/bootstrap/assets:/assets:ro \
@@ -182,8 +182,8 @@ storage:
           mv static-manifests/* /etc/kubernetes/manifests/
           mkdir -p /opt/bootstrap/assets
           mv manifests /opt/bootstrap/assets/manifests
-          mv manifests-networking/* /opt/bootstrap/assets/manifests/
-          rm -rf assets auth static-manifests tls manifests-networking
+          mv manifests-networking/* /opt/bootstrap/assets/manifests/ 2>/dev/null || true
+          rm -rf assets auth static-manifests tls manifests-networking manifests
     - path: /opt/bootstrap/apply
       mode: 0544
       contents:

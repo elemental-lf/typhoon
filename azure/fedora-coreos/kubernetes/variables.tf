@@ -82,10 +82,22 @@ variable "ssh_authorized_key" {
   description = "SSH public key for user 'core'"
 }
 
+variable "azure_authorized_key" {
+  type        = string
+  description = "Optionally, pass a dummy RSA key to satisfy Azure validations (then use an ed25519 key set above)"
+  default     = ""
+}
+
 variable "networking" {
   type        = string
   description = "Choice of networking provider (flannel, calico, or cilium)"
   default     = "cilium"
+}
+
+variable "install_container_networking" {
+  type        = bool
+  description = "Install the chosen networking provider during cluster bootstrap (use false to self-manage)"
+  default     = true
 }
 
 variable "host_cidr" {
